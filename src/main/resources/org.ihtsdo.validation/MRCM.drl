@@ -1,0 +1,17 @@
+
+import org.ihtsdo.validation.domain.ConceptImpl
+import org.ihtsdo.validation.domain.RelationshipImpl
+import org.ihtsdo.validation.InvalidContent
+
+global java.util.List invalidContent
+global org.ihtsdo.validation.ECL ecl
+
+rule "MRCM"
+    dialect "mvel"
+    when
+        // Bulk find invalid - <<123|procedure : 234|finding site != <345|body
+        c : ConceptImpl(ecl.match("<<123|procedure", c))
+        r : RelationshipImpl(sourceId == c.id, ecl.attTypeMatch("234|finding site", r), ecl.attValueNotMatch("<345|body", r))
+    then
+        invalidContent.add(new InvalidContent(c, "Finding site should be a descendant of body..", r));
+end

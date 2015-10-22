@@ -1,0 +1,15 @@
+
+import org.ihtsdo.validation.domain.ConceptImpl
+import org.ihtsdo.validation.domain.DescriptionImpl
+import org.ihtsdo.validation.InvalidContent
+
+global java.util.List invalidContent
+
+rule "Double spaces"
+    dialect "mvel"
+    when
+        c : ConceptImpl()
+        d : DescriptionImpl(conceptId == c.id, term matches ".*  .*")
+    then
+        invalidContent.add(new InvalidContent(c, "Term should not contain double spaces.", d));
+end
