@@ -6,7 +6,7 @@ import org.ihtsdo.validation.domain.Relationship;
 public class ECL {
 
 	public boolean match(String eclExpression, Concept c) {
-		return c.getId().equals(eclExpression);
+		return eclExpression.equals(c.getId());
 	}
 
 	public boolean attTypeMatch(String eclExpression, Relationship r) {

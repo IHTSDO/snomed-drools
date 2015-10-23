@@ -31,4 +31,20 @@ public class RuleExecutorTest {
 		Assert.assertEquals("Term should not contain double spaces.", invalidContent1.getReason());
 		Assert.assertEquals("Description{term='a  '}", invalidContent1.getDetail());
 	}
+
+	@Test
+	public void testExecuteNullConceptId() throws Exception {
+		final Concept concept = new ConceptImpl(null)
+				.addDescription(new DescriptionImpl("a  "))
+				.addRelationship(new RelationshipImpl("3"))
+				.addRelationship(new RelationshipImpl("4"));
+
+		final List<InvalidContent> invalidContent = ruleExecutor.execute(concept);
+
+		Assert.assertEquals(1, invalidContent.size());
+		final InvalidContent invalidContent1 = invalidContent.get(0);
+		Assert.assertEquals(concept, invalidContent1.getConcept());
+		Assert.assertEquals("Term should not contain double spaces.", invalidContent1.getReason());
+		Assert.assertEquals("Description{term='a  '}", invalidContent1.getDetail());
+	}
 }

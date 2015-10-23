@@ -27,10 +27,10 @@ public class RuleExecutor {
 
 	public List<InvalidContent> execute(Concept concept) {
 		final StatelessKieSession session = kieContainer.newStatelessKieSession(sessionConfiguration);
+		session.setGlobal("ecl", new ECL());
 
 		final List<InvalidContent> invalidContent = new ArrayList<>();
 		session.setGlobal("invalidContent", invalidContent);
-		session.setGlobal("ecl", new ECL());
 
 		Date start = new Date();
 		Set<Object> content = new HashSet<>();
