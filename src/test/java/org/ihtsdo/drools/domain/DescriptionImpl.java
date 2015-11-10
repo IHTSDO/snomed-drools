@@ -1,14 +1,19 @@
-package org.ihtsdo.validation.domain;
-
-import org.ihtsdo.validation.domain.Description;
+package org.ihtsdo.drools.domain;
 
 public class DescriptionImpl implements Description {
 
+	private final String id;
 	private String conceptId;
 	private String term;
 
-	public DescriptionImpl(String term) {
+	public DescriptionImpl(String id, String term) {
+		this.id = id;
 		this.term = term;
+	}
+
+	@Override
+	public String getId() {
+		return id;
 	}
 
 	@Override

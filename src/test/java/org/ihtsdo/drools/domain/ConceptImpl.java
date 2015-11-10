@@ -1,4 +1,4 @@
-package org.ihtsdo.validation.domain;
+package org.ihtsdo.drools.domain;
 
 import java.util.Collection;
 import java.util.HashSet;

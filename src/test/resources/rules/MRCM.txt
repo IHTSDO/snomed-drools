@@ -1,10 +1,10 @@
 
-import org.ihtsdo.validation.domain.Concept
-import org.ihtsdo.validation.domain.Relationship
-import org.ihtsdo.validation.InvalidContent
+import org.ihtsdo.drools.domain.Concept
+import org.ihtsdo.drools.domain.Relationship
+import org.ihtsdo.drools.InvalidContent
 
 global java.util.List invalidContent
-global org.ihtsdo.validation.ECL ecl
+global org.ihtsdo.drools.ECL ecl
 
 rule "MRCM"
     dialect "mvel"

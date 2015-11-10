@@ -1,13 +1,20 @@
-package org.ihtsdo.validation.domain;
+package org.ihtsdo.drools.domain;
 
 public class RelationshipImpl implements Relationship {
 
+	private final String id;
 	private String sourceId;
 	private String typeId;
 	private String destinationId;
 
-	public RelationshipImpl(String typeId) {
+	public RelationshipImpl(String id, String typeId) {
+		this.id = id;
 		this.typeId = typeId;
+	}
+
+	@Override
+	public String getId() {
+		return id;
 	}
 
 	@Override

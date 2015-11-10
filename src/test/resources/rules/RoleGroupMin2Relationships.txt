@@ -8,8 +8,7 @@ global java.util.List invalidContent
 rule "Double spaces"
     dialect "mvel"
     when
-        c : Concept()
-        d : Description(conceptId == c.id, term matches ".*  .*")
+        g : RoleGroup(group > 0, relationships.size < 2)
     then
-        invalidContent.add(new InvalidContent(c, "Term should not contain double spaces.", d));
+        invalidContent.add(new InvalidContent(g.conceptId, "Term should not contain double spaces.", g));
 end

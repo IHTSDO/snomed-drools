@@ -4,7 +4,7 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.ihtsdo.qa</groupId>
+	<groupId>org.ihtsdo.drools</groupId>
 	<artifactId>snomed-drools</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 
@@ -49,30 +49,32 @@
 
 	<build>
 		<plugins>
+			<!-- Generate Manifest -->
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.4.1</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<!--<artifactSet>-->
-								<!--<excludes>-->
-									<!--<exclude>classworlds:classworlds</exclude>-->
-									<!--<exclude>junit:junit</exclude>-->
-									<!--<exclude>jmock:*</exclude>-->
-									<!--<exclude>*:xml-apis</exclude>-->
-									<!--<exclude>org.apache.maven:lib:tests</exclude>-->
-									<!--<exclude>log4j:log4j:jar:</exclude>-->
-								<!--</excludes>-->
-							<!--</artifactSet>-->
-						</configuration>
-					</execution>
-				</executions>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>2.5.3</version>
+				<dependencies>
+					<dependency>
+						<groupId>biz.aQute.bnd</groupId>
+						<artifactId>bndlib</artifactId>
+						<version>2.4.0</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<instructions>
+						<Build-Name>IHTSDO SNOMED-CT Drools</Build-Name>
+						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+						<Export-Package>org.ihtsdo.drools.*</Export-Package>
+						<Require-Capability>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.7))"</Require-Capability>
+						<Import-Package>
+							org.drools.compiler.*,
+							org.kie.api.*,
+							org.slf4j;version="1.7.2"
+						</Import-Package>
+					</instructions>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
