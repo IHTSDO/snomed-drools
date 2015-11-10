@@ -6,7 +6,7 @@
 
 	<groupId>org.ihtsdo.drools</groupId>
 	<artifactId>snomed-drools</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 
 	<properties>
 		<drools.version>6.3.0.Final</drools.version>
