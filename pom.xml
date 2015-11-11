@@ -6,7 +6,8 @@
 
 	<groupId>org.ihtsdo.drools</groupId>
 	<artifactId>snomed-drools</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
+	<packaging>bundle</packaging>
 
 	<properties>
 		<drools.version>6.3.0.Final</drools.version>
@@ -53,6 +54,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
 				<version>2.5.3</version>
 				<dependencies>
 					<dependency>
