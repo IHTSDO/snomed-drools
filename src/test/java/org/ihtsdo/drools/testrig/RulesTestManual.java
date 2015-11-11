@@ -2,9 +2,7 @@ package org.ihtsdo.drools.testrig;
 
 import org.ihtsdo.drools.InvalidContent;
 import org.ihtsdo.drools.RuleExecutor;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,8 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 
 public class RulesTestManual {
 
@@ -42,12 +40,13 @@ public class RulesTestManual {
 
 				final File testCasesFile = new File(ruleDirectory, "test-cases.json");
 				if (testCasesFile.isFile()) {
-					final JSONObject testCases = new JSONObject(new String(Files.readAllBytes(testCasesFile.toPath()), TestUtil.UTF8));
 
-					final JSONArray conceptsThatShouldPass = testCases.getJSONArray(CONCEPTS_THAT_SHOULD_PASS);
+					Map<String, List<TestConcept>> testConcepts = TestUtil.loadConceptMap(testCasesFile);
+
+					final List<TestConcept> conceptsThatShouldPass = testConcepts.get(CONCEPTS_THAT_SHOULD_PASS);
 					executeRulesAndAssertExpectations(ruleExecutor, conceptsThatShouldPass, true);
 
-					final JSONArray conceptsThatShouldFail = testCases.getJSONArray(CONCEPTS_THAT_SHOULD_FAIL);
+					final List<TestConcept> conceptsThatShouldFail = testConcepts.get(CONCEPTS_THAT_SHOULD_FAIL);
 					executeRulesAndAssertExpectations(ruleExecutor, conceptsThatShouldFail, false);
 				}
 			} catch (Exception e) {
@@ -58,10 +57,9 @@ public class RulesTestManual {
 		Assert.assertFalse("There should be no errors while testing all rules.", anyErrors);
 	}
 
-	private void executeRulesAndAssertExpectations(RuleExecutor ruleExecutor, JSONArray concepts, boolean expectPass) throws JSONException {
-		for (int i = 0; i < concepts.length(); i++) {
-			final JSONObject concept = concepts.getJSONObject(i);
-			final List<InvalidContent> invalidContent = ruleExecutor.execute(new TestRigConcept(concept));
+	private void executeRulesAndAssertExpectations(RuleExecutor ruleExecutor, List<TestConcept> concepts, boolean expectPass) throws JSONException {
+		for (TestConcept concept : concepts) {
+			final List<InvalidContent> invalidContent = ruleExecutor.execute(concept);
 			if (expectPass) {
 				Assert.assertEquals("A concept from the " + CONCEPTS_THAT_SHOULD_PASS + " set actually failed! " + invalidContent.toString(), 0, invalidContent.size());
 
@@ -71,5 +69,8 @@ public class RulesTestManual {
 		}
 	}
 
+	public static void main(String[] args) {
+		System.out.println("asdf(asdf".matches(".*[^ ]\\(.*"));
+	}
 
 }

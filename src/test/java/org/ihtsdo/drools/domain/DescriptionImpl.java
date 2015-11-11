@@ -17,6 +17,16 @@ public class DescriptionImpl implements Description {
 	}
 
 	@Override
+	public boolean isActive() {
+		return true;
+	}
+
+	@Override
+	public String getTypeId() {
+		return "";
+	}
+
+	@Override
 	public String getConceptId() {
 		return conceptId;
 	}
