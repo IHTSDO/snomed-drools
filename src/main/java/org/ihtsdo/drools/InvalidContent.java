@@ -14,13 +14,13 @@ public class InvalidContent {
 		this.message = message;
 	}
 
-	public InvalidContent(String conceptId, String message, Description description) {
-		this(conceptId, message);
+	public InvalidContent(Description description, String message) {
+		this(description.getConceptId(), message);
 		componentId = description.getId();
 	}
 
-	public InvalidContent(String conceptId, String message, Relationship relationship) {
-		this(conceptId, message);
+	public InvalidContent(Relationship relationship, String message) {
+		this(relationship.getSourceId(), message);
 		componentId = relationship.getSourceId();
 	}
 
