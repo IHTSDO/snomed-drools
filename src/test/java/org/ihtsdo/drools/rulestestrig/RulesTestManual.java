@@ -1,6 +1,6 @@
 package org.ihtsdo.drools.rulestestrig;
 
-import org.ihtsdo.drools.InvalidContent;
+import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.RuleExecutor;
 import org.ihtsdo.drools.domain.Concept;
 import org.json.JSONException;

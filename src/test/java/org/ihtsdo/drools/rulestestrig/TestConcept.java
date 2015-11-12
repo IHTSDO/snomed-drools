@@ -16,6 +16,7 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	private Collection<R> relationships;
 
 	public TestConcept() {
+		active = true;
 		descriptions = new ArrayList<>();
 		relationships = new ArrayList<>();
 	}

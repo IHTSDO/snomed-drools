@@ -1,5 +1,5 @@
 import org.ihtsdo.drools.domain.Description
-import org.ihtsdo.drools.InvalidContent
+import org.ihtsdo.drools.response.InvalidContent
 
 global java.util.List invalidContent
 

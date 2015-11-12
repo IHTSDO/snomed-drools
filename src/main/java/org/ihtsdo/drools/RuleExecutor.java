@@ -3,6 +3,7 @@ package org.ihtsdo.drools;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.domain.Relationship;
+import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.service.DescriptionService;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
