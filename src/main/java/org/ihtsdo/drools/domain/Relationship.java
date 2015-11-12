@@ -1,8 +1,6 @@
 package org.ihtsdo.drools.domain;
 
-public interface Relationship {
-
-	String getId();
+public interface Relationship extends Component {
 
 	String getSourceId();
 

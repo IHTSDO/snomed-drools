@@ -1,9 +1,12 @@
-package org.ihtsdo.drools;
+package org.ihtsdo.drools.unittest;
 
+import org.ihtsdo.drools.InvalidContent;
+import org.ihtsdo.drools.RuleExecutor;
 import org.ihtsdo.drools.domain.Concept;
-import org.ihtsdo.drools.domain.ConceptImpl;
-import org.ihtsdo.drools.domain.DescriptionImpl;
-import org.ihtsdo.drools.domain.RelationshipImpl;
+import org.ihtsdo.drools.rulestestrig.TestDescriptionService;
+import org.ihtsdo.drools.unittest.domain.ConceptImpl;
+import org.ihtsdo.drools.unittest.domain.DescriptionImpl;
+import org.ihtsdo.drools.unittest.domain.RelationshipImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +19,7 @@ public class RuleExecutorTest {
 
 	@Before
 	public void setup() {
-		ruleExecutor = new RuleExecutor("src/test/resources/rules");
+		ruleExecutor = new RuleExecutor("src/test/resources/rules", new TestDescriptionService());
 	}
 
 	@Test

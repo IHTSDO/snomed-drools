@@ -1,4 +1,4 @@
-package org.ihtsdo.drools.testrig;
+package org.ihtsdo.drools.rulestestrig;
 
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
@@ -10,6 +10,8 @@ import java.util.Collection;
 public class TestConcept<D extends Description, R extends Relationship> implements Concept {
 
 	private String id;
+	private boolean active;
+	private boolean published;
 	private Collection<D> descriptions;
 	private Collection<R> relationships;
 
@@ -24,6 +26,16 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	}
 
 	@Override
+	public boolean isActive() {
+		return active;
+	}
+
+	@Override
+	public boolean isPublished() {
+		return published;
+	}
+
+	@Override
 	public Collection<Description> getDescriptions() {
 		return (Collection<Description>) descriptions;
 	}
@@ -35,6 +47,14 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public void setPublished(boolean published) {
+		this.published = published;
 	}
 
 	public void setDescriptions(Collection<D> descriptions) {

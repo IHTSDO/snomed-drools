@@ -1,14 +1,21 @@
-package org.ihtsdo.drools.domain;
+package org.ihtsdo.drools.unittest.domain;
+
+import org.ihtsdo.drools.domain.Description;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DescriptionImpl implements Description {
 
 	private final String id;
 	private String conceptId;
 	private String term;
+	private Map<String, String> acceptabilityMap;
 
 	public DescriptionImpl(String id, String term) {
 		this.id = id;
 		this.term = term;
+		this.acceptabilityMap = new HashMap<>();
 	}
 
 	@Override
@@ -22,6 +29,11 @@ public class DescriptionImpl implements Description {
 	}
 
 	@Override
+	public boolean isPublished() {
+		return false;
+	}
+
+	@Override
 	public String getTypeId() {
 		return "";
 	}
@@ -31,13 +43,18 @@ public class DescriptionImpl implements Description {
 		return conceptId;
 	}
 
-	public void setConceptId(String conceptId) {
-		this.conceptId = conceptId;
-	}
-
 	@Override
 	public String getTerm() {
 		return term;
+	}
+
+	@Override
+	public Map<String, String> getAcceptabilityMap() {
+		return acceptabilityMap;
+	}
+
+	public void setConceptId(String conceptId) {
+		this.conceptId = conceptId;
 	}
 
 	public void setTerm(String term) {

@@ -1,4 +1,4 @@
-package org.ihtsdo.drools.testrig;
+package org.ihtsdo.drools.rulestestrig;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

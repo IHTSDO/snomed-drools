@@ -2,6 +2,7 @@ package org.ihtsdo.drools;
 
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
+import org.ihtsdo.drools.service.DescriptionService;
 import org.ihtsdo.drools.domain.Relationship;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
@@ -28,10 +29,12 @@ public class RuleExecutor {
 	};
 
 	private final KieContainer kieContainer;
+	private final DescriptionService descriptionService;
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	public RuleExecutor(String rulesDirectory) {
+	public RuleExecutor(String rulesDirectory, DescriptionService descriptionService) {
+		this.descriptionService = descriptionService;
 		KieServices kieServices = KieServices.Factory.get();
 
 		// Create the in-memory File System and add the resources files  to it
@@ -74,12 +77,13 @@ public class RuleExecutor {
 
 		final List<InvalidContent> invalidContent = new ArrayList<>();
 		session.setGlobal("invalidContent", invalidContent);
+		session.setGlobal("descriptionService", descriptionService);
 
 		Date start = new Date();
 		Set<Object> content = new HashSet<>();
 		addConcept(concept, content);
 		session.execute(content);
-		logger.info("execute took {} milliseconds", new Date().getTime() - start.getTime());
+		logger.debug("execute took {} milliseconds", new Date().getTime() - start.getTime());
 
 		return invalidContent;
 	}

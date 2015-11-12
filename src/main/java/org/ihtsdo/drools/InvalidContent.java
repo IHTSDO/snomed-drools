@@ -1,5 +1,6 @@
 package org.ihtsdo.drools;
 
+import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.domain.Relationship;
 
@@ -12,6 +13,10 @@ public class InvalidContent {
 	public InvalidContent(String conceptId, String message) {
 		this.conceptId = conceptId;
 		this.message = message;
+	}
+
+	public InvalidContent(Concept concept, String message) {
+		this(concept.getId(), message);
 	}
 
 	public InvalidContent(Description description, String message) {

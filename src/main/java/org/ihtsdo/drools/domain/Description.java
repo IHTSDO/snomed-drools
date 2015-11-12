@@ -1,14 +1,14 @@
 package org.ihtsdo.drools.domain;
 
-public interface Description {
+import java.util.Map;
 
-	String getId();
-
-	boolean isActive();
+public interface Description extends Component {
 
 	String getTypeId();
 
 	String getConceptId();
 
 	String getTerm();
+
+	Map<String, String> getAcceptabilityMap();
 }
