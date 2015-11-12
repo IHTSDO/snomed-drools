@@ -2,8 +2,8 @@ package org.ihtsdo.drools;
 
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
-import org.ihtsdo.drools.service.DescriptionService;
 import org.ihtsdo.drools.domain.Relationship;
+import org.ihtsdo.drools.service.DescriptionService;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
@@ -16,17 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
 public class RuleExecutor {
 
-	public static final FilenameFilter RULE_FILE_FILTER = new FilenameFilter() {
-		@Override
-		public boolean accept(File file, String name) {
-			return name.endsWith(".drl");
-		}
-	};
+	public static final String RULE_FILENAME_EXTENSION = ".drl";
 
 	private final KieContainer kieContainer;
 	private final DescriptionService descriptionService;
@@ -43,16 +43,18 @@ public class RuleExecutor {
 		if (!rulesDir.isDirectory()) {
 			throw new RuleExecutorException("Rules directory does not exist: " + rulesDir.getAbsolutePath());
 		}
-		int rules = 0;
-		for (File ruleFile : rulesDir.listFiles(RULE_FILE_FILTER)) {
-			logger.info("Loading rule {}", ruleFile.getAbsolutePath());
-			kieFileSystem.write(ResourceFactory.newFileResource(ruleFile));
-			rules++;
+		try {
+			final RuleLoader ruleLoader = new RuleLoader(kieFileSystem);
+			Files.walkFileTree(rulesDir.toPath(), ruleLoader);
+			if (ruleLoader.getRulesLoaded() == 0) {
+				logger.warn("No rules loaded. Rules directory: {}", rulesDir.getAbsolutePath());
+			} else {
+				logger.info("{} rules loaded.", ruleLoader.getRulesLoaded());
+			}
+		} catch (IOException e) {
+			throw new RuleExecutorException("Failed to load rules.", e);
 		}
 
-		if (rules == 0) {
-			logger.warn("No rules loaded.");
-		}
 
 		// Create the builder for the resources of the File System
 		KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
@@ -98,4 +100,29 @@ public class RuleExecutor {
 		}
 	}
 
+	private static final class RuleLoader extends SimpleFileVisitor<Path> {
+
+		private final KieFileSystem kieFileSystem;
+		private int rulesLoaded;
+
+		public RuleLoader(KieFileSystem kieFileSystem) {
+			this.kieFileSystem = kieFileSystem;
+		}
+
+		@Override
+		public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+			File file = path.toFile();
+			if (file.isFile() && file.getName().endsWith(RULE_FILENAME_EXTENSION)) {
+				kieFileSystem.write(ResourceFactory.newFileResource(file));
+				rulesLoaded++;
+			}
+
+			return FileVisitResult.CONTINUE;
+		}
+
+		public int getRulesLoaded() {
+			return rulesLoaded;
+		}
+
+	}
 }
