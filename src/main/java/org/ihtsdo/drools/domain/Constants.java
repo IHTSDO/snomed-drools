@@ -8,5 +8,6 @@ public class Constants {
 	public static final String GB_EN_LANG_REFSET = "900000000000508004";
 	public static final String ACCEPTABILITY_PREFERRED = "900000000000548007";
 	public static final String ACCEPTABILITY_ACCEPTABLE = "900000000000549004";
+	public static final String ENTIRE_TERM_CASE_SENSITIVE = "900000000000017005";
 
 }

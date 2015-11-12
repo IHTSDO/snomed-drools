@@ -58,8 +58,9 @@ public class RelationshipImpl implements Relationship {
 
 	@Override
 	public String toString() {
-		return "Relationship{" +
-				"sourceId='" + sourceId + '\'' +
+		return "RelationshipImpl{" +
+				"id='" + id + '\'' +
+				", sourceId='" + sourceId + '\'' +
 				", typeId='" + typeId + '\'' +
 				", destinationId='" + destinationId + '\'' +
 				'}';

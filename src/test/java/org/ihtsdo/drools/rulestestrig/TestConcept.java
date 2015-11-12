@@ -68,8 +68,10 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 
 	@Override
 	public String toString() {
-		return "Concept{" +
+		return "TestConcept{" +
 				"id='" + id + '\'' +
+				", active=" + active +
+				", published=" + published +
 				", descriptions=" + descriptions +
 				", relationships=" + relationships +
 				'}';

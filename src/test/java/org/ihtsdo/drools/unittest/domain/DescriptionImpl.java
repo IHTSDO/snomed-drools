@@ -44,8 +44,18 @@ public class DescriptionImpl implements Description {
 	}
 
 	@Override
+	public String getCaseSignificanceId() {
+		return "";
+	}
+
+	@Override
 	public String getTerm() {
 		return term;
+	}
+
+	@Override
+	public boolean isTextDefinition() {
+		return false;
 	}
 
 	@Override

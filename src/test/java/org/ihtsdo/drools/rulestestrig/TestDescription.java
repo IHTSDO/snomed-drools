@@ -10,10 +10,12 @@ public class TestDescription implements Description {
 	private String id;
 	private boolean active;
 	private boolean published;
-	private String typeId;
 	private String conceptId;
+	private String typeId;
+	private String caseSignificanceId;
 	private String term;
 	private Map<String, String> acceptabilityMap;
+	private boolean textDefinition;
 
 	public TestDescription() {
 		active = true;
@@ -46,8 +48,18 @@ public class TestDescription implements Description {
 	}
 
 	@Override
+	public String getCaseSignificanceId() {
+		return caseSignificanceId;
+	}
+
+	@Override
 	public String getTerm() {
 		return term;
+	}
+
+	@Override
+	public boolean isTextDefinition() {
+		return textDefinition;
 	}
 
 	@Override
@@ -75,6 +87,10 @@ public class TestDescription implements Description {
 		this.conceptId = conceptId;
 	}
 
+	public void setCaseSignificanceId(String caseSignificanceId) {
+		this.caseSignificanceId = caseSignificanceId;
+	}
+
 	public void setTerm(String term) {
 		this.term = term;
 	}
@@ -83,14 +99,22 @@ public class TestDescription implements Description {
 		this.acceptabilityMap = acceptabilityMap;
 	}
 
+	public void setTextDefinition(boolean textDefinition) {
+		this.textDefinition = textDefinition;
+	}
+
 	@Override
 	public String toString() {
-		return "Description{" +
+		return "TestDescription{" +
 				"id='" + id + '\'' +
 				", active=" + active +
-				", typeId='" + typeId + '\'' +
+				", published=" + published +
 				", conceptId='" + conceptId + '\'' +
+				", typeId='" + typeId + '\'' +
+				", caseSignificanceId='" + caseSignificanceId + '\'' +
 				", term='" + term + '\'' +
+				", acceptabilityMap=" + acceptabilityMap +
+				", textDefinition=" + textDefinition +
 				'}';
 	}
 }
