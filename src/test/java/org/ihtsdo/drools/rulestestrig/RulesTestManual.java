@@ -33,36 +33,38 @@ public class RulesTestManual {
 	@Test
 	public void testAllRules() {
 		boolean anyErrors = false;
-		for (File ruleDirectory : rulesDirectory.listFiles(TestUtil.DIRECTORY_FILTER)) {
-			logger.info("Testing {}", ruleDirectory.getName());
-			try {
-				final File[] ruleFiles = ruleDirectory.listFiles(TestUtil.RULE_FILE_FILTER);
-				if (ruleFiles.length == 0) {
-					continue;
-				}
-
-				final TestDescriptionService descriptionService = new TestDescriptionService();
-				final RuleExecutor ruleExecutor = new RuleExecutor(ruleDirectory.getAbsolutePath(), descriptionService);
-
-				final File testCasesFile = new File(ruleDirectory, "test-cases.json");
-				if (testCasesFile.isFile()) {
-
-					Map<String, List<TestConcept>> testConcepts = TestUtil.loadConceptMap(testCasesFile);
-
-					final List<TestConcept> givenConcepts = testConcepts.get(GIVEN_CONCEPTS);
-					if (givenConcepts != null) {
-						descriptionService.addTestConcepts(new ArrayList<Concept>(givenConcepts));
+		for (File ruleGroupDirectory : rulesDirectory.listFiles(TestUtil.DIRECTORY_FILTER)) {
+			for (File ruleDirectory : ruleGroupDirectory.listFiles(TestUtil.DIRECTORY_FILTER)) {
+				logger.info("Testing {}", ruleDirectory.getName());
+				try {
+					final File[] ruleFiles = ruleDirectory.listFiles(TestUtil.RULE_FILE_FILTER);
+					if (ruleFiles.length == 0) {
+						continue;
 					}
 
-					final List<TestConcept> conceptsThatShouldPass = testConcepts.get(ASSERT_CONCEPTS_PASS);
-					executeRulesAndAssertExpectations(ruleExecutor, conceptsThatShouldPass, true);
+					final TestDescriptionService descriptionService = new TestDescriptionService();
+					final RuleExecutor ruleExecutor = new RuleExecutor(ruleDirectory.getAbsolutePath(), descriptionService);
 
-					final List<TestConcept> conceptsThatShouldFail = testConcepts.get(ASSERT_CONCEPTS_FAIL);
-					executeRulesAndAssertExpectations(ruleExecutor, conceptsThatShouldFail, false);
+					final File testCasesFile = new File(ruleDirectory, "test-cases.json");
+					if (testCasesFile.isFile()) {
+
+						Map<String, List<TestConcept>> testConcepts = TestUtil.loadConceptMap(testCasesFile);
+
+						final List<TestConcept> givenConcepts = testConcepts.get(GIVEN_CONCEPTS);
+						if (givenConcepts != null) {
+							descriptionService.addTestConcepts(new ArrayList<Concept>(givenConcepts));
+						}
+
+						final List<TestConcept> conceptsThatShouldPass = testConcepts.get(ASSERT_CONCEPTS_PASS);
+						executeRulesAndAssertExpectations(ruleExecutor, conceptsThatShouldPass, true);
+
+						final List<TestConcept> conceptsThatShouldFail = testConcepts.get(ASSERT_CONCEPTS_FAIL);
+						executeRulesAndAssertExpectations(ruleExecutor, conceptsThatShouldFail, false);
+					}
+				} catch (Exception e) {
+					anyErrors = true;
+					logger.error("Error testing {}", ruleDirectory.getName(), e);
 				}
-			} catch (Exception e) {
-				anyErrors = true;
-				logger.error("Error testing {}", ruleDirectory.getName(), e);
 			}
 		}
 		Assert.assertFalse("There should be no errors while testing all rules.", anyErrors);
