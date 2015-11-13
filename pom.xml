@@ -24,6 +24,15 @@
 			<version>${drools.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.kie</groupId>
+			<artifactId>kie-internal</artifactId>
+			<version>6.3.0.Final_fixed</version>
+			<type>bundle</type>
+			<!-- 6.3.0.Final_fixed is a modifed version of the kie-internal 6.3.0.Final bundle
+			the '.*' has been removed from the package import section
+			of the OSGi manifest because Snow Owl's Virgo OSGi container cannot parse it -->
+		</dependency>
+		<dependency>
 			<groupId>org.drools</groupId>
 			<artifactId>drools-compiler</artifactId>
 			<version>${drools.version}</version>
@@ -91,6 +100,21 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>ihtsdo-releases</id>
+			<releases><enabled>true</enabled></releases>
+			<snapshots><enabled>false</enabled></snapshots>
+			<url>https://maven.ihtsdotools.org/content/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>ihtsdo-snapshots</id>
+			<releases><enabled>false</enabled></releases>
+			<snapshots><enabled>true</enabled></snapshots>
+			<url>https://maven.ihtsdotools.org/content/repositories/snapshots/</url>
+		</repository>
+	</repositories>
 
 	<distributionManagement>
 		<repository>
