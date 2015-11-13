@@ -33,6 +33,7 @@ public class RuleExecutor {
 	private final DescriptionService descriptionService;
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
+	private boolean failedToInitialize;
 
 	public RuleExecutor(String rulesDirectory, DescriptionService descriptionService) {
 		this.descriptionService = descriptionService;
@@ -42,20 +43,21 @@ public class RuleExecutor {
 		KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
 		final File rulesDir = new File(rulesDirectory);
 		if (!rulesDir.isDirectory()) {
-			throw new RuleExecutorException("Rules directory does not exist: " + rulesDir.getAbsolutePath());
-		}
-		try {
-			final RuleLoader ruleLoader = new RuleLoader(kieFileSystem);
-			Files.walkFileTree(rulesDir.toPath(), ruleLoader);
-			if (ruleLoader.getRulesLoaded() == 0) {
-				logger.warn("No rules loaded. Rules directory: {}", rulesDir.getAbsolutePath());
-			} else {
-				logger.info("{} rules loaded.", ruleLoader.getRulesLoaded());
+			failedToInitialize = true;
+			logger.error("Rules directory does not exist: {}", rulesDir.getAbsolutePath());
+		} else {
+			try {
+				final RuleLoader ruleLoader = new RuleLoader(kieFileSystem);
+				Files.walkFileTree(rulesDir.toPath(), ruleLoader);
+				if (ruleLoader.getRulesLoaded() == 0) {
+					logger.warn("No rules loaded. Rules directory: {}", rulesDir.getAbsolutePath());
+				} else {
+					logger.info("{} rules loaded.", ruleLoader.getRulesLoaded());
+				}
+			} catch (IOException e) {
+				throw new RuleExecutorException("Failed to load rules.", e);
 			}
-		} catch (IOException e) {
-			throw new RuleExecutorException("Failed to load rules.", e);
 		}
-
 
 		// Create the builder for the resources of the File System
 		KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
@@ -76,6 +78,8 @@ public class RuleExecutor {
 	}
 
 	public List<InvalidContent> execute(Concept concept) {
+		if (failedToInitialize) throw new RuleExecutorException("Unable to complete request: rule engine failed to initialize.");
+
 		final StatelessKieSession session = kieContainer.newStatelessKieSession();
 
 		final List<InvalidContent> invalidContent = new ArrayList<>();
