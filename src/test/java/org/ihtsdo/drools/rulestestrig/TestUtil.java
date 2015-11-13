@@ -48,7 +48,7 @@ public class TestUtil {
 	public static final FileFilter DIRECTORY_FILTER = new FileFilter() {
 		@Override
 		public boolean accept(File file) {
-			return file.isDirectory();
+			return file.isDirectory() && !file.isHidden();
 		}
 	};
 
