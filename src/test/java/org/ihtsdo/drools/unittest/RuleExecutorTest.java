@@ -1,9 +1,14 @@
-package org.ihtsdo.drools;
+package org.ihtsdo.drools.unittest;
 
+import org.ihtsdo.drools.RuleExecutorException;
+import org.ihtsdo.drools.response.InvalidContent;
+import org.ihtsdo.drools.RuleExecutor;
 import org.ihtsdo.drools.domain.Concept;
-import org.ihtsdo.drools.domain.ConceptImpl;
-import org.ihtsdo.drools.domain.DescriptionImpl;
-import org.ihtsdo.drools.domain.RelationshipImpl;
+import org.ihtsdo.drools.rulestestrig.TestDescriptionService;
+import org.ihtsdo.drools.service.DescriptionService;
+import org.ihtsdo.drools.unittest.domain.ConceptImpl;
+import org.ihtsdo.drools.unittest.domain.DescriptionImpl;
+import org.ihtsdo.drools.unittest.domain.RelationshipImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +21,23 @@ public class RuleExecutorTest {
 
 	@Before
 	public void setup() {
-		ruleExecutor = new RuleExecutor("src/test/resources/rules");
+		ruleExecutor = new RuleExecutor("src/test/resources/rules", new TestDescriptionService());
+	}
+
+	@Test
+	public void testInitFailure() {
+		final RuleExecutor ruleExecutor1 = new RuleExecutor("non-existant-directory", new DescriptionService() {
+			@Override
+			public boolean isUniqueActiveTerm(String term) {
+				return false;
+			}
+		});
+		try {
+			ruleExecutor1.execute(new ConceptImpl("1"));
+			Assert.fail("Should have thrown exception.");
+		} catch (RuleExecutorException e) {
+			// Pass
+		}
 	}
 
 	@Test

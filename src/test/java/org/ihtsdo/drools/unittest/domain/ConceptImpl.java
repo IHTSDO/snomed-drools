@@ -1,4 +1,8 @@
-package org.ihtsdo.drools.domain;
+package org.ihtsdo.drools.unittest.domain;
+
+import org.ihtsdo.drools.domain.Concept;
+import org.ihtsdo.drools.domain.Description;
+import org.ihtsdo.drools.domain.Relationship;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -18,6 +22,16 @@ public class ConceptImpl implements Concept {
 	@Override
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public boolean isActive() {
+		return false;
+	}
+
+	@Override
+	public boolean isPublished() {
+		return false;
 	}
 
 	public ConceptImpl addDescription(DescriptionImpl description) {
