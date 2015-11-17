@@ -4,7 +4,8 @@ import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.domain.Relationship;
 import org.ihtsdo.drools.response.InvalidContent;
-import org.ihtsdo.drools.service.DescriptionService;
+import org.ihtsdo.drools.service.ConceptService;
+import org.ihtsdo.drools.service.RelationshipService;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
@@ -30,13 +31,12 @@ public class RuleExecutor {
 	public static final String RULE_FILENAME_EXTENSION = ".drl";
 
 	private final KieContainer kieContainer;
-	private final DescriptionService descriptionService;
+	private int rulesLoaded = 0;
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private boolean failedToInitialize;
 
-	public RuleExecutor(String rulesDirectory, DescriptionService descriptionService) {
-		this.descriptionService = descriptionService;
+	public RuleExecutor(String rulesDirectory) {
 		KieServices kieServices = KieServices.Factory.get();
 
 		// Create the in-memory File System and add the resources files  to it
@@ -49,7 +49,8 @@ public class RuleExecutor {
 			try {
 				final RuleLoader ruleLoader = new RuleLoader(kieFileSystem);
 				Files.walkFileTree(rulesDir.toPath(), ruleLoader);
-				if (ruleLoader.getRulesLoaded() == 0) {
+				rulesLoaded = ruleLoader.getRulesLoaded();
+				if (rulesLoaded == 0) {
 					logger.warn("No rules loaded. Rules directory: {}", rulesDir.getAbsolutePath());
 				} else {
 					logger.info("{} rules loaded.", ruleLoader.getRulesLoaded());
@@ -77,14 +78,28 @@ public class RuleExecutor {
 		kieContainer = kieServices.newKieContainer(relId);
 	}
 
-	public List<InvalidContent> execute(Concept concept) {
+	/**
+	 * Validate a concept using drools rules available to this executor.
+	 * A temporary identifier should be assigned to the concepts or any of it's descriptions and relationships
+	 * if the component is new and does not yet have an SCTID. The identifier of the component is used to identify invalid content.
+	 *
+	 * Passing services in with every invocation of this method allows the implementation to capture content context. For example
+	 * services relevant to the content branch being worked on.
+	 * @param concept The concept to be validated.
+	 * @param onlyUnpublishedContentCanBeInvalid Flag to filter results so that only unpublished content can be returned as invalid.
+	 * @param conceptService An implementation of the ConceptService class for use in validation rules.
+	 * @param relationshipService An implementation of the RelationshipService class for use in validation rules.
+	 * @return A list of content found to be invalid is returned.
+	 */
+	public List<InvalidContent> execute(Concept concept, boolean onlyUnpublishedContentCanBeInvalid, ConceptService conceptService, RelationshipService relationshipService) {
 		if (failedToInitialize) throw new RuleExecutorException("Unable to complete request: rule engine failed to initialize.");
 
 		final StatelessKieSession session = kieContainer.newStatelessKieSession();
 
 		final List<InvalidContent> invalidContent = new ArrayList<>();
 		session.setGlobal("invalidContent", invalidContent);
-		session.setGlobal("descriptionService", descriptionService);
+		session.setGlobal("conceptService", conceptService);
+		session.setGlobal("relationshipService", relationshipService);
 
 		Date start = new Date();
 		Set<Object> content = new HashSet<>();
@@ -92,7 +107,22 @@ public class RuleExecutor {
 		session.execute(content);
 		logger.debug("execute took {} milliseconds", new Date().getTime() - start.getTime());
 
+		if (onlyUnpublishedContentCanBeInvalid) {
+			Set<InvalidContent> publishedInvalidContent = new HashSet<>();
+			for (InvalidContent invalidContentItem : invalidContent) {
+				if (invalidContentItem.isPublished()) {
+					publishedInvalidContent.add(invalidContentItem);
+				}
+			}
+			invalidContent.removeAll(publishedInvalidContent);
+		}
+
 		return invalidContent;
+	}
+
+	@SuppressWarnings("unused")
+	public int getRulesLoaded() {
+		return rulesLoaded;
 	}
 
 	private static void addConcept(Concept concept, Set<Object> content) {

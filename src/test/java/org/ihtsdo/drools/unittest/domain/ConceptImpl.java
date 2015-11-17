@@ -10,6 +10,7 @@ import java.util.HashSet;
 public class ConceptImpl implements Concept {
 
 	private String id;
+	private String definitionStatusId;
 	private Collection<Description> descriptions;
 	private Collection<Relationship> relationships;
 
@@ -44,6 +45,15 @@ public class ConceptImpl implements Concept {
 		relationship.setSourceId(id);
 		relationships.add(relationship);
 		return this;
+	}
+
+	@Override
+	public String getDefinitionStatusId() {
+		return definitionStatusId;
+	}
+
+	public void setDefinitionStatusId(String definitionStatusId) {
+		this.definitionStatusId = definitionStatusId;
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package org.ihtsdo.drools.rulestestrig;
+package org.ihtsdo.drools.rulestestrig.domain;
 
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
@@ -12,6 +12,7 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	private String id;
 	private boolean active;
 	private boolean published;
+	private String definitionStatusId;
 	private Collection<D> descriptions;
 	private Collection<R> relationships;
 
@@ -37,6 +38,11 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	}
 
 	@Override
+	public String getDefinitionStatusId() {
+		return definitionStatusId;
+	}
+
+	@Override
 	public Collection<Description> getDescriptions() {
 		return (Collection<Description>) descriptions;
 	}
@@ -58,6 +64,10 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 		this.published = published;
 	}
 
+	public void setDefinitionStatusId(String definitionStatusId) {
+		this.definitionStatusId = definitionStatusId;
+	}
+
 	public void setDescriptions(Collection<D> descriptions) {
 		this.descriptions = descriptions;
 	}
@@ -72,6 +82,7 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 				"id='" + id + '\'' +
 				", active=" + active +
 				", published=" + published +
+				", definitionStatusId=" + definitionStatusId +
 				", descriptions=" + descriptions +
 				", relationships=" + relationships +
 				'}';

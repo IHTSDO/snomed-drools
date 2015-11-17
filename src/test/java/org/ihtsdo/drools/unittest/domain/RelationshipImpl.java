@@ -6,8 +6,9 @@ public class RelationshipImpl implements Relationship {
 
 	private final String id;
 	private String sourceId;
-	private String typeId;
 	private String destinationId;
+	private int relationshipGroup;
+	private String typeId;
 
 	public RelationshipImpl(String id, String typeId) {
 		this.id = id;
@@ -35,13 +36,18 @@ public class RelationshipImpl implements Relationship {
 	}
 
 	@Override
-	public String getTypeId() {
-		return typeId;
+	public String getDestinationId() {
+		return destinationId;
 	}
 
 	@Override
-	public String getDestinationId() {
-		return destinationId;
+	public int getRelationshipGroup() {
+		return relationshipGroup;
+	}
+
+	@Override
+	public String getTypeId() {
+		return typeId;
 	}
 
 	public void setSourceId(String sourceId) {

@@ -4,7 +4,9 @@ public interface Relationship extends Component {
 
 	String getSourceId();
 
-	String getTypeId();
-
 	String getDestinationId();
+
+	int getRelationshipGroup();
+
+	String getTypeId();
 }

@@ -7,6 +7,9 @@ import com.google.gson.reflect.TypeToken;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.domain.Relationship;
+import org.ihtsdo.drools.rulestestrig.domain.TestConcept;
+import org.ihtsdo.drools.rulestestrig.domain.TestDescription;
+import org.ihtsdo.drools.rulestestrig.domain.TestRelationship;
 
 import java.io.*;
 import java.lang.reflect.Type;

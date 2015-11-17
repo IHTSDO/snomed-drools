@@ -1,4 +1,4 @@
-package org.ihtsdo.drools.rulestestrig;
+package org.ihtsdo.drools.rulestestrig.domain;
 
 import org.ihtsdo.drools.domain.Relationship;
 
@@ -8,10 +8,12 @@ public class TestRelationship implements Relationship {
 	private boolean active;
 	private boolean published;
 	private String sourceId;
+	private int relationshipGroup;
 	private String typeId;
 	private String destinationId;
 
 	public TestRelationship() {
+		active = true;
 	}
 
 	@Override
@@ -32,6 +34,11 @@ public class TestRelationship implements Relationship {
 	@Override
 	public String getSourceId() {
 		return sourceId;
+	}
+
+	@Override
+	public int getRelationshipGroup() {
+		return relationshipGroup;
 	}
 
 	@Override
@@ -60,12 +67,16 @@ public class TestRelationship implements Relationship {
 		this.sourceId = sourceId;
 	}
 
-	public void setTypeId(String typeId) {
-		this.typeId = typeId;
-	}
-
 	public void setDestinationId(String destinationId) {
 		this.destinationId = destinationId;
+	}
+
+	public void setRelationshipGroup(int relationshipGroup) {
+		this.relationshipGroup = relationshipGroup;
+	}
+
+	public void setTypeId(String typeId) {
+		this.typeId = typeId;
 	}
 
 	@Override
@@ -73,8 +84,9 @@ public class TestRelationship implements Relationship {
 		return "Relationship{" +
 				"id='" + id + '\'' +
 				", sourceId='" + sourceId + '\'' +
-				", typeId='" + typeId + '\'' +
 				", destinationId='" + destinationId + '\'' +
+				", relationshipGroup='" + relationshipGroup + '\'' +
+				", typeId='" + typeId + '\'' +
 				'}';
 	}
 }

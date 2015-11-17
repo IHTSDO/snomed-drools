@@ -1,4 +1,4 @@
-package org.ihtsdo.drools.rulestestrig;
+package org.ihtsdo.drools.rulestestrig.domain;
 
 import org.ihtsdo.drools.domain.Description;
 

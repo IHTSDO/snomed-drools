@@ -1,5 +1,6 @@
 package org.ihtsdo.drools.response;
 
+import org.ihtsdo.drools.domain.Component;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.domain.Relationship;
@@ -7,22 +8,19 @@ import org.ihtsdo.drools.domain.Relationship;
 public class InvalidContent {
 
 	private String conceptId;
+	private Component component;
 	private String message;
-	private String componentId;
 	private Severity severity;
 
-	public InvalidContent(String conceptId, String message, Severity severity) {
+	private InvalidContent(String conceptId, Component component, String message, Severity severity) {
 		this.conceptId = conceptId;
+		this.component = component;
 		this.message = message;
 		this.severity = severity;
 	}
 
-	public InvalidContent(String conceptId, String message) {
-		this(conceptId, message, Severity.ERROR);
-	}
-
 	public InvalidContent(Concept concept, String message, Severity severity) {
-		this(concept.getId(), message, severity);
+		this(concept.getId(), concept, message, severity);
 	}
 
 	public InvalidContent(Concept concept, String message) {
@@ -30,8 +28,7 @@ public class InvalidContent {
 	}
 
 	public InvalidContent(Description description, String message, Severity severity) {
-		this(description.getConceptId(), message, severity);
-		componentId = description.getId();
+		this(description.getConceptId(), description, message, severity);
 	}
 
 	public InvalidContent(Description description, String message) {
@@ -39,8 +36,7 @@ public class InvalidContent {
 	}
 
 	public InvalidContent(Relationship relationship, String message, Severity severity) {
-		this(relationship.getSourceId(), message, severity);
-		componentId = relationship.getSourceId();
+		this(relationship.getSourceId(), relationship, message, severity);
 	}
 
 	public InvalidContent(Relationship relationship, String message) {
@@ -51,12 +47,16 @@ public class InvalidContent {
 		return conceptId;
 	}
 
-	public String getMessage() {
-		return message;
+	public String getComponentId() {
+		return component.getId();
 	}
 
-	public String getComponentId() {
-		return componentId;
+	public boolean isPublished() {
+		return component.isPublished();
+	}
+
+	public String getMessage() {
+		return message;
 	}
 
 	public Severity getSeverity() {
@@ -67,8 +67,9 @@ public class InvalidContent {
 	public String toString() {
 		return "InvalidContent{" +
 				"conceptId='" + conceptId + '\'' +
+				", componentId='" + getComponentId() + '\'' +
+				", published='" + isPublished() + '\'' +
 				", message='" + message + '\'' +
-				", componentId='" + componentId + '\'' +
 				'}';
 	}
 }
