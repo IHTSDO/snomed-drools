@@ -1,4 +1,4 @@
-package org.ihtsdo.drools;
+package org.ihtsdo.drools.exception;
 
 public class RuleExecutorException extends RuntimeException {
 

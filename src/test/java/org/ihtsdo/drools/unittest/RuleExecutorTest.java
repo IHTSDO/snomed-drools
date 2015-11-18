@@ -1,7 +1,8 @@
 package org.ihtsdo.drools.unittest;
 
 import org.ihtsdo.drools.RuleExecutor;
-import org.ihtsdo.drools.RuleExecutorException;
+import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
+import org.ihtsdo.drools.exception.RuleExecutorException;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.rulestestrig.service.TestConceptService;
@@ -59,19 +60,33 @@ public class RuleExecutorTest {
 		Assert.assertEquals("2", invalidContent1.getComponentId());
 	}
 
-	@Test
+	@Test(expected = BadRequestRuleExecutorException.class)
 	public void testExecuteNullConceptId() throws Exception {
 		final Concept concept = new ConceptImpl(null)
 				.addDescription(new DescriptionImpl("2", "a  "))
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, conceptService, relationshipService, true, false);
+		ruleExecutor.execute(concept, conceptService, relationshipService, true, false);
+	}
 
-		Assert.assertEquals(1, invalidContent.size());
-		final InvalidContent invalidContent1 = invalidContent.get(0);
-		Assert.assertEquals(concept.getId(), invalidContent1.getConceptId());
-		Assert.assertEquals("Term should not contain double spaces.", invalidContent1.getMessage());
-		Assert.assertEquals("2", invalidContent1.getComponentId());
+	@Test(expected = BadRequestRuleExecutorException.class)
+	public void testExecuteNullDescriptionId() throws Exception {
+		final Concept concept = new ConceptImpl("1")
+				.addDescription(new DescriptionImpl(null, "a  "))
+				.addRelationship(new RelationshipImpl("r1", "3"))
+				.addRelationship(new RelationshipImpl("r2", "4"));
+
+		ruleExecutor.execute(concept, conceptService, relationshipService, true, false);
+	}
+
+	@Test(expected = BadRequestRuleExecutorException.class)
+	public void testExecuteNullRelationshipId() throws Exception {
+		final Concept concept = new ConceptImpl("1")
+				.addDescription(new DescriptionImpl("2", "a  "))
+				.addRelationship(new RelationshipImpl("r1", "3"))
+				.addRelationship(new RelationshipImpl(null, "4"));
+
+		ruleExecutor.execute(concept, conceptService, relationshipService, true, false);
 	}
 }

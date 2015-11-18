@@ -1,9 +1,8 @@
 package org.ihtsdo.drools;
 
-import org.ihtsdo.drools.domain.Concept;
-import org.ihtsdo.drools.domain.Constants;
-import org.ihtsdo.drools.domain.Description;
-import org.ihtsdo.drools.domain.Relationship;
+import org.ihtsdo.drools.domain.*;
+import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
+import org.ihtsdo.drools.exception.RuleExecutorException;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.service.ConceptService;
 import org.ihtsdo.drools.service.RelationshipService;
@@ -99,6 +98,8 @@ public class RuleExecutor {
 			boolean includePublishedComponents, boolean includeInferredRelationships) {
 		if (failedToInitialize) throw new RuleExecutorException("Unable to complete request: rule engine failed to initialize.");
 
+		assertComponentIdsPresent(concept);
+
 		final StatelessKieSession session = kieContainer.newStatelessKieSession();
 
 		final List<InvalidContent> invalidContent = new ArrayList<>();
@@ -123,6 +124,23 @@ public class RuleExecutor {
 		}
 
 		return invalidContent;
+	}
+
+	private void assertComponentIdsPresent(Concept concept) {
+		assertComponentIdPresent(concept);
+		for (Description description : concept.getDescriptions()) {
+			assertComponentIdPresent(description);
+		}
+		for (Relationship relationship : concept.getRelationships()) {
+			assertComponentIdPresent(relationship);
+		}
+	}
+
+	private void assertComponentIdPresent(Component component) {
+		if (component.getId() == null || component.getId().isEmpty()) {
+			throw new BadRequestRuleExecutorException("All components to be validated must have an SCTID or any temporary ID. " +
+					"This includes the concept, descriptions and relationships.");
+		}
 	}
 
 	@SuppressWarnings("unused")
