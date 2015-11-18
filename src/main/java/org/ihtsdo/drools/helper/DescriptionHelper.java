@@ -5,8 +5,12 @@ import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DescriptionHelper {
+
+	public static final Pattern TAG_PATTERN = Pattern.compile("^.*\\((.*)\\)$");
 
 	public static Collection<Description> filterByActiveTypeAndDialectPreferred(Concept concept, boolean active, String typeId, String dialectPreferred) {
 		Collection<Description> descriptions = new HashSet<>();
@@ -40,7 +44,23 @@ public class DescriptionHelper {
 	}
 
 	public static boolean isSemanticTagEquivalentToAnother(String testTerm, Set<String> otherTerms) {
+		String tag = getTag(testTerm);
+		if (tag != null) {
+			for (String otherTerm : otherTerms) {
+				if (tag.equals(getTag(otherTerm))) {
+					return true;
+				}
+			}
+		}
 		return false;
+	}
+
+	private static String getTag(String term) {
+		final Matcher matcher = TAG_PATTERN.matcher(term);
+		if (matcher.matches()) {
+			return matcher.group(1);
+		}
+		return null;
 	}
 
 }

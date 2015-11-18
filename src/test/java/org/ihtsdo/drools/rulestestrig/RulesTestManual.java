@@ -8,6 +8,7 @@ import org.ihtsdo.drools.rulestestrig.domain.TestConcept;
 import org.ihtsdo.drools.rulestestrig.domain.TestDescription;
 import org.ihtsdo.drools.rulestestrig.domain.TestRelationship;
 import org.ihtsdo.drools.rulestestrig.service.TestConceptService;
+import org.ihtsdo.drools.rulestestrig.service.TestDescriptionService;
 import org.ihtsdo.drools.rulestestrig.service.TestRelationshipService;
 import org.json.JSONException;
 import org.junit.Assert;
@@ -29,6 +30,7 @@ public class RulesTestManual {
 
 	private Map<String, Concept> concepts;
 	private TestConceptService conceptService;
+	private TestDescriptionService descriptionService;
 	private TestRelationshipService relationshipService;
 
 	@Before
@@ -39,6 +41,7 @@ public class RulesTestManual {
 
 		concepts = new HashMap<>();
 		conceptService = new TestConceptService(concepts);
+		descriptionService = new TestDescriptionService(concepts);
 		relationshipService = new TestRelationshipService(concepts);
 	}
 
@@ -114,7 +117,7 @@ public class RulesTestManual {
 
 	private void executeRulesAndAssertExpectations(RuleExecutor ruleExecutor, List<TestConcept> concepts, boolean expectPass) throws JSONException {
 		for (TestConcept concept : concepts) {
-			final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, conceptService, relationshipService, true, false);
+			final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, conceptService, descriptionService, relationshipService, true, false);
 			if (expectPass) {
 				Assert.assertEquals("A concept from the " + ASSERT_CONCEPTS_PASS + " set actually failed! " + invalidContent.toString(), 0, invalidContent.size());
 

@@ -1,11 +1,12 @@
 package org.ihtsdo.drools.unittest;
 
 import org.ihtsdo.drools.RuleExecutor;
+import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
 import org.ihtsdo.drools.exception.RuleExecutorException;
-import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.rulestestrig.service.TestConceptService;
+import org.ihtsdo.drools.rulestestrig.service.TestDescriptionService;
 import org.ihtsdo.drools.rulestestrig.service.TestRelationshipService;
 import org.ihtsdo.drools.unittest.domain.ConceptImpl;
 import org.ihtsdo.drools.unittest.domain.DescriptionImpl;
@@ -22,12 +23,14 @@ public class RuleExecutorTest {
 
 	private RuleExecutor ruleExecutor;
 	private TestConceptService conceptService;
+	private TestDescriptionService descriptionService;
 	private TestRelationshipService relationshipService;
 
 	@Before
 	public void setup() {
 		final Map<String, Concept> concepts = new HashMap<>();
 		conceptService = new TestConceptService(concepts);
+		descriptionService = new TestDescriptionService(concepts);
 		relationshipService = new TestRelationshipService(concepts);
 		ruleExecutor = new RuleExecutor("src/test/resources/rules");
 	}
@@ -37,7 +40,7 @@ public class RuleExecutorTest {
 		final RuleExecutor ruleExecutor1 = new RuleExecutor("non-existant-directory");
 
 		try {
-			ruleExecutor1.execute(new ConceptImpl("1"), conceptService, relationshipService, true, false);
+			ruleExecutor1.execute(new ConceptImpl("1"), conceptService, descriptionService, relationshipService, true, false);
 			Assert.fail("Should have thrown exception.");
 		} catch (RuleExecutorException e) {
 			// Pass
@@ -51,7 +54,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, conceptService, relationshipService, true, false);
+		final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, conceptService, descriptionService, relationshipService, true, false);
 
 		Assert.assertEquals(1, invalidContent.size());
 		final InvalidContent invalidContent1 = invalidContent.get(0);
@@ -67,7 +70,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		ruleExecutor.execute(concept, conceptService, relationshipService, true, false);
+		ruleExecutor.execute(concept, conceptService, descriptionService, relationshipService, true, false);
 	}
 
 	@Test(expected = BadRequestRuleExecutorException.class)
@@ -77,7 +80,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		ruleExecutor.execute(concept, conceptService, relationshipService, true, false);
+		ruleExecutor.execute(concept, conceptService, descriptionService, relationshipService, true, false);
 	}
 
 	@Test(expected = BadRequestRuleExecutorException.class)
@@ -87,6 +90,6 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl(null, "4"));
 
-		ruleExecutor.execute(concept, conceptService, relationshipService, true, false);
+		ruleExecutor.execute(concept, conceptService, descriptionService, relationshipService, true, false);
 	}
 }

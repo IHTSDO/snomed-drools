@@ -4,6 +4,6 @@ import java.util.Set;
 
 public interface DescriptionService {
 
-	Set<String> getFSNs(Set<String> conceptId, String... languageRefsetIds);
+	Set<String> getFSNs(Set<String> conceptIds, String... languageRefsetIds);
 
 }

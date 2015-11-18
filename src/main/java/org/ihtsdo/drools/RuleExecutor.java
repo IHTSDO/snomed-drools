@@ -1,10 +1,14 @@
 package org.ihtsdo.drools;
 
-import org.ihtsdo.drools.domain.*;
+import org.ihtsdo.drools.domain.Concept;
+import org.ihtsdo.drools.domain.Constants;
+import org.ihtsdo.drools.domain.Description;
+import org.ihtsdo.drools.domain.Relationship;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
 import org.ihtsdo.drools.exception.RuleExecutorException;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.service.ConceptService;
+import org.ihtsdo.drools.service.DescriptionService;
 import org.ihtsdo.drools.service.RelationshipService;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
@@ -87,6 +91,7 @@ public class RuleExecutor {
 	 * services relevant to the content branch being worked on.
 	 * @param concept The concept to be validated.
 	 * @param conceptService An implementation of the ConceptService class for use in validation rules.
+	 * @param descriptionService An implementation of the DescriptionService class for use in validation rules.
 	 * @param relationshipService An implementation of the RelationshipService class for use in validation rules.
 	 * @param includePublishedComponents Include the published components of the given concept in results if found to be invalid.
 	 *                                   Published content will be used during validation regardless just not returned.
@@ -94,7 +99,7 @@ public class RuleExecutor {
 	 *                                     in results if found to be invalid.
 	 * @return A list of content found to be invalid is returned.
 	 */
-	public List<InvalidContent> execute(Concept concept, ConceptService conceptService, RelationshipService relationshipService,
+	public List<InvalidContent> execute(Concept concept, ConceptService conceptService, DescriptionService descriptionService, RelationshipService relationshipService,
 			boolean includePublishedComponents, boolean includeInferredRelationships) {
 		if (failedToInitialize) throw new RuleExecutorException("Unable to complete request: rule engine failed to initialize.");
 
@@ -105,6 +110,7 @@ public class RuleExecutor {
 		final List<InvalidContent> invalidContent = new ArrayList<>();
 		session.setGlobal("invalidContent", invalidContent);
 		session.setGlobal("conceptService", conceptService);
+		session.setGlobal("descriptionService", descriptionService);
 		session.setGlobal("relationshipService", relationshipService);
 
 		Date start = new Date();
