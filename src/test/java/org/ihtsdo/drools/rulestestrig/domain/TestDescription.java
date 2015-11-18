@@ -5,7 +5,7 @@ import org.ihtsdo.drools.domain.Description;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestDescription implements Description {
+public class TestDescription implements Description, TestComponent {
 
 	private String id;
 	private boolean active;

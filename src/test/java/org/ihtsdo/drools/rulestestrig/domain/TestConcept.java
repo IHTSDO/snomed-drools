@@ -7,7 +7,7 @@ import org.ihtsdo.drools.domain.Relationship;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class TestConcept<D extends Description, R extends Relationship> implements Concept {
+public class TestConcept<D extends Description, R extends Relationship> implements Concept, TestComponent {
 
 	private String id;
 	private boolean active;

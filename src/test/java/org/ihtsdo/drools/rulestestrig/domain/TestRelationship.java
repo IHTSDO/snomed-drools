@@ -2,7 +2,7 @@ package org.ihtsdo.drools.rulestestrig.domain;
 
 import org.ihtsdo.drools.domain.Relationship;
 
-public class TestRelationship implements Relationship {
+public class TestRelationship implements Relationship, TestComponent {
 
 	private String id;
 	private boolean active;

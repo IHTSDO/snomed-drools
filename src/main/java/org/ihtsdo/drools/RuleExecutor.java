@@ -127,19 +127,28 @@ public class RuleExecutor {
 	}
 
 	private void assertComponentIdsPresent(Concept concept) {
-		assertComponentIdPresent(concept);
+		final String conceptId = concept.getId();
+		if (conceptId == null || conceptId.isEmpty()) {
+			throw new BadRequestRuleExecutorException("For validation concepts must have an SCTID or some temporary ID. " +
+					"This also applies to the descriptions and relationships.");
+		}
 		for (Description description : concept.getDescriptions()) {
-			assertComponentIdPresent(description);
+			if (description.getId() == null || description.getId().isEmpty()) {
+				throw new BadRequestRuleExecutorException("For validation descriptions must have an SCTID or some temporary ID. " +
+						"This also applies to the concept and relationships.");
+			}
+			if (!conceptId.equals(description.getConceptId())) {
+				throw new BadRequestRuleExecutorException("For validation description conceptId must be the ID of the concept.");
+			}
 		}
 		for (Relationship relationship : concept.getRelationships()) {
-			assertComponentIdPresent(relationship);
-		}
-	}
-
-	private void assertComponentIdPresent(Component component) {
-		if (component.getId() == null || component.getId().isEmpty()) {
-			throw new BadRequestRuleExecutorException("All components to be validated must have an SCTID or any temporary ID. " +
-					"This includes the concept, descriptions and relationships.");
+			if (relationship.getId() == null || relationship.getId().isEmpty()) {
+				throw new BadRequestRuleExecutorException("For validation relationships must have an SCTID or some temporary ID. " +
+						"This also applies to the concept and descriptions.");
+			}
+			if (!conceptId.equals(relationship.getSourceId())) {
+				throw new BadRequestRuleExecutorException("For validation relationship sourceId must be the ID of the concept.");
+			}
 		}
 	}
 
