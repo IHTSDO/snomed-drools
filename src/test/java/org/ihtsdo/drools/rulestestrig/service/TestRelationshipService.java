@@ -1,6 +1,7 @@
 package org.ihtsdo.drools.rulestestrig.service;
 
 import org.ihtsdo.drools.domain.Concept;
+import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Relationship;
 import org.ihtsdo.drools.service.RelationshipService;
 import org.slf4j.Logger;
@@ -18,13 +19,19 @@ public class TestRelationshipService implements RelationshipService {
 	}
 
 	@Override
-	public boolean hasActiveInboundRelationship(String conceptId, String relationshipTypeId) {
+	public boolean hasActiveInboundStatedRelationship(String conceptId) {
+		return hasActiveInboundStatedRelationship(conceptId, null);
+	}
+
+	@Override
+	public boolean hasActiveInboundStatedRelationship(String conceptId, String relationshipTypeId) {
 		for (Concept concept : concepts.values()) {
-			if (!concept.equals(concept.getId())) {
+			if (!conceptId.equals(concept.getId())) {
 				for (Relationship relationship : concept.getRelationships()) {
 					if (relationship.isActive()
-							&& relationshipTypeId.equals(relationship.getTypeId())
-							&& conceptId.equals(relationship.getDestinationId())) {
+							&& conceptId.equals(relationship.getDestinationId())
+							&& !Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())
+							&& (relationshipTypeId == null || relationshipTypeId.equals(relationship.getTypeId()))) {
 						logger.info("Active inbound relationship sourceId {}", relationship.getSourceId());
 						return true;
 					}

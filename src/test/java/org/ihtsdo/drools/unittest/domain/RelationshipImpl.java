@@ -9,6 +9,7 @@ public class RelationshipImpl implements Relationship {
 	private String destinationId;
 	private int relationshipGroup;
 	private String typeId;
+	private String characteristicTypeId;
 
 	public RelationshipImpl(String id, String typeId) {
 		this.id = id;
@@ -50,6 +51,11 @@ public class RelationshipImpl implements Relationship {
 		return typeId;
 	}
 
+	@Override
+	public String getCharacteristicTypeId() {
+		return characteristicTypeId;
+	}
+
 	public void setSourceId(String sourceId) {
 		this.sourceId = sourceId;
 	}
@@ -62,13 +68,23 @@ public class RelationshipImpl implements Relationship {
 		this.destinationId = destinationId;
 	}
 
+	public void setRelationshipGroup(int relationshipGroup) {
+		this.relationshipGroup = relationshipGroup;
+	}
+
+	public void setCharacteristicTypeId(String characteristicTypeId) {
+		this.characteristicTypeId = characteristicTypeId;
+	}
+
 	@Override
 	public String toString() {
 		return "RelationshipImpl{" +
 				"id='" + id + '\'' +
 				", sourceId='" + sourceId + '\'' +
-				", typeId='" + typeId + '\'' +
 				", destinationId='" + destinationId + '\'' +
+				", relationshipGroup='" + relationshipGroup + '\'' +
+				", typeId='" + typeId + '\'' +
+				", characteristicTypeId='" + characteristicTypeId + '\'' +
 				'}';
 	}
 }

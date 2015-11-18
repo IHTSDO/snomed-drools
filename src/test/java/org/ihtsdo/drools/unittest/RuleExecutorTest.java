@@ -36,7 +36,7 @@ public class RuleExecutorTest {
 		final RuleExecutor ruleExecutor1 = new RuleExecutor("non-existant-directory");
 
 		try {
-			ruleExecutor1.execute(new ConceptImpl("1"), true, conceptService, relationshipService);
+			ruleExecutor1.execute(new ConceptImpl("1"), conceptService, relationshipService, true, false);
 			Assert.fail("Should have thrown exception.");
 		} catch (RuleExecutorException e) {
 			// Pass
@@ -50,7 +50,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, true, conceptService, relationshipService);
+		final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, conceptService, relationshipService, true, false);
 
 		Assert.assertEquals(1, invalidContent.size());
 		final InvalidContent invalidContent1 = invalidContent.get(0);
@@ -66,7 +66,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, true, conceptService, relationshipService);
+		final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, conceptService, relationshipService, true, false);
 
 		Assert.assertEquals(1, invalidContent.size());
 		final InvalidContent invalidContent1 = invalidContent.get(0);

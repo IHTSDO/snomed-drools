@@ -11,6 +11,7 @@ public class TestRelationship implements Relationship {
 	private int relationshipGroup;
 	private String typeId;
 	private String destinationId;
+	private String characteristicTypeId;
 
 	public TestRelationship() {
 		active = true;
@@ -51,6 +52,11 @@ public class TestRelationship implements Relationship {
 		return destinationId;
 	}
 
+	@Override
+	public String getCharacteristicTypeId() {
+		return characteristicTypeId;
+	}
+
 	public void setId(String id) {
 		this.id = id;
 	}
@@ -79,6 +85,10 @@ public class TestRelationship implements Relationship {
 		this.typeId = typeId;
 	}
 
+	public void setCharacteristicTypeId(String characteristicTypeId) {
+		this.characteristicTypeId = characteristicTypeId;
+	}
+
 	@Override
 	public String toString() {
 		return "Relationship{" +
@@ -87,6 +97,7 @@ public class TestRelationship implements Relationship {
 				", destinationId='" + destinationId + '\'' +
 				", relationshipGroup='" + relationshipGroup + '\'' +
 				", typeId='" + typeId + '\'' +
+				", characteristicTypeId='" + characteristicTypeId + '\'' +
 				'}';
 	}
 }

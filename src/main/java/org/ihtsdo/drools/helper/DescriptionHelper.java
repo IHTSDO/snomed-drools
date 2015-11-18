@@ -19,17 +19,27 @@ public class DescriptionHelper {
 		return descriptions;
 	}
 
-	public static boolean isAnyDuplicateActiveDescriptionsWithinAConcept(Concept concept) {
-		Set<String> terms = new HashSet<>();
-		for (Description description : concept.getDescriptions()) {
-			if (description.isActive()) {
-				final String term = description.getTerm();
-				if (terms.contains(term)) {
-					return true;
-				}
-				terms.add(term);
+	public static boolean isUniqueWithinConcept(Description description, Concept concept) {
+		final String term = description.getTerm();
+		for (Description otherDescription : concept.getDescriptions()) {
+			if (!description.getId().equals(otherDescription.getId()) && term.equals(otherDescription.getTerm())) {
+				return false;
 			}
 		}
+		return true;
+	}
+
+	public static boolean isPreferredInAnyDialect(Description description) {
+		final Map<String, String> acceptabilityMap = description.getAcceptabilityMap();
+		for (String lang : acceptabilityMap.keySet()) {
+			if (lang != null && Constants.ACCEPTABILITY_PREFERRED.equals(acceptabilityMap.get(lang))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean isSemanticTagEquivalentToAnother(String testTerm, Set<String> otherTerms) {
 		return false;
 	}
 

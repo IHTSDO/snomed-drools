@@ -1,6 +1,7 @@
 package org.ihtsdo.drools;
 
 import org.ihtsdo.drools.domain.Concept;
+import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.domain.Relationship;
 import org.ihtsdo.drools.response.InvalidContent;
@@ -86,12 +87,16 @@ public class RuleExecutor {
 	 * Passing services in with every invocation of this method allows the implementation to capture content context. For example
 	 * services relevant to the content branch being worked on.
 	 * @param concept The concept to be validated.
-	 * @param onlyUnpublishedContentCanBeInvalid Flag to filter results so that only unpublished content can be returned as invalid.
 	 * @param conceptService An implementation of the ConceptService class for use in validation rules.
 	 * @param relationshipService An implementation of the RelationshipService class for use in validation rules.
+	 * @param includePublishedComponents Include the published components of the given concept in results if found to be invalid.
+	 *                                   Published content will be used during validation regardless just not returned.
+	 * @param includeInferredRelationships Include the inferred relationships of the given concept during validation and
+	 *                                     in results if found to be invalid.
 	 * @return A list of content found to be invalid is returned.
 	 */
-	public List<InvalidContent> execute(Concept concept, boolean onlyUnpublishedContentCanBeInvalid, ConceptService conceptService, RelationshipService relationshipService) {
+	public List<InvalidContent> execute(Concept concept, ConceptService conceptService, RelationshipService relationshipService,
+			boolean includePublishedComponents, boolean includeInferredRelationships) {
 		if (failedToInitialize) throw new RuleExecutorException("Unable to complete request: rule engine failed to initialize.");
 
 		final StatelessKieSession session = kieContainer.newStatelessKieSession();
@@ -103,11 +108,11 @@ public class RuleExecutor {
 
 		Date start = new Date();
 		Set<Object> content = new HashSet<>();
-		addConcept(concept, content);
+		addConcept(concept, content, includeInferredRelationships);
 		session.execute(content);
 		logger.debug("execute took {} milliseconds", new Date().getTime() - start.getTime());
 
-		if (onlyUnpublishedContentCanBeInvalid) {
+		if (!includePublishedComponents) {
 			Set<InvalidContent> publishedInvalidContent = new HashSet<>();
 			for (InvalidContent invalidContentItem : invalidContent) {
 				if (invalidContentItem.isPublished()) {
@@ -125,13 +130,15 @@ public class RuleExecutor {
 		return rulesLoaded;
 	}
 
-	private static void addConcept(Concept concept, Set<Object> content) {
+	private static void addConcept(Concept concept, Set<Object> content, boolean includeInferredRelationships) {
 		content.add(concept);
 		for (Description description : concept.getDescriptions()) {
 			content.add(description);
 		}
 		for (Relationship relationship : concept.getRelationships()) {
-			content.add(relationship);
+			if (includeInferredRelationships || !Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
+				content.add(relationship);
+			}
 		}
 	}
 

@@ -4,6 +4,7 @@ import org.ihtsdo.drools.RuleExecutor;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.rulestestrig.domain.TestConcept;
+import org.ihtsdo.drools.rulestestrig.domain.TestDescription;
 import org.ihtsdo.drools.rulestestrig.domain.TestRelationship;
 import org.ihtsdo.drools.rulestestrig.service.TestConceptService;
 import org.ihtsdo.drools.rulestestrig.service.TestRelationshipService;
@@ -61,7 +62,7 @@ public class RulesTestManual {
 					if (testCasesFile.isFile()) {
 
 						Map<String, List<TestConcept>> testConcepts = TestUtil.loadConceptMap(testCasesFile);
-						setRelationshipSourceIds(testConcepts);
+						setConceptIdReferences(testConcepts);
 
 						final List<TestConcept> givenConcepts = testConcepts.get(GIVEN_CONCEPTS);
 						if (givenConcepts != null) {
@@ -89,12 +90,16 @@ public class RulesTestManual {
 		Assert.assertFalse("There should be no errors while testing all rules.", anyErrors);
 	}
 
-	private void setRelationshipSourceIds(Map<String, List<TestConcept>> conceptListMap) {
+	@SuppressWarnings("unchecked")
+	private void setConceptIdReferences(Map<String, List<TestConcept>> conceptListMap) {
 		for (List<TestConcept> concepts : conceptListMap.values()) {
 			for (TestConcept concept : concepts) {
-				final Collection<TestRelationship> relationships = concept.getRelationships();
-				for (TestRelationship relationship : relationships) {
-					relationship.setSourceId(concept.getId());
+				final String id = concept.getId();
+				for (TestRelationship relationship : (Collection<TestRelationship>) concept.getRelationships()) {
+					relationship.setSourceId(id);
+				}
+				for (TestDescription description : (Collection<TestDescription>) concept.getDescriptions()) {
+					description.setConceptId(id);
 				}
 			}
 		}
@@ -102,7 +107,7 @@ public class RulesTestManual {
 
 	private void executeRulesAndAssertExpectations(RuleExecutor ruleExecutor, List<TestConcept> concepts, boolean expectPass) throws JSONException {
 		for (TestConcept concept : concepts) {
-			final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, true, conceptService, relationshipService);
+			final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, conceptService, relationshipService, true, false);
 			if (expectPass) {
 				Assert.assertEquals("A concept from the " + ASSERT_CONCEPTS_PASS + " set actually failed! " + invalidContent.toString(), 0, invalidContent.size());
 

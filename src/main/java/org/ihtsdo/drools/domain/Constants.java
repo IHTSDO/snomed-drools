@@ -12,5 +12,7 @@ public class Constants {
 	public static final String IS_A = "116680003";
 	public static final String PRIMITIVE = "900000000000074008";
 	public static final String DEFINED = "900000000000073002";
+	public static final String INFERRED_RELATIONSHIP = "900000000000011006";
+
 
 }

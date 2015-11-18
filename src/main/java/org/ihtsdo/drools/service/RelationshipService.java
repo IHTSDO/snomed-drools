@@ -2,6 +2,8 @@ package org.ihtsdo.drools.service;
 
 public interface RelationshipService {
 
-	boolean hasActiveInboundRelationship(String conceptId, String relationshipTypeId);
+	boolean hasActiveInboundStatedRelationship(String conceptId);
+
+	boolean hasActiveInboundStatedRelationship(String conceptId, String relationshipTypeId);
 
 }

@@ -9,4 +9,6 @@ public interface Relationship extends Component {
 	int getRelationshipGroup();
 
 	String getTypeId();
+
+	String getCharacteristicTypeId();
 }
