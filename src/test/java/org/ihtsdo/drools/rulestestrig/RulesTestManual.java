@@ -3,6 +3,7 @@ package org.ihtsdo.drools.rulestestrig;
 import org.ihtsdo.drools.RuleExecutor;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.response.InvalidContent;
+import org.ihtsdo.drools.rulestestrig.domain.TestComponent;
 import org.ihtsdo.drools.rulestestrig.domain.TestConcept;
 import org.ihtsdo.drools.rulestestrig.domain.TestDescription;
 import org.ihtsdo.drools.rulestestrig.domain.TestRelationship;
@@ -16,10 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RulesTestManual {
 
@@ -62,7 +60,7 @@ public class RulesTestManual {
 					if (testCasesFile.isFile()) {
 
 						Map<String, List<TestConcept>> testConcepts = TestUtil.loadConceptMap(testCasesFile);
-						setConceptIdReferences(testConcepts);
+						setConceptIdReferencesAndTempIds(testConcepts);
 
 						final List<TestConcept> givenConcepts = testConcepts.get(GIVEN_CONCEPTS);
 						if (givenConcepts != null) {
@@ -91,17 +89,26 @@ public class RulesTestManual {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void setConceptIdReferences(Map<String, List<TestConcept>> conceptListMap) {
+	private void setConceptIdReferencesAndTempIds(Map<String, List<TestConcept>> conceptListMap) {
 		for (List<TestConcept> concepts : conceptListMap.values()) {
 			for (TestConcept concept : concepts) {
+				setTempIdIfMissing(concept);
 				final String id = concept.getId();
 				for (TestRelationship relationship : (Collection<TestRelationship>) concept.getRelationships()) {
+					setTempIdIfMissing(relationship);
 					relationship.setSourceId(id);
 				}
 				for (TestDescription description : (Collection<TestDescription>) concept.getDescriptions()) {
+					setTempIdIfMissing(description);
 					description.setConceptId(id);
 				}
 			}
+		}
+	}
+
+	private void setTempIdIfMissing(TestComponent component) {
+		if (component.getId() == null) {
+			component.setId("temp-id-" + UUID.randomUUID());
 		}
 	}
 
