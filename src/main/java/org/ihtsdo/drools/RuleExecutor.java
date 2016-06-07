@@ -123,7 +123,7 @@ public class RuleExecutor {
 		if (!includePublishedComponents) {
 			Set<InvalidContent> publishedInvalidContent = new HashSet<>();
 			for (InvalidContent invalidContentItem : invalidContent) {
-				if (invalidContentItem.isPublished()) {
+				if (!invalidContentItem.isIgnorePublishedCheck() && invalidContentItem.isPublished()) {
 					publishedInvalidContent.add(invalidContentItem);
 				}
 			}

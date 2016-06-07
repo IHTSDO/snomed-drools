@@ -11,11 +11,22 @@ public class DescriptionImpl implements Description {
 	private String conceptId;
 	private String term;
 	private Map<String, String> acceptabilityMap;
+	private boolean published;
 
 	public DescriptionImpl(String id, String term) {
 		this.id = id;
 		this.term = term;
 		this.acceptabilityMap = new HashMap<>();
+	}
+
+	public DescriptionImpl published() {
+		published = true;
+		return this;
+	}
+
+	public DescriptionImpl addToAcceptability(String key, String value) {
+		acceptabilityMap.put(key, value);
+		return this;
 	}
 
 	@Override
@@ -30,7 +41,7 @@ public class DescriptionImpl implements Description {
 
 	@Override
 	public boolean isPublished() {
-		return false;
+		return published;
 	}
 
 	@Override

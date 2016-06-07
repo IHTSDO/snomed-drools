@@ -11,6 +11,7 @@ public class InvalidContent {
 	private Component component;
 	private String message;
 	private Severity severity;
+	private boolean ignorePublishedCheck;
 
 	private InvalidContent(String conceptId, Component component, String message, Severity severity) {
 		this.conceptId = conceptId;
@@ -43,12 +44,26 @@ public class InvalidContent {
 		this(relationship, message, Severity.ERROR);
 	}
 
+	public InvalidContent ignorePublishedCheck() {
+		ignorePublishedCheck = true;
+		return this;
+	}
+
 	public String getConceptId() {
 		return conceptId;
 	}
 
 	public String getComponentId() {
 		return component.getId();
+	}
+
+	/**
+	 * The ignorePublishedCheck field can be set to true by rules which test data
+	 * where the published state cannot be evaluated. For example language reference set members.
+	 * @return
+	 */
+	public boolean isIgnorePublishedCheck() {
+		return ignorePublishedCheck;
 	}
 
 	public boolean isPublished() {
@@ -68,6 +83,7 @@ public class InvalidContent {
 		return "InvalidContent{" +
 				"conceptId='" + conceptId + '\'' +
 				", componentId='" + getComponentId() + '\'' +
+				", ignorePublishedCheck='" + isIgnorePublishedCheck() + '\'' +
 				", published='" + isPublished() + '\'' +
 				", message='" + message + '\'' +
 				'}';
