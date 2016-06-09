@@ -43,13 +43,13 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	}
 
 	@Override
-	public Collection<Description> getDescriptions() {
-		return (Collection<Description>) descriptions;
+	public Collection<D> getDescriptions() {
+		return descriptions;
 	}
 
 	@Override
-	public Collection<Relationship> getRelationships() {
-		return (Collection<Relationship>) relationships;
+	public Collection<R> getRelationships() {
+		return relationships;
 	}
 
 	public void setId(String id) {
