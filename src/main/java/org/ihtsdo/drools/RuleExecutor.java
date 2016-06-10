@@ -1,9 +1,6 @@
 package org.ihtsdo.drools;
 
-import org.ihtsdo.drools.domain.Concept;
-import org.ihtsdo.drools.domain.Constants;
-import org.ihtsdo.drools.domain.Description;
-import org.ihtsdo.drools.domain.Relationship;
+import org.ihtsdo.drools.domain.*;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
 import org.ihtsdo.drools.exception.RuleExecutorException;
 import org.ihtsdo.drools.response.InvalidContent;
@@ -114,15 +111,19 @@ public class RuleExecutor {
 		session.setGlobal("relationshipService", relationshipService);
 
 		Date start = new Date();
-		Set<Object> content = new HashSet<>();
-		addConcept(concept, content, includeInferredRelationships);
-		session.execute(content);
+		Set<Component> components = new HashSet<>();
+
+		// Load components into working set
+		addConcept(components, concept, includeInferredRelationships);
+
+		// Execute rules on working set
+		session.execute(components);
 		logger.debug("execute took {} milliseconds", new Date().getTime() - start.getTime());
 
 		if (!includePublishedComponents) {
 			Set<InvalidContent> publishedInvalidContent = new HashSet<>();
 			for (InvalidContent invalidContentItem : invalidContent) {
-				if (invalidContentItem.isPublished()) {
+				if (!invalidContentItem.isIgnorePublishedCheck() && invalidContentItem.isPublished()) {
 					publishedInvalidContent.add(invalidContentItem);
 				}
 			}
@@ -158,19 +159,14 @@ public class RuleExecutor {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	public int getRulesLoaded() {
-		return rulesLoaded;
-	}
-
-	private static void addConcept(Concept concept, Set<Object> content, boolean includeInferredRelationships) {
-		content.add(concept);
+	private static void addConcept(Set<Component> components, Concept concept, boolean includeInferredRelationships) {
+		components.add(concept);
 		for (Description description : concept.getDescriptions()) {
-			content.add(description);
+			components.add(description);
 		}
 		for (Relationship relationship : concept.getRelationships()) {
 			if (includeInferredRelationships || !Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
-				content.add(relationship);
+				components.add(relationship);
 			}
 		}
 	}
@@ -200,4 +196,10 @@ public class RuleExecutor {
 		}
 
 	}
+
+	@SuppressWarnings("unused")
+	public int getRulesLoaded() {
+		return rulesLoaded;
+	}
+
 }

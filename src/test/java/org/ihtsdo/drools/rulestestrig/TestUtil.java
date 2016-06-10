@@ -27,7 +27,7 @@ public class TestUtil {
 				.registerTypeAdapter(Concept.class, new InstanceCreator<Concept>() {
 					@Override
 					public Concept createInstance(Type type) {
-						return new TestConcept();
+						return new TestConcept<TestDescription, TestRelationship>();
 					}
 				})
 				.registerTypeAdapter(Description.class, new InstanceCreator<Description>() {
@@ -44,7 +44,8 @@ public class TestUtil {
 				})
 				.create();
 	}
-	public static final Map<String, List<TestConcept>> loadConceptMap(File jsonFile) throws FileNotFoundException {
+	
+	public static final Map<String, List<TestConcept<TestDescription, TestRelationship>>> loadConceptMap(File jsonFile) throws FileNotFoundException {
 		return gson.fromJson(new FileReader(jsonFile), new TypeToken<Map<String, List<TestConcept<TestDescription, TestRelationship>>>>() {}.getType());
 	}
 

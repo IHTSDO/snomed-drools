@@ -6,7 +6,7 @@ public interface Concept extends Component {
 
 	String getDefinitionStatusId();
 
-	Collection<Description> getDescriptions();
+	Collection<? extends Description> getDescriptions();
 
-	Collection<Relationship> getRelationships();
+	Collection<? extends Relationship> getRelationships();
 }
