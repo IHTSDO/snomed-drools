@@ -4,7 +4,7 @@
 
 	<groupId>org.ihtsdo.drools</groupId>
 	<artifactId>snomed-drools</artifactId>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.0.4</version>
 	<packaging>bundle</packaging>
 
 	<properties>
