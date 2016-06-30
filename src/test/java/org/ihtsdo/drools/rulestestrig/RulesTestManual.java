@@ -1,13 +1,5 @@
 package org.ihtsdo.drools.rulestestrig;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import org.ihtsdo.drools.RuleExecutor;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
@@ -26,6 +18,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
 
 @RunWith(Parameterized.class)
 public class RulesTestManual {
@@ -49,20 +45,22 @@ public class RulesTestManual {
 		Assert.assertTrue(rulesDirectory.isDirectory());
 
 		final List<File> ruleDirectories = new ArrayList<>();
-		for (File ruleGroupDirectory : rulesDirectory.listFiles(TestUtil.DIRECTORY_FILTER)) {
-			for (File ruleDirectory : ruleGroupDirectory.listFiles(TestUtil.DIRECTORY_FILTER)) {
-				final File[] ruleFiles = ruleDirectory.listFiles(TestUtil.RULE_FILE_FILTER);
-				if (ruleFiles.length > 0) {
-					ruleDirectories.add(ruleDirectory);
+		for (File productGroupDirectory : rulesDirectory.listFiles(TestUtil.DIRECTORY_FILTER)) {
+			for (File ruleGroupDirectory : productGroupDirectory.listFiles(TestUtil.DIRECTORY_FILTER)) {
+				for (File ruleDirectory : ruleGroupDirectory.listFiles(TestUtil.DIRECTORY_FILTER)) {
+					final File[] ruleFiles = ruleDirectory.listFiles(TestUtil.RULE_FILE_FILTER);
+					if (ruleFiles.length > 0) {
+						ruleDirectories.add(ruleDirectory);
+					}
 				}
 			}
 		}
-
 		return ruleDirectories;
 	}
 
 	public RulesTestManual(File ruleDirectory) {
-		this.ruleExecutor = new RuleExecutor(ruleDirectory.getAbsolutePath());
+		this.ruleExecutor = new RuleExecutor();
+		this.ruleExecutor.addRuleSet("OneRule", ruleDirectory);
 		this.concepts = new HashMap<>();
 		
 		final File testCasesFile = new File(ruleDirectory, "test-cases.json");
@@ -135,7 +133,9 @@ public class RulesTestManual {
 
 	private void executeRulesAndAssertExpectations(RuleExecutor ruleExecutor, List<TestConcept<TestDescription, TestRelationship>> conceptsThatShouldFail, boolean expectPass) throws JSONException {
 		for (TestConcept<TestDescription, TestRelationship> concept : conceptsThatShouldFail) {
-			final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, conceptService, descriptionService, relationshipService, true, false);
+			final HashSet<String> ruleSetNames = new HashSet<>();
+			ruleSetNames.add("OneRule");
+			final List<InvalidContent> invalidContent = ruleExecutor.execute(ruleSetNames, concept, conceptService, descriptionService, relationshipService, true, false);
 			
 			if (expectPass) {
 				Assert.assertEquals("A concept from the " + ASSERT_CONCEPTS_PASS + " set actually failed! " + invalidContent.toString(), 0, invalidContent.size());

@@ -15,12 +15,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RuleExecutorTest {
 
+	public static final Set<String> RULE_SET_NAMES = Collections.singleton("Common");
 	private RuleExecutor ruleExecutor;
 	private TestConceptService conceptService;
 	private TestDescriptionService descriptionService;
@@ -40,7 +39,7 @@ public class RuleExecutorTest {
 		final RuleExecutor ruleExecutor1 = new RuleExecutor("non-existant-directory");
 
 		try {
-			ruleExecutor1.execute(new ConceptImpl("1"), conceptService, descriptionService, relationshipService, true, false);
+			ruleExecutor1.execute(RULE_SET_NAMES, new ConceptImpl("1"), conceptService, descriptionService, relationshipService, true, false);
 			Assert.fail("Should have thrown exception.");
 		} catch (RuleExecutorException e) {
 			// Pass
@@ -54,7 +53,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, conceptService, descriptionService, relationshipService, true, false);
+		final List<InvalidContent> invalidContent = ruleExecutor.execute(RULE_SET_NAMES, concept, conceptService, descriptionService, relationshipService, true, false);
 
 		Assert.assertEquals(1, invalidContent.size());
 		final InvalidContent invalidContent1 = invalidContent.get(0);
@@ -70,7 +69,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, conceptService, descriptionService, relationshipService, false, false);
+		final List<InvalidContent> invalidContent = ruleExecutor.execute(RULE_SET_NAMES, concept, conceptService, descriptionService, relationshipService, false, false);
 
 		Assert.assertEquals(0, invalidContent.size());
 	}
@@ -80,7 +79,7 @@ public class RuleExecutorTest {
 		final Concept concept = new ConceptImpl("1")
 				.addDescription(new DescriptionImpl("2", "a").published().addToAcceptability("900000000000508004", "PREFERRED"));
 
-		final List<InvalidContent> invalidContent = ruleExecutor.execute(concept, conceptService, descriptionService, relationshipService, false, false);
+		final List<InvalidContent> invalidContent = ruleExecutor.execute(RULE_SET_NAMES, concept, conceptService, descriptionService, relationshipService, false, false);
 
 		Assert.assertEquals(1, invalidContent.size());
 		final InvalidContent invalidContent1 = invalidContent.get(0);
@@ -96,7 +95,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		ruleExecutor.execute(concept, conceptService, descriptionService, relationshipService, true, false);
+		ruleExecutor.execute(RULE_SET_NAMES, concept, conceptService, descriptionService, relationshipService, true, false);
 	}
 
 	@Test(expected = BadRequestRuleExecutorException.class)
@@ -106,7 +105,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		ruleExecutor.execute(concept, conceptService, descriptionService, relationshipService, true, false);
+		ruleExecutor.execute(RULE_SET_NAMES, concept, conceptService, descriptionService, relationshipService, true, false);
 	}
 
 	@Test(expected = BadRequestRuleExecutorException.class)
@@ -116,6 +115,6 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl(null, "4"));
 
-		ruleExecutor.execute(concept, conceptService, descriptionService, relationshipService, true, false);
+		ruleExecutor.execute(RULE_SET_NAMES, concept, conceptService, descriptionService, relationshipService, true, false);
 	}
 }

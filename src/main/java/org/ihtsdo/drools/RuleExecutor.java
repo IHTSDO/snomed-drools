@@ -31,34 +31,51 @@ public class RuleExecutor {
 
 	public static final String RULE_FILENAME_EXTENSION = ".drl";
 
-	private final KieContainer kieContainer;
+	private Map<String, KieContainer> ruleSetContainers;
 	private int rulesLoaded = 0;
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private boolean failedToInitialize;
+	private final KieServices kieServices;
 
-	public RuleExecutor(String rulesDirectory) {
-		KieServices kieServices = KieServices.Factory.get();
+	public RuleExecutor() {
+		ruleSetContainers = new HashMap<>();
+		kieServices = KieServices.Factory.get();
+	}
 
-		// Create the in-memory File System and add the resources files  to it
-		KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
-		final File rulesDir = new File(rulesDirectory);
+	public RuleExecutor(String directoryOfRuleSets) {
+		this();
+
+		final File rulesDir = new File(directoryOfRuleSets);
 		if (!rulesDir.isDirectory()) {
 			failedToInitialize = true;
 			logger.error("Rules directory does not exist: {}", rulesDir.getAbsolutePath());
 		} else {
-			try {
-				final RuleLoader ruleLoader = new RuleLoader(kieFileSystem);
-				Files.walkFileTree(rulesDir.toPath(), ruleLoader);
-				rulesLoaded = ruleLoader.getRulesLoaded();
-				if (rulesLoaded == 0) {
-					logger.warn("No rules loaded. Rules directory: {}", rulesDir.getAbsolutePath());
-				} else {
-					logger.info("{} rules loaded.", ruleLoader.getRulesLoaded());
+			for (File file : rulesDir.listFiles()) {
+				if (file.isDirectory() && !file.isHidden()) {
+					final String ruleSetName = file.getName();
+					logger.info("Loading Drools rule set {}", ruleSetName);
+					addRuleSet(file.getName(), file);
 				}
-			} catch (IOException e) {
-				throw new RuleExecutorException("Failed to load rules.", e);
 			}
+		}
+	}
+
+	public void addRuleSet(String ruleSetName, File ruleSetDirectory) throws RuleExecutorException {
+		// Create the in-memory File System and add the resources files  to it
+		KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
+
+		try {
+			final RuleLoader ruleLoader = new RuleLoader(kieFileSystem);
+			Files.walkFileTree(ruleSetDirectory.toPath(), ruleLoader);
+			rulesLoaded = ruleLoader.getRulesLoaded();
+			if (rulesLoaded == 0) {
+				logger.warn("No rules loaded. Rules directory: {}", ruleSetDirectory.getAbsolutePath());
+			} else {
+				logger.info("{} rules loaded.", ruleLoader.getRulesLoaded());
+			}
+		} catch (IOException e) {
+			throw new RuleExecutorException("Failed to load rule set " + ruleSetName, e);
 		}
 
 		// Create the builder for the resources of the File System
@@ -76,7 +93,7 @@ public class RuleExecutor {
 		ReleaseId relId = kieBuilder.getKieModule().getReleaseId();
 
 		// Create the Container, wrapping the KieModule with the given ReleaseId
-		kieContainer = kieServices.newKieContainer(relId);
+		ruleSetContainers.put(ruleSetName, kieServices.newKieContainer(relId));
 	}
 
 	/**
@@ -86,6 +103,7 @@ public class RuleExecutor {
 	 *
 	 * Passing services in with every invocation of this method allows the implementation to capture content context. For example
 	 * services relevant to the content branch being worked on.
+	 * @param ruleSetNames The rule sets to use during validation.
 	 * @param concept The concept to be validated.
 	 * @param conceptService An implementation of the ConceptService class for use in validation rules.
 	 * @param descriptionService An implementation of the DescriptionService class for use in validation rules.
@@ -96,19 +114,12 @@ public class RuleExecutor {
 	 *                                     in results if found to be invalid.
 	 * @return A list of content found to be invalid is returned.
 	 */
-	public List<InvalidContent> execute(Concept concept, ConceptService conceptService, DescriptionService descriptionService, RelationshipService relationshipService,
+	public List<InvalidContent> execute(Set<String> ruleSetNames, Concept concept, ConceptService conceptService, DescriptionService descriptionService, RelationshipService relationshipService,
 			boolean includePublishedComponents, boolean includeInferredRelationships) {
+
 		if (failedToInitialize) throw new RuleExecutorException("Unable to complete request: rule engine failed to initialize.");
 
 		assertComponentIdsPresent(concept);
-
-		final StatelessKieSession session = kieContainer.newStatelessKieSession();
-
-		final List<InvalidContent> invalidContent = new ArrayList<>();
-		session.setGlobal("invalidContent", invalidContent);
-		session.setGlobal("conceptService", conceptService);
-		session.setGlobal("descriptionService", descriptionService);
-		session.setGlobal("relationshipService", relationshipService);
 
 		Date start = new Date();
 		Set<Component> components = new HashSet<>();
@@ -116,9 +127,24 @@ public class RuleExecutor {
 		// Load components into working set
 		addConcept(components, concept, includeInferredRelationships);
 
-		// Execute rules on working set
-		session.execute(components);
-		logger.debug("execute took {} milliseconds", new Date().getTime() - start.getTime());
+		final List<InvalidContent> invalidContent = new ArrayList<>();
+		for (String ruleSetName : ruleSetNames) {
+			final KieContainer kieContainer = ruleSetContainers.get(ruleSetName);
+			if (kieContainer == null) {
+				throw new RuleExecutorException("Rule set not found for name '" + ruleSetName + "'");
+			}
+			final StatelessKieSession session = kieContainer.newStatelessKieSession();
+
+			session.setGlobal("invalidContent", invalidContent);
+			session.setGlobal("conceptService", conceptService);
+			session.setGlobal("descriptionService", descriptionService);
+			session.setGlobal("relationshipService", relationshipService);
+
+
+			// Execute rules on working set
+			session.execute(components);
+			logger.debug("execute took {} milliseconds", new Date().getTime() - start.getTime());
+		}
 
 		if (!includePublishedComponents) {
 			Set<InvalidContent> publishedInvalidContent = new HashSet<>();
