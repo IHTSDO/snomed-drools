@@ -32,7 +32,7 @@ public class RuleExecutor {
 	public static final String RULE_FILENAME_EXTENSION = ".drl";
 
 	private Map<String, KieContainer> ruleSetContainers;
-	private int rulesLoaded = 0;
+	private int totalRulesLoaded = 0;
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private boolean failedToInitialize;
@@ -68,11 +68,12 @@ public class RuleExecutor {
 		try {
 			final RuleLoader ruleLoader = new RuleLoader(kieFileSystem);
 			Files.walkFileTree(ruleSetDirectory.toPath(), ruleLoader);
-			rulesLoaded = ruleLoader.getRulesLoaded();
+			int rulesLoaded = ruleLoader.getRulesLoaded();
 			if (rulesLoaded == 0) {
 				logger.warn("No rules loaded. Rules directory: {}", ruleSetDirectory.getAbsolutePath());
 			} else {
 				logger.info("{} rules loaded.", ruleLoader.getRulesLoaded());
+				totalRulesLoaded += rulesLoaded;
 			}
 		} catch (IOException e) {
 			throw new RuleExecutorException("Failed to load rule set " + ruleSetName, e);
@@ -224,8 +225,8 @@ public class RuleExecutor {
 	}
 
 	@SuppressWarnings("unused")
-	public int getRulesLoaded() {
-		return rulesLoaded;
+	public int getTotalRulesLoaded() {
+		return totalRulesLoaded;
 	}
 
 }
