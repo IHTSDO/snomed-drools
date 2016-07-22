@@ -6,6 +6,8 @@ public interface Description extends Component {
 
 	String getConceptId();
 
+	String getLanguageCode();
+
 	String getTypeId();
 
 	String getTerm();

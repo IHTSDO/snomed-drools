@@ -50,6 +50,11 @@ public class DescriptionImpl implements Description {
 	}
 
 	@Override
+	public String getLanguageCode() {
+		return "";
+	}
+
+	@Override
 	public String getConceptId() {
 		return conceptId;
 	}

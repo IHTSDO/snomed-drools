@@ -10,6 +10,7 @@ public class TestDescription implements Description, TestComponent {
 	private String id;
 	private boolean active;
 	private boolean published;
+	private String languageCode;
 	private String conceptId;
 	private String typeId;
 	private String caseSignificanceId;
@@ -40,6 +41,11 @@ public class TestDescription implements Description, TestComponent {
 	@Override
 	public String getTypeId() {
 		return typeId;
+	}
+
+	@Override
+	public String getLanguageCode() {
+		return languageCode;
 	}
 
 	@Override
@@ -83,6 +89,10 @@ public class TestDescription implements Description, TestComponent {
 		this.typeId = typeId;
 	}
 
+	public void setLanguageCode(String languageCode) {
+		this.languageCode = languageCode;
+	}
+
 	public void setConceptId(String conceptId) {
 		this.conceptId = conceptId;
 	}
@@ -109,6 +119,7 @@ public class TestDescription implements Description, TestComponent {
 				"id='" + id + '\'' +
 				", active=" + active +
 				", published=" + published +
+				", languageCode='" + languageCode + '\'' +
 				", conceptId='" + conceptId + '\'' +
 				", typeId='" + typeId + '\'' +
 				", caseSignificanceId='" + caseSignificanceId + '\'' +
