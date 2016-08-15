@@ -28,6 +28,15 @@ public class RelationshipHelper {
 		}
 		return false;
 	}
+	
+	public static boolean hasActiveRelationshipNotOfType(Concept concept, String typeId) {
+		for (Relationship relationship : concept.getRelationships()) {
+			if (relationship.isActive() && !typeId.equals(relationship.getTypeId())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public static Set<String> getActiveStatedParentConceptIds(Concept concept) {
 		Set<String> activeParentConceptIds = new HashSet<>();
