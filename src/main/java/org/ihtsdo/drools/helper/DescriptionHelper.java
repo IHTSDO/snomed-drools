@@ -24,6 +24,18 @@ public class DescriptionHelper {
 		}
 		return descriptions;
 	}
+	
+	public static Collection<Description> filterByActiveAndType(Concept concept, boolean active, String typeId) {
+		Collection<Description> descriptions = new HashSet<>();
+		for (Description description : concept.getDescriptions()) {
+			System.out.println(description.toString());
+			if (description.isActive() == active && typeId.equals(description.getTypeId())) {
+				descriptions.add(description);
+			}
+		}
+		System.out.println(descriptions.size());
+		return descriptions;
+	}
 
 	/**
 	 * Boolean check for whether description has defined acceptability map
@@ -106,9 +118,11 @@ public class DescriptionHelper {
 	}
 
 
-	private static String getTag(String term) {
+	public static String getTag(String term) {
 		final Matcher matcher = TAG_PATTERN.matcher(term);
+		System.out.println(term);
 		if (matcher.matches()) {
+			System.out.println(matcher.group(1));
 			return matcher.group(1);
 		}
 		return null;
