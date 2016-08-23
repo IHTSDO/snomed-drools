@@ -1,0 +1,12 @@
+import org.ihtsdo.drools.domain.Description
+import org.ihtsdo.drools.response.InvalidContent
+
+global java.util.List invalidContent
+
+rule "Double spaces"
+    dialect "mvel"
+    when
+        d : Description(term matches ".*  .*" || term matches " .*" || term matches ".* ")
+    then
+        invalidContent.add(new InvalidContent(d, "Term should not contain double spaces."));
+end

@@ -8,4 +8,6 @@ public interface Component {
 
 	boolean isPublished();
 
+	String getModuleId();
+
 }

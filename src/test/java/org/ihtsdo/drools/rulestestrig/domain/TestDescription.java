@@ -10,6 +10,7 @@ public class TestDescription implements Description, TestComponent {
 	private String id;
 	private boolean active;
 	private boolean published;
+	private String moduleId;
 	private String languageCode;
 	private String conceptId;
 	private String typeId;
@@ -36,6 +37,15 @@ public class TestDescription implements Description, TestComponent {
 	@Override
 	public boolean isPublished() {
 		return published;
+	}
+
+	@Override
+	public String getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(String moduleId) {
+		this.moduleId = moduleId;
 	}
 
 	@Override

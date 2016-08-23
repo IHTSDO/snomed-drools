@@ -8,6 +8,7 @@ import java.util.Map;
 public class DescriptionImpl implements Description {
 
 	private final String id;
+	private String moduleId;
 	private String conceptId;
 	private String term;
 	private Map<String, String> acceptabilityMap;
@@ -32,6 +33,15 @@ public class DescriptionImpl implements Description {
 	@Override
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public String getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(String moduleId) {
+		this.moduleId = moduleId;
 	}
 
 	@Override

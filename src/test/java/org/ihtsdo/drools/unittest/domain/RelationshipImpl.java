@@ -5,6 +5,7 @@ import org.ihtsdo.drools.domain.Relationship;
 public class RelationshipImpl implements Relationship {
 
 	private final String id;
+	private String moduleId;
 	private String sourceId;
 	private String destinationId;
 	private int relationshipGroup;
@@ -24,6 +25,15 @@ public class RelationshipImpl implements Relationship {
 	@Override
 	public boolean isActive() {
 		return false;
+	}
+
+	@Override
+	public String getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(String moduleId) {
+		this.moduleId = moduleId;
 	}
 
 	@Override
