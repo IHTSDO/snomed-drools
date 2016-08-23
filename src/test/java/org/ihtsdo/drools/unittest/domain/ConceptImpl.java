@@ -10,6 +10,7 @@ import java.util.HashSet;
 public class ConceptImpl implements Concept {
 
 	private String id;
+	private String moduleId;
 	private String definitionStatusId;
 	private Collection<Description> descriptions;
 	private Collection<Relationship> relationships;
@@ -28,6 +29,15 @@ public class ConceptImpl implements Concept {
 	@Override
 	public boolean isActive() {
 		return false;
+	}
+
+	@Override
+	public String getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(String moduleId) {
+		this.moduleId = moduleId;
 	}
 
 	@Override

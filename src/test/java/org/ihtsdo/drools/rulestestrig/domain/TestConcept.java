@@ -12,6 +12,7 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	private String id;
 	private boolean active;
 	private boolean published;
+	private String moduleId;
 	private String definitionStatusId;
 	private Collection<D> descriptions;
 	private Collection<R> relationships;
@@ -30,6 +31,15 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	@Override
 	public boolean isActive() {
 		return active;
+	}
+
+	@Override
+	public String getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(String moduleId) {
+		this.moduleId = moduleId;
 	}
 
 	@Override
