@@ -224,7 +224,6 @@ public class RuleExecutor {
 
 	}
 
-	@SuppressWarnings("unused")
 	public int getTotalRulesLoaded() {
 		return totalRulesLoaded;
 	}

@@ -46,4 +46,17 @@ public class TestDescriptionService implements DescriptionService {
 		}
 		return matches;
 	}
+
+	@Override
+	public Set<Description> findInactiveDescriptionByExactTerm(String exactTerm) {
+		Set<Description> matches = new HashSet<>();
+		for (Concept concept : concepts.values()) {
+			for (Description description : concept.getDescriptions()) {
+				if (!description.isActive() && description.getTerm().equals(exactTerm)) {
+					matches.add(description);
+				}
+			}
+		}
+		return matches;
+	}
 }

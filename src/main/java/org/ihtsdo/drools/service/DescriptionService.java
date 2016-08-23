@@ -10,4 +10,5 @@ public interface DescriptionService {
 
 	Set<Description> findActiveDescriptionByExactTerm(String exactTerm);
 
+	Set<Description> findInactiveDescriptionByExactTerm(String exactTerm);
 }
