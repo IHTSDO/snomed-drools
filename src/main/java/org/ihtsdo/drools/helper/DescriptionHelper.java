@@ -1,18 +1,23 @@
 package org.ihtsdo.drools.helper;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
-
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DescriptionHelper {
 
 	public static final Pattern TAG_PATTERN = Pattern.compile("^.*\\((.*)\\)$");
 	public static final Pattern FIRST_WORD_PATTERN = Pattern.compile("([^\\s]*).*$");
 
+	
+	
 	public static Collection<Description> filterByActiveTypeAndDialectPreferred(Concept concept, boolean active,
 			String typeId, String dialectPreferred) {
 		Collection<Description> descriptions = new HashSet<>();
@@ -137,16 +142,12 @@ public class DescriptionHelper {
 		String fw1 = getFirstWord(description.getTerm());
 		for (Description d : concept.getDescriptions()) {
 			String fw2 = getFirstWord(d.getTerm());
-			System.out.println("checking pair " + concept.getDescriptions().size());
-			System.out.println("  " + fw1 + " " + description.getCaseSignificanceId());
-			System.out.println("  " + fw2 + " " + d.getCaseSignificanceId());
-
+	
 			// if first words are equal and case significance not equal, return
 			// false
 			if (fw1 != null && fw2 != null && fw1.equals(fw2) && d.getCaseSignificanceId() != null
 					&& description.getCaseSignificanceId() != null
 					&& !d.getCaseSignificanceId().equals(description.getCaseSignificanceId())) {
-				System.out.println("  --> violation");
 				return false;
 			}
 		}
@@ -161,16 +162,34 @@ public class DescriptionHelper {
 		}
 		return null;
 	}
-
-	private static String getFirstWord(String term) {
-		final Matcher matcher = FIRST_WORD_PATTERN.matcher(term);
-		System.out.println(matcher);
-		if (matcher.matches()) {
-			System.out.println(matcher.group(1));
-			return matcher.group(1);
+	
+	public static String getTagForConcept(Concept concept) {
+		for (Description d : concept.getDescriptions()) {
+			if (Constants.FSN.equals(d.getTypeId())) {
+				return getTag(d.getTerm());
+			}
 		}
-		System.out.println("no first word");
 		return null;
 	}
 
+	private static String getFirstWord(String term) {
+		final Matcher matcher = FIRST_WORD_PATTERN.matcher(term);
+		if (matcher.matches()) {
+			return matcher.group(1);
+		}
+		return null;
+	}
+	
+	
+	public static boolean hasMatchingDescriptionByTypeTermLanguage(Concept concept, Description description) {
+		for (Description d : concept.getDescriptions()) {
+			if (description.getTypeId().equals(d.getTypeId()) &&
+					description.getTerm().equals(d.getTerm()) &&
+					description.getLanguageCode().equals(d.getLanguageCode())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }
