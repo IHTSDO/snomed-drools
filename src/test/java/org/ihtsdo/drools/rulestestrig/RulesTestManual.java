@@ -40,7 +40,7 @@ public class RulesTestManual {
 
 	@Parameters(name = "{0}")
 	public static Iterable<? extends Object> data() {
-		final String rulesPath = "rules"; // symlink to snomed-drools-rules
+		final String rulesPath = "D:/ihtsdo/snomed-drools-rules"; // symlink to snomed-drools-rules
 		final File rulesDirectory = new File(rulesPath);
 		Assert.assertTrue(rulesDirectory.isDirectory());
 

@@ -1,9 +1,8 @@
 package org.ihtsdo.drools.service;
 
-import org.ihtsdo.drools.domain.Concept;
-import org.ihtsdo.drools.domain.Description;
-
 import java.util.Set;
+
+import org.ihtsdo.drools.domain.Description;
 
 public interface DescriptionService {
 
@@ -13,7 +12,9 @@ public interface DescriptionService {
 
 	Set<Description> findInactiveDescriptionByExactTerm(String exactTerm);
 
-	Set<Concept> findConceptsByActiveExactTerm(String exactTerm, boolean active);
+	boolean isTermUniqueWithinHierarchy(String exactTerm, String semanticTag, boolean isActive);
+	
+	String getLanguageSpecificErrorMessage(Description description);
 
 	boolean hasCaseSignificantWord(String term);
 	
