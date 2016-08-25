@@ -12,7 +12,7 @@ public interface DescriptionService {
 
 	Set<Description> findInactiveDescriptionByExactTerm(String exactTerm);
 
-	boolean isTermUniqueWithinHierarchy(String exactTerm, String semanticTag, boolean isActive);
+	boolean isActiveDescriptionUniqueWithinHierarchy(Description description, String semanticTag);
 	
 	String getLanguageSpecificErrorMessage(Description description);
 

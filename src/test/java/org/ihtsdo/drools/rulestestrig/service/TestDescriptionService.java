@@ -139,26 +139,28 @@ public class TestDescriptionService implements DescriptionService {
 	}
 
 	@Override
-	public boolean isTermUniqueWithinHierarchy(String exactTerm, String semanticTag, boolean isActive) {
-		
+	public boolean isActiveDescriptionUniqueWithinHierarchy(Description description, String semanticTag) {
 		for (Concept concept : concepts.values()) {
-			String conceptTag = null;
-			// find the FSN
-			for (Description description : concept.getDescriptions()) {
-				if (description.isActive() == isActive && description.getTypeId().equals(Constants.FSN)){
-					final Matcher matcher = Pattern.compile("^.*\\((.*)\\)$").matcher(description.getTerm());
-					if (matcher.matches()) {
-						conceptTag = matcher.group(1);
+			if (concept.isActive()) {
+
+				String conceptTag = null;
+				// find the FSN
+				for (Description d : concept.getDescriptions()) {
+					if (d.isActive() && d.getTypeId().equals(Constants.FSN)) {
+						final Matcher matcher = Pattern.compile("^.*\\((.*)\\)$").matcher(d.getTerm());
+						if (matcher.matches()) {
+							conceptTag = matcher.group(1);
+					}
 					}
 				}
-			}
-			
-			
-			for (Description description : concept.getDescriptions()) {
-				if (description.isActive() == isActive && description.getTerm().equals(exactTerm) && semanticTag.equals(conceptTag)) {
-					return false;
+
+				for (Description d : concept.getDescriptions()) {
+						if (d.isActive() && !d.getId().equals(description.getId()) && d.getTerm().equals(description.getTerm())
+							&& d.getLanguageCode().equals(description.getLanguageCode()) && semanticTag.equals(conceptTag)) {
+						return false;
+					}
 				}
-			}
+		}
 		}
 		return true;
 	}
@@ -181,9 +183,10 @@ public class TestDescriptionService implements DescriptionService {
 		String[] words = description.getTerm().split("\\s+");
 		for (String refsetId : description.getAcceptabilityMap().keySet()) {
 			for (String word : words) {
-			if (refsetToLanguageSpecificWordsMap.get(refsetId).contains(word)) {
-				return "Synonym is prefered in the GB Language refset but refers to a word has en-us spelling: " + word;
-			}
+				if (refsetToLanguageSpecificWordsMap.get(refsetId).contains(word)) {
+					return "Synonym is prefered in the GB Language refset but refers to a word has en-us spelling: "
+							+ word;
+				}
 			}
 		}
 		return null;
