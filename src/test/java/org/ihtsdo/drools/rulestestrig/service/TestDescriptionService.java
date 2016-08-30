@@ -168,17 +168,18 @@ public class TestDescriptionService implements DescriptionService {
 	}
 
 	@Override
-	public boolean hasCaseSignificantWord(String term) {
+	public boolean getCaseSensitiveWordsFromTerm(String term) {
 		String[] words = term.split("\\s+");
+		String result = "";
 		for (String word : words) {
 			// if lower case match and not original word match
-			if (caseSignificantWordsLowerCase.contains(word.toLowerCase())
-					&& !caseSignificantWordsOriginal.contains(word)) {
-				return true;
+			if (caseSignificantWordsLowerCase.contains(word.toLowerCase())) {
+				result += word + " ";
 			}
 		}
-		return false;
+		return result;
 	}
+	
 
 	@Override
 	public String getLanguageSpecificErrorMessage(Description description) {
