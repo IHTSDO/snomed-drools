@@ -150,17 +150,19 @@ public class TestDescriptionService implements DescriptionService {
 						final Matcher matcher = Pattern.compile("^.*\\((.*)\\)$").matcher(d.getTerm());
 						if (matcher.matches()) {
 							conceptTag = matcher.group(1);
-					}
+						}
 					}
 				}
 
 				for (Description d : concept.getDescriptions()) {
-						if (d.isActive() && !d.getId().equals(description.getId()) && d.getTerm().equals(description.getTerm())
-							&& d.getLanguageCode().equals(description.getLanguageCode()) && semanticTag.equals(conceptTag)) {
+					if (d.isActive() && !d.getId().equals(description.getId())
+							&& d.getTerm().equals(description.getTerm())
+							&& d.getLanguageCode().equals(description.getLanguageCode())
+							&& semanticTag.equals(conceptTag)) {
 						return false;
 					}
 				}
-		}
+			}
 		}
 		return true;
 	}
@@ -180,15 +182,43 @@ public class TestDescriptionService implements DescriptionService {
 
 	@Override
 	public String getLanguageSpecificErrorMessage(Description description) {
+		
+		String errorMessage = "";
+
+		// null checks
+		if (description == null || description.getAcceptabilityMap() == null || description.getTerm() == null) {
+			return errorMessage;
+		}
+
 		String[] words = description.getTerm().split("\\s+");
-		for (String refsetId : description.getAcceptabilityMap().keySet()) {
+
+		// convenience variables
+		String usAcc = description.getAcceptabilityMap().get(Constants.US_EN_LANG_REFSET);
+		String gbAcc = description.getAcceptabilityMap().get(Constants.GB_EN_LANG_REFSET);
+
+	
+		
+		// NOTE: Supports international only at this point
+		// Only check active synonyms
+		if (description.isActive() && Constants.SYNONYM.equals(description.getTypeId())) {
 			for (String word : words) {
-				if (refsetToLanguageSpecificWordsMap.get(refsetId).contains(word)) {
-					return "Synonym is prefered in the GB Language refset but refers to a word has en-us spelling: "
-							+ word;
+				
+				// Step 1: Check en-us preferred synonyms for en-gb spellings
+				if (Constants.ACCEPTABILITY_PREFERRED.equals(usAcc) && refsetToLanguageSpecificWordsMap
+						.get(Constants.GB_EN_LANG_REFSET).contains(word.toLowerCase())) {
+					errorMessage += "Synonym is preferred in the en-us refset but refers to a word that has en-gb spelling: "
+							+ word + "\n";
+				}
+
+				// Step 2: Check en-gb preferred synonyms for en-en spellings
+				if (Constants.ACCEPTABILITY_PREFERRED.equals(gbAcc) && refsetToLanguageSpecificWordsMap
+						.get(Constants.US_EN_LANG_REFSET).contains(word.toLowerCase())) {
+					errorMessage += "Synonym is preferred in the en-gb refset but refers to a word that has en-us spelling: "
+							+ word + "\n";
 				}
 			}
 		}
-		return null;
+		
+		return errorMessage;
 	}
 }
