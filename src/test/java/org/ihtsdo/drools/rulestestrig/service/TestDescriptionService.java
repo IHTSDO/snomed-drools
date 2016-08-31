@@ -26,8 +26,7 @@ public class TestDescriptionService implements DescriptionService {
 
 	// Static block of sample case significant words
 	// In non-dev environments, this should initialize on startup
-	public static final Set<String> caseSignificantWordsOriginal = new HashSet<>();
-	public static final Set<String> caseSignificantWordsLowerCase = new HashSet<>();
+	public static final Map<String, String> caseSignificantWordsMap = new HashMap<>();
 	static {
 
 		File file = new File("src/test/resources/data/CSWordsSample.txt");
@@ -43,11 +42,10 @@ public class TestDescriptionService implements DescriptionService {
 				String[] words = line.split("\\s+");
 
 				// format: 0: word, 1: type (unused)
-				caseSignificantWordsOriginal.add(words[0]);
-				caseSignificantWordsLowerCase.add(words[0].toLowerCase());
+				caseSignificantWordsMap.put(words[0].toLowerCase(), words[0]);
 			}
 			fileReader.close();
-			logger.info("Loaded " + caseSignificantWordsOriginal.size() + " case sensitive words into cache");
+			logger.info("Loaded " + caseSignificantWordsMap.size() + " case sensitive words into cache");
 		} catch (IOException e) {
 			logger.debug("Failed to retrieve case significant words file -- tests will be skipped");
 
@@ -168,24 +166,57 @@ public class TestDescriptionService implements DescriptionService {
 	}
 
 	@Override
-	public String getCaseSensitiveWordsFromTerm(String term) {
-		String[] words = term.split("\\s+");
+	public String getCaseSensitiveWordsErrorMessage(Description description) {
 		String result = "";
+
+		// return immediately if description null
+		if (description == null) {
+			return result;
+		}
+
+		System.out
+				.println("Checking description " + description.getTerm() + ", " + description.getCaseSignificanceId());
+
+		String[] words = description.getTerm().split("\\s+");
+
 		for (String word : words) {
-	
-			// if lower case match and not original word match
-			if (caseSignificantWordsLowerCase.contains(word.toLowerCase())
-					&& !caseSignificantWordsOriginal.contains(word)) {
-				result += word + " ";
+
+			System.out.println("  Checking word " + word);
+
+			if (caseSignificantWordsMap.containsKey(word.toLowerCase())) {
+
+				// Check 1: term containing case-sensitive words should not be
+				// entire-term-case-insensitive
+				if (Constants.ENTIRE_TERM_CASE_INSENSITIVE.equals(description.getCaseSignificanceId())) {
+					result += "Description marked case insensitive should not contain case-sensitive word: "
+							+ caseSignificantWordsMap.get(word.toLowerCase()) + ".\n";
+				}
+
+				// Check 2: term marked ONLY_INITIAL_CHARACTER_CASE_INSENSITIVE
+				// should not start with case sensitive word
+				// TODO Confirm this
+				else if (Constants.ONLY_INITIAL_CHARACTER_CASE_INSENSITIVE.equals(description.getCaseSignificanceId())
+						&& description.getTerm().startsWith(word)) {
+					result += "Description marked only initial character case insensitive should not start with a case-sensitive word: " + word + ".\n";
+				}
+				// Check 3: term containing case-sensitive word with invalid
+				// case
+				else if (caseSignificantWordsMap.containsKey(word.toLowerCase())
+						&& !caseSignificantWordsMap.get(word.toLowerCase()).equals(word)) {
+					result += "Description contains case-sensitive word with improper case: " + word + " should be "
+							+ caseSignificantWordsMap.get(word.toLowerCase()) + ".\n";
+				}
 			}
+		}
+		if (result.length() > 0) {
+			System.out.println(result);
 		}
 		return result;
 	}
-	
 
 	@Override
 	public String getLanguageSpecificErrorMessage(Description description) {
-		
+
 		String errorMessage = "";
 
 		// null checks
@@ -199,13 +230,11 @@ public class TestDescriptionService implements DescriptionService {
 		String usAcc = description.getAcceptabilityMap().get(Constants.US_EN_LANG_REFSET);
 		String gbAcc = description.getAcceptabilityMap().get(Constants.GB_EN_LANG_REFSET);
 
-	
-		
 		// NOTE: Supports international only at this point
 		// Only check active synonyms
 		if (description.isActive() && Constants.SYNONYM.equals(description.getTypeId())) {
 			for (String word : words) {
-				
+
 				// Step 1: Check en-us preferred synonyms for en-gb spellings
 				if (Constants.ACCEPTABILITY_PREFERRED.equals(usAcc) && refsetToLanguageSpecificWordsMap
 						.get(Constants.GB_EN_LANG_REFSET).contains(word.toLowerCase())) {
@@ -221,7 +250,7 @@ public class TestDescriptionService implements DescriptionService {
 				}
 			}
 		}
-		
+
 		return errorMessage;
 	}
 }

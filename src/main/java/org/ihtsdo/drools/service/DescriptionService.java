@@ -16,6 +16,6 @@ public interface DescriptionService {
 	
 	String getLanguageSpecificErrorMessage(Description description);
 
-	String getCaseSensitiveWordsFromTerm(String term);
+	String getCaseSensitiveWordsErrorMessage(Description description);
 	
 }
