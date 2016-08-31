@@ -168,7 +168,7 @@ public class TestDescriptionService implements DescriptionService {
 	}
 
 	@Override
-	public boolean getCaseSensitiveWordsFromTerm(String term) {
+	public String getCaseSensitiveWordsFromTerm(String term) {
 		String[] words = term.split("\\s+");
 		String result = "";
 		for (String word : words) {
