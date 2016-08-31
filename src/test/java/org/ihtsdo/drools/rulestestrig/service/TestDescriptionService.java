@@ -172,8 +172,10 @@ public class TestDescriptionService implements DescriptionService {
 		String[] words = term.split("\\s+");
 		String result = "";
 		for (String word : words) {
+	
 			// if lower case match and not original word match
-			if (caseSignificantWordsLowerCase.contains(word.toLowerCase())) {
+			if (caseSignificantWordsLowerCase.contains(word.toLowerCase())
+					&& !caseSignificantWordsOriginal.contains(word)) {
 				result += word + " ";
 			}
 		}
