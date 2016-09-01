@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
@@ -137,32 +135,9 @@ public class TestDescriptionService implements DescriptionService {
 	}
 
 	@Override
-	public boolean isActiveDescriptionUniqueWithinHierarchy(Description description, String semanticTag) {
-		for (Concept concept : concepts.values()) {
-			if (concept.isActive()) {
-
-				String conceptTag = null;
-				// find the FSN
-				for (Description d : concept.getDescriptions()) {
-					if (d.isActive() && d.getTypeId().equals(Constants.FSN)) {
-						final Matcher matcher = Pattern.compile("^.*\\((.*)\\)$").matcher(d.getTerm());
-						if (matcher.matches()) {
-							conceptTag = matcher.group(1);
-						}
-					}
-				}
-
-				for (Description d : concept.getDescriptions()) {
-					if (d.isActive() && !d.getId().equals(description.getId())
-							&& d.getTerm().equals(description.getTerm())
-							&& d.getLanguageCode().equals(description.getLanguageCode())
-							&& semanticTag.equals(conceptTag)) {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
+	public Set<Description> findMatchingDescriptionInHierarchy(Concept concept, Description description) {
+		// NOTE: Test environment with hierarchical data required for any adequate test
+		return null;
 	}
 
 	@Override

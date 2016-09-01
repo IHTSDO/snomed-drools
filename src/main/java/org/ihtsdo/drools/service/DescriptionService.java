@@ -2,6 +2,7 @@ package org.ihtsdo.drools.service;
 
 import java.util.Set;
 
+import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
 
 public interface DescriptionService {
@@ -12,7 +13,7 @@ public interface DescriptionService {
 
 	Set<Description> findInactiveDescriptionByExactTerm(String exactTerm);
 
-	boolean isActiveDescriptionUniqueWithinHierarchy(Description description, String semanticTag);
+	Set<Description> findMatchingDescriptionInHierarchy(Concept concept, Description description);
 	
 	String getLanguageSpecificErrorMessage(Description description);
 
