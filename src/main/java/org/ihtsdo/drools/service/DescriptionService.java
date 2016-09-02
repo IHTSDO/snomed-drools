@@ -1,8 +1,9 @@
 package org.ihtsdo.drools.service;
 
-import org.ihtsdo.drools.domain.Description;
-
 import java.util.Set;
+
+import org.ihtsdo.drools.domain.Concept;
+import org.ihtsdo.drools.domain.Description;
 
 public interface DescriptionService {
 
@@ -10,4 +11,12 @@ public interface DescriptionService {
 
 	Set<Description> findActiveDescriptionByExactTerm(String exactTerm);
 
+	Set<Description> findInactiveDescriptionByExactTerm(String exactTerm);
+
+	Set<Description> findMatchingDescriptionInHierarchy(Concept concept, Description description);
+	
+	String getLanguageSpecificErrorMessage(Description description);
+
+	String getCaseSensitiveWordsErrorMessage(Description description);
+	
 }
