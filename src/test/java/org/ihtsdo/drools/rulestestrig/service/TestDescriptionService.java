@@ -22,12 +22,17 @@ public class TestDescriptionService implements DescriptionService {
 
 	private final Map<String, Concept> concepts;
 
-	// Static block of sample case significant words
-	// In non-dev environments, this should initialize on startup
-	public static final Map<String, String> caseSignificantWordsMap = new HashMap<>();
+	// Static block of sample case significant words - lower case word -> exact
+	// word as supplied
+	// NOTE: This will not handle cases where the same word exists with
+	// different capitalizations
+	// However, at this time no further precision is required
+	public static final Set<String> caseSignificantWords = new HashSet<>();
 	static {
 
-		File file = new File("src/test/resources/data/CSWordsSample.txt");
+		String fileName = "src/test/resources/data/CSWordsSample.txt";
+
+		File file = new File(fileName);
 		FileReader fileReader;
 		BufferedReader bufferedReader;
 		try {
@@ -40,12 +45,12 @@ public class TestDescriptionService implements DescriptionService {
 				String[] words = line.split("\\s+");
 
 				// format: 0: word, 1: type (unused)
-				caseSignificantWordsMap.put(words[0].toLowerCase(), words[0]);
+				caseSignificantWords.add(words[0]);
 			}
 			fileReader.close();
-			logger.info("Loaded " + caseSignificantWordsMap.size() + " case sensitive words into cache");
+			logger.info("Loaded " + caseSignificantWords.size() + " case sensitive words into cache from: " + fileName);
 		} catch (IOException e) {
-			logger.debug("Failed to retrieve case significant words file -- tests will be skipped");
+			logger.debug("Failed to retrieve case sensitive words file: " + fileName);
 
 		}
 
@@ -136,7 +141,8 @@ public class TestDescriptionService implements DescriptionService {
 
 	@Override
 	public Set<Description> findMatchingDescriptionInHierarchy(Concept concept, Description description) {
-		// NOTE: Test environment with hierarchical data required for any adequate test
+		// NOTE: Test environment with hierarchical data required for any
+		// adequate test
 		return null;
 	}
 
@@ -153,17 +159,20 @@ public class TestDescriptionService implements DescriptionService {
 
 		for (String word : words) {
 
-			// NOTE: Simple test to see if a case-sensitive term exists as written
-			// Original test checked for mis-capitalization, but too many false positives
-			// e.g. "oF" appears in list but spuriously reports "of"
+			System.out.println("Checking word " + word + " in set? " + caseSignificantWords.contains(word));
+
+			// NOTE: Simple test to see if a case-sensitive term exists as
+			// written. Original check for mis-capitalization, but false
+			// positives, e.g. "oF" appears in list but spuriously reports "of"
 			// Map preserved for lower-case matching in future
-			if (word.equals(caseSignificantWordsMap.get(word.toLowerCase()))
+			if (caseSignificantWords.contains(word)
 					&& !Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(description.getCaseSignificanceId())) {
 				result += "Description contains case-sensitive words but is not marked case sensitive: "
-						+ caseSignificantWordsMap.get(word.toLowerCase()) + ".\n";
+						+ caseSignificantWords.contains(word) + ".\n";
 
 			}
 		}
+
 		return result;
 	}
 
