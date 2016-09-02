@@ -149,42 +149,20 @@ public class TestDescriptionService implements DescriptionService {
 			return result;
 		}
 
-		System.out
-				.println("Checking description " + description.getTerm() + ", " + description.getCaseSignificanceId());
-
 		String[] words = description.getTerm().split("\\s+");
 
 		for (String word : words) {
 
-			System.out.println("  Checking word " + word);
+			// NOTE: Simple test to see if a case-sensitive term exists as written
+			// Original test checked for mis-capitalization, but too many false positives
+			// e.g. "oF" appears in list but spuriously reports "of"
+			// Map preserved for lower-case matching in future
+			if (word.equals(caseSignificantWordsMap.get(word.toLowerCase()))
+					&& !Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(description.getCaseSignificanceId())) {
+				result += "Description contains case-sensitive words but is not marked case sensitive: "
+						+ caseSignificantWordsMap.get(word.toLowerCase()) + ".\n";
 
-			if (caseSignificantWordsMap.containsKey(word.toLowerCase())) {
-
-				// Check 1: term containing case-sensitive words should not be
-				// entire-term-case-insensitive
-				if (Constants.ENTIRE_TERM_CASE_INSENSITIVE.equals(description.getCaseSignificanceId())) {
-					result += "Description marked case insensitive should not contain case-sensitive word: "
-							+ caseSignificantWordsMap.get(word.toLowerCase()) + ".\n";
-				}
-
-				// Check 2: term marked ONLY_INITIAL_CHARACTER_CASE_INSENSITIVE
-				// should not start with case sensitive word
-				// TODO Confirm this
-				else if (Constants.ONLY_INITIAL_CHARACTER_CASE_INSENSITIVE.equals(description.getCaseSignificanceId())
-						&& description.getTerm().startsWith(word)) {
-					result += "Description marked only initial character case insensitive should not start with a case-sensitive word: " + word + ".\n";
-				}
-				// Check 3: term containing case-sensitive word with invalid
-				// case
-				else if (caseSignificantWordsMap.containsKey(word.toLowerCase())
-						&& !caseSignificantWordsMap.get(word.toLowerCase()).equals(word)) {
-					result += "Description contains case-sensitive word with improper case: " + word + " should be "
-							+ caseSignificantWordsMap.get(word.toLowerCase()) + ".\n";
-				}
 			}
-		}
-		if (result.length() > 0) {
-			System.out.println(result);
 		}
 		return result;
 	}
