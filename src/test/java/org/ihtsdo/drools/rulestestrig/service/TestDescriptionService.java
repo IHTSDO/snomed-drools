@@ -159,8 +159,6 @@ public class TestDescriptionService implements DescriptionService {
 
 		for (String word : words) {
 
-			System.out.println("Checking word " + word + " in set? " + caseSignificantWords.contains(word));
-
 			// NOTE: Simple test to see if a case-sensitive term exists as
 			// written. Original check for mis-capitalization, but false
 			// positives, e.g. "oF" appears in list but spuriously reports "of"
@@ -204,7 +202,7 @@ public class TestDescriptionService implements DescriptionService {
 							+ word + "\n";
 				}
 
-				// Step 2: Check en-gb preferred synonyms for en-en spellings
+				// Step 2: Check en-gb preferred synonyms for en-us spellings
 				if (Constants.ACCEPTABILITY_PREFERRED.equals(gbAcc) && refsetToLanguageSpecificWordsMap
 						.get(Constants.US_EN_LANG_REFSET).contains(word.toLowerCase())) {
 					errorMessage += "Synonym is preferred in the en-gb refset but refers to a word that has en-us spelling: "
