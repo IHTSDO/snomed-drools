@@ -142,11 +142,14 @@ public class DescriptionHelper {
 		String fw1 = getFirstWord(description.getTerm());
 		for (Description d : concept.getDescriptions()) {
 			String fw2 = getFirstWord(d.getTerm());
+			
 	
 			// if first words are equal and case significance not equal, return
-			// false
-			if (fw1 != null && fw2 != null && fw1.equals(fw2) && d.getCaseSignificanceId() != null
-					&& description.getCaseSignificanceId() != null
+			// false - exclude text definitions
+			if (fw1 != null && fw2 != null && fw1.toLowerCase().equals(fw2.toLowerCase())
+					&& !Constants.TEXT_DEFINITION.equals(d.getTypeId())
+					&& !Constants.TEXT_DEFINITION.equals(description.getTypeId())
+					&& d.getCaseSignificanceId() != null
 					&& !d.getCaseSignificanceId().equals(description.getCaseSignificanceId())) {
 				return false;
 			}
