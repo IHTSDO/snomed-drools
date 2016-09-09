@@ -14,10 +14,9 @@ import org.ihtsdo.drools.domain.Description;
 public class DescriptionHelper {
 
 	public static final Pattern TAG_PATTERN = Pattern.compile("^.*\\((.*)\\)$");
+	public static final Pattern FULL_TAG_PATTERN = Pattern.compile("^.*(\\s\\([^\\)]+\\))$");
 	public static final Pattern FIRST_WORD_PATTERN = Pattern.compile("([^\\s]*).*$");
 
-	
-	
 	public static Collection<Description> filterByActiveTypeAndDialectPreferred(Concept concept, boolean active,
 			String typeId, String dialectPreferred) {
 		Collection<Description> descriptions = new HashSet<>();
@@ -34,7 +33,7 @@ public class DescriptionHelper {
 	public static Collection<Description> filterByActiveAndType(Concept concept, boolean active, String typeId) {
 		Collection<Description> descriptions = new HashSet<>();
 		for (Description description : concept.getDescriptions()) {
-				if (description.isActive() == active && typeId.equals(description.getTypeId())) {
+			if (description.isActive() == active && typeId.equals(description.getTypeId())) {
 				descriptions.add(description);
 			}
 		}
@@ -142,14 +141,12 @@ public class DescriptionHelper {
 		String fw1 = getFirstWord(description.getTerm());
 		for (Description d : concept.getDescriptions()) {
 			String fw2 = getFirstWord(d.getTerm());
-			
-	
+
 			// if first words are equal and case significance not equal, return
 			// false - exclude text definitions
 			if (fw1 != null && fw2 != null && fw1.toLowerCase().equals(fw2.toLowerCase())
 					&& !Constants.TEXT_DEFINITION.equals(d.getTypeId())
-					&& !Constants.TEXT_DEFINITION.equals(description.getTypeId())
-					&& d.getCaseSignificanceId() != null
+					&& !Constants.TEXT_DEFINITION.equals(description.getTypeId()) && d.getCaseSignificanceId() != null
 					&& !d.getCaseSignificanceId().equals(description.getCaseSignificanceId())) {
 				return false;
 			}
@@ -165,7 +162,7 @@ public class DescriptionHelper {
 		}
 		return null;
 	}
-	
+
 	public static String getTagForConcept(Concept concept) {
 		for (Description d : concept.getDescriptions()) {
 			if (Constants.FSN.equals(d.getTypeId())) {
@@ -175,6 +172,18 @@ public class DescriptionHelper {
 		return null;
 	}
 
+	public static String getFsnTerm(String term) {
+		final Matcher matcher = FULL_TAG_PATTERN.matcher(term);
+		System.out.println("FSN  : " + term);
+		if (matcher.matches()) {
+			
+			System.out.println(" Term: " + term.replace(matcher.group(1), ""));
+			return term.replace(matcher.group(1), "");
+		}
+		return null;
+
+	}
+
 	private static String getFirstWord(String term) {
 		final Matcher matcher = FIRST_WORD_PATTERN.matcher(term);
 		if (matcher.matches()) {
@@ -182,17 +191,15 @@ public class DescriptionHelper {
 		}
 		return null;
 	}
-	
-	
+
 	public static boolean hasMatchingDescriptionByTypeTermLanguage(Concept concept, Description description) {
 		for (Description d : concept.getDescriptions()) {
-			if (description.getTypeId().equals(d.getTypeId()) &&
-					description.getTerm().equals(d.getTerm()) &&
-					description.getLanguageCode().equals(d.getLanguageCode())) {
+			if (description.getTypeId().equals(d.getTypeId()) && description.getTerm().equals(d.getTerm())
+					&& description.getLanguageCode().equals(d.getLanguageCode())) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 }
