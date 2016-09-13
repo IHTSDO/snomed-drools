@@ -158,6 +158,7 @@ public class DescriptionHelper {
 	public static String getTag(String term) {
 		final Matcher matcher = TAG_PATTERN.matcher(term);
 		if (matcher.matches()) {
+			System.out.println(matcher.group(1));
 			return matcher.group(1);
 		}
 		return null;
@@ -183,6 +184,10 @@ public class DescriptionHelper {
 		return null;
 
 	}
+	
+	public static boolean hasSemanticTag(Description description) {
+		return description.getTerm() != null && Constants.SEMANTIC_TAGS.contains(getTag(description.getTerm().toLowerCase()));
+	}
 
 	private static String getFirstWord(String term) {
 		final Matcher matcher = FIRST_WORD_PATTERN.matcher(term);
@@ -195,7 +200,7 @@ public class DescriptionHelper {
 	public static boolean hasMatchingDescriptionByTypeTermLanguage(Concept concept, Description description) {
 		for (Description d : concept.getDescriptions()) {
 			if (description.getTypeId().equals(d.getTypeId()) && description.getTerm().equals(d.getTerm())
-					&& description.getLanguageCode().equals(d.getLanguageCode())) {
+					&& description.getLanguageCode() != null && description.getLanguageCode().equals(d.getLanguageCode())) {
 				return true;
 			}
 		}
