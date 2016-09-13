@@ -158,7 +158,6 @@ public class DescriptionHelper {
 	public static String getTag(String term) {
 		final Matcher matcher = TAG_PATTERN.matcher(term);
 		if (matcher.matches()) {
-			System.out.println(matcher.group(1));
 			return matcher.group(1);
 		}
 		return null;
@@ -175,10 +174,7 @@ public class DescriptionHelper {
 
 	public static String getFsnTerm(String term) {
 		final Matcher matcher = FULL_TAG_PATTERN.matcher(term);
-		System.out.println("FSN  : " + term);
 		if (matcher.matches()) {
-			
-			System.out.println(" Term: " + term.replace(matcher.group(1), ""));
 			return term.replace(matcher.group(1), "");
 		}
 		return null;
