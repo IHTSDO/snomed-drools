@@ -13,7 +13,7 @@ import org.ihtsdo.drools.domain.Description;
 
 public class DescriptionHelper {
 
-	public static final Pattern TAG_PATTERN = Pattern.compile("^.*\\((.*)\\)$");
+	public static final Pattern TAG_PATTERN = Pattern.compile("^.*\\s\\((.*)\\)$");
 	public static final Pattern FULL_TAG_PATTERN = Pattern.compile("^.*(\\s\\([^\\)]+\\))$");
 	public static final Pattern FIRST_WORD_PATTERN = Pattern.compile("([^\\s]*).*$");
 
