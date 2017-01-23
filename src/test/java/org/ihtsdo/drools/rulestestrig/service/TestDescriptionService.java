@@ -114,6 +114,7 @@ public class TestDescriptionService implements DescriptionService {
 
 	@Override
 	public Set<Description> findActiveDescriptionByExactTerm(String exactTerm) {
+		checkMinSearchLength(exactTerm);
 
 		Set<Description> matches = new HashSet<>();
 		for (Concept concept : concepts.values()) {
@@ -128,6 +129,8 @@ public class TestDescriptionService implements DescriptionService {
 
 	@Override
 	public Set<Description> findInactiveDescriptionByExactTerm(String exactTerm) {
+		checkMinSearchLength(exactTerm);
+
 		Set<Description> matches = new HashSet<>();
 		for (Concept concept : concepts.values()) {
 			for (Description description : concept.getDescriptions()) {
@@ -141,9 +144,17 @@ public class TestDescriptionService implements DescriptionService {
 
 	@Override
 	public Set<Description> findMatchingDescriptionInHierarchy(Concept concept, Description description) {
+		checkMinSearchLength(description.getTerm());
+
 		// NOTE: Test environment with hierarchical data required for any
 		// adequate test
 		return null;
+	}
+
+	private void checkMinSearchLength(String exactTerm) {
+		if (exactTerm.length() < 2) {
+			throw new IllegalArgumentException("Term search requires at least two characters");
+		}
 	}
 
 	@Override
