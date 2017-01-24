@@ -1,9 +1,6 @@
 package org.ihtsdo.drools.helper;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -89,14 +86,30 @@ public class DescriptionHelper {
 	}
 
 	public static boolean isSemanticTagEquivalentToAnother(String testTerm, Set<String> otherTerms) {
+		return isSemanticTagEquivalentToAnother(testTerm, otherTerms, null);
+	}
+
+	public static boolean isSemanticTagEquivalentToAnother(String testTerm, Set<String> otherTerms,
+														   String[][] acceptablePairs) {
 		String tag = getTag(testTerm);
 		if (tag != null) {
 			for (String otherTerm : otherTerms) {
-				if (tag.equals(getTag(otherTerm))) {
+				String otherTag = getTag(otherTerm);
+				if (tag.equals(otherTag)) {
 					return true;
+				}
+				if (acceptablePairs != null) {
+					for (String[] acceptablePair : acceptablePairs) {
+						if (acceptablePair.length == 2
+								&& tag.equals(acceptablePair[0])
+								&& otherTag.equals(acceptablePair[1])) {
+							return true;
+						}
+					}
 				}
 			}
 		}
+
 		return false;
 	}
 
