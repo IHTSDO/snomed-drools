@@ -12,6 +12,7 @@ import java.util.Set;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
+import org.ihtsdo.drools.domain.Relationship;
 import org.ihtsdo.drools.service.DescriptionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,12 +144,37 @@ public class TestDescriptionService implements DescriptionService {
 	}
 
 	@Override
+	/**
+	 * This primitive implementation just uses the direct parents to group given concepts into a 'hierarchy'.
+	 */
 	public Set<Description> findMatchingDescriptionInHierarchy(Concept concept, Description description) {
 		checkMinSearchLength(description.getTerm());
 
-		// NOTE: Test environment with hierarchical data required for any
-		// adequate test
-		return null;
+		Set<Description> matchingDescription = new HashSet<>();
+		Set<String> parents = getParents(concept);
+		for (Concept otherConcept : concepts.values()) {
+			for (String otherConceptParent : getParents(otherConcept)) {
+				if (parents.contains(otherConceptParent)) {
+					for (Description otherDescription : otherConcept.getDescriptions()) {
+						if (description.getTerm().equals(otherDescription.getTerm())) {
+							matchingDescription.add(otherDescription);
+						}
+					}
+				}
+			}
+		}
+
+		return matchingDescription;
+	}
+
+	private Set<String> getParents(Concept concept) {
+		final Set<String> parents = new HashSet<>();
+		for (Relationship relationship : concept.getRelationships()) {
+			if (Constants.IS_A.equals(relationship.getTypeId())) {
+				parents.add(relationship.getDestinationId());
+			}
+		}
+		return parents;
 	}
 
 	private void checkMinSearchLength(String exactTerm) {

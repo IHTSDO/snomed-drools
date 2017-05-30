@@ -94,15 +94,15 @@ public class DescriptionHelper {
 		String tag = getTag(testTerm);
 		if (tag != null) {
 			for (String otherTerm : otherTerms) {
-				String otherTag = getTag(otherTerm);
-				if (tag.equals(otherTag)) {
+				String parentTag = getTag(otherTerm);
+				if (tag.equals(parentTag)) {
 					return true;
 				}
 				if (acceptablePairs != null) {
 					for (String[] acceptablePair : acceptablePairs) {
 						if (acceptablePair.length == 2
-								&& tag.equals(acceptablePair[0])
-								&& otherTag.equals(acceptablePair[1])) {
+								&& (acceptablePair[0].equals("*") || tag.equals(acceptablePair[0]))
+								&& parentTag.equals(acceptablePair[1])) {
 							return true;
 						}
 					}
