@@ -13,6 +13,7 @@ public class DescriptionImpl implements Description {
 	private String term;
 	private Map<String, String> acceptabilityMap;
 	private boolean published;
+	private boolean released;
 
 	public DescriptionImpl(String id, String term) {
 		this.id = id;
@@ -52,6 +53,11 @@ public class DescriptionImpl implements Description {
 	@Override
 	public boolean isPublished() {
 		return published;
+	}
+
+	@Override
+	public boolean isReleased() {
+		return released;
 	}
 
 	@Override
@@ -95,6 +101,10 @@ public class DescriptionImpl implements Description {
 
 	public void setTerm(String term) {
 		this.term = term;
+	}
+
+	public void setReleased(boolean released) {
+		this.released = released;
 	}
 
 	@Override

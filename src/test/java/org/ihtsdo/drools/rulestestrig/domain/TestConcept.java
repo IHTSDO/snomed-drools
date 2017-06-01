@@ -12,6 +12,7 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	private String id;
 	private boolean active;
 	private boolean published;
+	private boolean released;
 	private String moduleId;
 	private String definitionStatusId;
 	private Collection<D> descriptions;
@@ -48,6 +49,11 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	}
 
 	@Override
+	public boolean isReleased() {
+		return released;
+	}
+
+	@Override
 	public String getDefinitionStatusId() {
 		return definitionStatusId;
 	}
@@ -72,6 +78,10 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 
 	public void setPublished(boolean published) {
 		this.published = published;
+	}
+
+	public void setReleased(boolean released) {
+		this.released = released;
 	}
 
 	public void setDefinitionStatusId(String definitionStatusId) {

@@ -14,6 +14,7 @@ public class ConceptImpl implements Concept {
 	private String definitionStatusId;
 	private Collection<Description> descriptions;
 	private Collection<Relationship> relationships;
+	private boolean released;
 
 	public ConceptImpl(String id) {
 		this.id = id;
@@ -43,6 +44,15 @@ public class ConceptImpl implements Concept {
 	@Override
 	public boolean isPublished() {
 		return false;
+	}
+
+	@Override
+	public boolean isReleased() {
+		return released;
+	}
+
+	public void setReleased(boolean released) {
+		this.released = released;
 	}
 
 	public ConceptImpl addDescription(DescriptionImpl description) {

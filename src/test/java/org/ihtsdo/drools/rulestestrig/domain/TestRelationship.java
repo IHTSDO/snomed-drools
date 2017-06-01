@@ -7,6 +7,7 @@ public class TestRelationship implements Relationship, TestComponent {
 	private String id;
 	private boolean active;
 	private boolean published;
+	private boolean released;
 	private String moduleId;
 	private String sourceId;
 	private int relationshipGroup;
@@ -31,6 +32,11 @@ public class TestRelationship implements Relationship, TestComponent {
 	@Override
 	public boolean isPublished() {
 		return published;
+	}
+
+	@Override
+	public boolean isReleased() {
+		return released;
 	}
 
 	@Override
@@ -77,6 +83,10 @@ public class TestRelationship implements Relationship, TestComponent {
 
 	public void setPublished(boolean published) {
 		this.published = published;
+	}
+
+	public void setReleased(boolean released) {
+		this.released = released;
 	}
 
 	public void setSourceId(String sourceId) {

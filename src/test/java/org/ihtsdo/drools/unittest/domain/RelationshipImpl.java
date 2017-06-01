@@ -11,6 +11,7 @@ public class RelationshipImpl implements Relationship {
 	private int relationshipGroup;
 	private String typeId;
 	private String characteristicTypeId;
+	private boolean released;
 
 	public RelationshipImpl(String id, String typeId) {
 		this.id = id;
@@ -66,6 +67,11 @@ public class RelationshipImpl implements Relationship {
 		return characteristicTypeId;
 	}
 
+	@Override
+	public boolean isReleased() {
+		return released;
+	}
+
 	public void setSourceId(String sourceId) {
 		this.sourceId = sourceId;
 	}
@@ -84,6 +90,10 @@ public class RelationshipImpl implements Relationship {
 
 	public void setCharacteristicTypeId(String characteristicTypeId) {
 		this.characteristicTypeId = characteristicTypeId;
+	}
+
+	public void setReleased(boolean released) {
+		this.released = released;
 	}
 
 	@Override

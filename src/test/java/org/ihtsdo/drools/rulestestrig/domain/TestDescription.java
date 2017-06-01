@@ -10,6 +10,7 @@ public class TestDescription implements Description, TestComponent {
 	private String id;
 	private boolean active;
 	private boolean published;
+	private boolean released;
 	private String moduleId;
 	private String languageCode;
 	private String conceptId;
@@ -37,6 +38,11 @@ public class TestDescription implements Description, TestComponent {
 	@Override
 	public boolean isPublished() {
 		return published;
+	}
+
+	@Override
+	public boolean isReleased() {
+		return released;
 	}
 
 	@Override
@@ -93,6 +99,10 @@ public class TestDescription implements Description, TestComponent {
 
 	public void setPublished(boolean published) {
 		this.published = published;
+	}
+
+	public void setReleased(boolean released) {
+		this.released = released;
 	}
 
 	public void setTypeId(String typeId) {
