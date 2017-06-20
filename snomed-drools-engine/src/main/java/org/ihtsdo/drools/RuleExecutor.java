@@ -105,7 +105,7 @@ public class RuleExecutor {
 	 * Passing services in with every invocation of this method allows the implementation to capture content context. For example
 	 * services relevant to the content branch being worked on.
 	 * @param ruleSetNames The rule sets to use during validation.
-	 * @param concept The concept to be validated.
+	 * @param concepts The concepts to be validated.
 	 * @param conceptService An implementation of the ConceptService class for use in validation rules.
 	 * @param descriptionService An implementation of the DescriptionService class for use in validation rules.
 	 * @param relationshipService An implementation of the RelationshipService class for use in validation rules.
@@ -115,18 +115,17 @@ public class RuleExecutor {
 	 *                                     in results if found to be invalid.
 	 * @return A list of content found to be invalid is returned.
 	 */
-	public List<InvalidContent> execute(Set<String> ruleSetNames, Concept concept, ConceptService conceptService, DescriptionService descriptionService, RelationshipService relationshipService,
+	public List<InvalidContent> execute(Set<String> ruleSetNames, Collection<? extends Concept> concepts, ConceptService conceptService, DescriptionService descriptionService, RelationshipService relationshipService,
 			boolean includePublishedComponents, boolean includeInferredRelationships) {
 
 		if (failedToInitialize) throw new RuleExecutorException("Unable to complete request: rule engine failed to initialize.");
 
-		assertComponentIdsPresent(concept);
+		for (Concept concept : concepts) {
+			assertComponentIdsPresent(concept);
+		}
 
 		Date start = new Date();
 		Set<Component> components = new HashSet<>();
-
-		// Load components into working set
-		addConcept(components, concept, includeInferredRelationships);
 
 		final List<InvalidContent> invalidContent = new ArrayList<>();
 		for (String ruleSetName : ruleSetNames) {
@@ -142,9 +141,23 @@ public class RuleExecutor {
 			session.setGlobal("relationshipService", relationshipService);
 
 
-			// Execute rules on working set
-			session.execute(components);
-			logger.debug("execute took {} milliseconds", new Date().getTime() - start.getTime());
+			int total = concepts.size();
+			int complete = 0;
+			for (Concept concept : concepts) {
+				// Load components into working set
+				components.clear();
+				addConcept(components, concept, includeInferredRelationships);
+
+				// Execute rules on working set
+				session.execute(components);
+
+				complete++;
+				if (complete % 10000 == 0) {
+					logger.info("{} of {} concepts validated.", complete, total);
+				}
+			}
+
+			logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
 		}
 
 		if (!includePublishedComponents) {
@@ -187,15 +200,18 @@ public class RuleExecutor {
 	}
 
 	private static void addConcept(Set<Component> components, Concept concept, boolean includeInferredRelationships) {
-		components.add(concept);
-		for (Description description : concept.getDescriptions()) {
-			components.add(description);
-		}
-		for (Relationship relationship : concept.getRelationships()) {
-			if (includeInferredRelationships || !Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
-				components.add(relationship);
+//	private static void addConcept(Set<Component> components, Collection<? extends Concept> concepts, boolean includeInferredRelationships) {
+//		for (Concept concept : concepts) {
+			components.add(concept);
+			for (Description description : concept.getDescriptions()) {
+				components.add(description);
 			}
-		}
+			for (Relationship relationship : concept.getRelationships()) {
+				if (includeInferredRelationships || !Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
+					components.add(relationship);
+				}
+			}
+//		}
 	}
 
 	private static final class RuleLoader extends SimpleFileVisitor<Path> {

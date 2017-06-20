@@ -1,5 +1,13 @@
 package org.ihtsdo.drools.rulestestrig.service;
 
+import org.ihtsdo.drools.domain.Concept;
+import org.ihtsdo.drools.domain.Constants;
+import org.ihtsdo.drools.domain.Description;
+import org.ihtsdo.drools.domain.Relationship;
+import org.ihtsdo.drools.service.DescriptionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -8,14 +16,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.ihtsdo.drools.domain.Concept;
-import org.ihtsdo.drools.domain.Constants;
-import org.ihtsdo.drools.domain.Description;
-import org.ihtsdo.drools.domain.Relationship;
-import org.ihtsdo.drools.service.DescriptionService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TestDescriptionService implements DescriptionService {
 

@@ -40,7 +40,7 @@ public class RulesTestManual {
 
 	@Parameters(name = "{0}")
 	public static Iterable<? extends Object> data() {
-		final String rulesPath = "rules"; // relative path to snomed-drools-rules, either check out to here or use symlink
+		final String rulesPath = "../../snomed-drools-rules"; // relative path to snomed-drools-rules, either check out to here or use symlink
 		final File rulesDirectory = new File(rulesPath);
 		Assert.assertTrue(rulesDirectory.isDirectory());
 
@@ -135,7 +135,7 @@ public class RulesTestManual {
 		for (TestConcept<TestDescription, TestRelationship> concept : conceptsThatShouldFail) {
 			final HashSet<String> ruleSetNames = new HashSet<>();
 			ruleSetNames.add("OneRule");
-			final List<InvalidContent> invalidContent = ruleExecutor.execute(ruleSetNames, concept, conceptService, descriptionService, relationshipService, true, false);
+			final List<InvalidContent> invalidContent = ruleExecutor.execute(ruleSetNames, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
 			
 			if (expectPass) {
 				Assert.assertEquals("A concept from the " + ASSERT_CONCEPTS_PASS + " set actually failed! " + invalidContent.toString(), 0, invalidContent.size());
