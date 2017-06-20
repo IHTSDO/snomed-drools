@@ -5,118 +5,19 @@
 	<groupId>org.ihtsdo.drools</groupId>
 	<artifactId>snomed-drools</artifactId>
 	<version>1.3.0-SNAPSHOT</version>
-	<packaging>bundle</packaging>
+	<packaging>pom</packaging>
 
 	<properties>
-		<drools.version>6.3.0.Final</drools.version>
-		<slf4j.version>1.7.5</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<maven.compiler.source>1.7</maven.compiler.source>
+		<slf4j.version>1.7.5</slf4j.version>
 	</properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.kie</groupId>
-			<artifactId>kie-api</artifactId>
-			<version>${drools.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.kie</groupId>
-			<artifactId>kie-internal</artifactId>
-			<version>6.3.0.Final_fixed</version>
-			<type>bundle</type>
-			<!-- 6.3.0.Final_fixed is a modifed version of the kie-internal 6.3.0.Final bundle
-			the '.*' has been removed from the package import section
-			of the OSGi manifest because Snow Owl's Virgo OSGi container cannot parse it -->
-		</dependency>
-		<dependency>
-			<groupId>org.drools</groupId>
-			<artifactId>drools-compiler</artifactId>
-			<version>6.3.0.Final_fixed</version>
-			<!-- 6.3.0.Final_fixed is a modifed version of the drools-compiler 6.3.0.Final bundle
-			the '.*' has been removed from the package import section
-			of the OSGi manifest because Snow Owl's Virgo OSGi container cannot parse it -->
-		</dependency>
-		<dependency>
-			<groupId>jboss</groupId>
-			<artifactId>jboss-jaas</artifactId>
-			<version>3.2.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>${slf4j.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20090211</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.2.2</version>
-		</dependency>
-	</dependencies>
-
-	<build>
-		<plugins>
-			<!-- Generate Manifest -->
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<version>2.5.3</version>
-				<dependencies>
-					<dependency>
-						<groupId>biz.aQute.bnd</groupId>
-						<artifactId>bndlib</artifactId>
-						<version>2.4.0</version>
-					</dependency>
-				</dependencies>
-				<configuration>
-					<instructions>
-						<Build-Name>IHTSDO SNOMED-CT Drools</Build-Name>
-						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
-						<Embed-Transitive>true</Embed-Transitive>
-						<Export-Package>org.ihtsdo.drools.*</Export-Package>
-						<Require-Capability>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.7))"</Require-Capability>
-						<Import-Package>
-							org.drools.compiler.*,
-							org.kie.api.*,
-							javax.naming,
-							org.slf4j;version="1.7.2"
-						</Import-Package>
-					</instructions>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>external.atlassian.jgitflow</groupId>
-				<artifactId>jgitflow-maven-plugin</artifactId>
-				<version>1.0-m5.1</version>
-				<configuration>
-					<autoVersionSubmodules>true</autoVersionSubmodules>
-					<enableSshAgent>true</enableSshAgent>
-					<noDeploy>true</noDeploy>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+	<modules>
+		<module>snomed-drools-engine</module>
+		<module>snomed-drools-rf2-validator</module>
+	</modules>
 
 	<repositories>
 		<repository>

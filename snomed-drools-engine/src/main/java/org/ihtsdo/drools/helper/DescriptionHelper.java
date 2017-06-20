@@ -7,10 +7,11 @@ import java.util.regex.Pattern;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
+import org.slf4j.LoggerFactory;
 
 public class DescriptionHelper {
 
-	public static final Pattern TAG_PATTERN = Pattern.compile("^.*\\s\\((.*)\\)$");
+	public static final Pattern TAG_PATTERN = Pattern.compile("^.*\\((.*)\\)$");
 	public static final Pattern FULL_TAG_PATTERN = Pattern.compile("^.*(\\s\\([^\\)]+\\))$");
 	public static final Pattern FIRST_WORD_PATTERN = Pattern.compile("([^\\s]*).*$");
 
@@ -102,7 +103,7 @@ public class DescriptionHelper {
 					for (String[] acceptablePair : acceptablePairs) {
 						if (acceptablePair.length == 2
 								&& (acceptablePair[0].equals("*") || tag.equals(acceptablePair[0]))
-								&& parentTag.equals(acceptablePair[1])) {
+								&& acceptablePair[1].equals(parentTag)) {
 							return true;
 						}
 					}
