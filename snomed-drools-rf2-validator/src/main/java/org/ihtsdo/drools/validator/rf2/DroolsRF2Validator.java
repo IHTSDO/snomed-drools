@@ -14,12 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.ihtsdo.drools.response.Severity.ERROR;
 
 public class DroolsRF2Validator {
 
@@ -51,8 +50,8 @@ public class DroolsRF2Validator {
 		return invalidContents;
 	}
 
-	public static void main(String[] args) throws FileNotFoundException, ReleaseImportException {
-		String releaseFilePath = "/Users/kai/release/xSnomedCT_InternationalRF2_ALPHA_20170731T120000Z.zip";
+	public static void main(String[] args) throws IOException, ReleaseImportException {
+		String releaseFilePath = "/Users/kai/release/xSnomedCT_InternationalRF2_BETA_20170731T120000Z.zip";
 		String directoryOfRuleSetsPath = "../snomed-drools-rules";
 		HashSet<String> ruleSetNamesToRun = Sets.newHashSet("common-authoring");
 		List<InvalidContent> invalidContents = new DroolsRF2Validator().validateSnapshot(new FileInputStream(releaseFilePath), directoryOfRuleSetsPath, ruleSetNamesToRun);
@@ -64,20 +63,36 @@ public class DroolsRF2Validator {
 			System.out.println(invalidContent);
 		}
 
-		System.out.println();
-		System.out.println("Failure counts by assertion:");
-		Map<String, AtomicInteger> failureCounts = new HashMap<>();
-		for (InvalidContent invalidContent : invalidContents) {
-			String message = invalidContent.getSeverity().toString() + " - " + invalidContent.getMessage();
-			AtomicInteger atomicInteger = failureCounts.get(message);
-			if (atomicInteger == null) {
-				atomicInteger = new AtomicInteger();
-				failureCounts.put(message, atomicInteger);
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter("errors.txt"))) {
+			writer.write("Severity\tMessage\tConceptId\tComponentId");
+			writer.newLine();
+
+			System.out.println();
+			System.out.println("Failure counts by assertion:");
+			Map<String, AtomicInteger> failureCounts = new HashMap<>();
+			for (InvalidContent invalidContent : invalidContents) {
+				String message = invalidContent.getSeverity().toString() + " - " + invalidContent.getMessage();
+				AtomicInteger atomicInteger = failureCounts.get(message);
+				if (atomicInteger == null) {
+					atomicInteger = new AtomicInteger();
+					failureCounts.put(message, atomicInteger);
+				}
+				atomicInteger.incrementAndGet();
+
+				// also write out all errors
+				if (invalidContent.getSeverity() == ERROR) {
+					writer.write(
+							invalidContent.getSeverity()
+									+ "\t" + invalidContent.getMessage()
+									+ "\t" + invalidContent.getConceptId()
+									+ "\t" + invalidContent.getComponentId()
+					);
+					writer.newLine();
+				}
 			}
-			atomicInteger.incrementAndGet();
-		}
-		for (String errorMessage : failureCounts.keySet()) {
-			System.out.println(failureCounts.get(errorMessage).toString() + " - " + errorMessage);
+			for (String errorMessage : failureCounts.keySet()) {
+				System.out.println(failureCounts.get(errorMessage).toString() + " - " + errorMessage);
+			}
 		}
 	}
 
