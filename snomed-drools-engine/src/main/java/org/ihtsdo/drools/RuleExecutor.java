@@ -3,6 +3,7 @@ package org.ihtsdo.drools;
 import org.ihtsdo.drools.domain.*;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
 import org.ihtsdo.drools.exception.RuleExecutorException;
+import org.ihtsdo.drools.helper.DescriptionHelper;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.service.ConceptService;
 import org.ihtsdo.drools.service.DescriptionService;
