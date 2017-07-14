@@ -135,7 +135,7 @@ public class RulesTestManual {
 		for (TestConcept<TestDescription, TestRelationship> concept : conceptsThatShouldFail) {
 			final HashSet<String> ruleSetNames = new HashSet<>();
 			ruleSetNames.add("OneRule");
-			final List<InvalidContent> invalidContent = ruleExecutor.execute(ruleSetNames, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
+			final List<InvalidContent> invalidContent = ruleExecutor.execute(ruleSetNames, Collections.singleton(concept), conceptService, descriptionService, relationshipService, false, false);
 			
 			if (expectPass) {
 				Assert.assertEquals("A concept from the " + ASSERT_CONCEPTS_PASS + " set actually failed! " + invalidContent.toString(), 0, invalidContent.size());
@@ -145,7 +145,4 @@ public class RulesTestManual {
 		}
 	}
 
-	public static void main(String[] args) {
-		System.out.println("asdf(asdf".matches(".*[^ ]\\(.*"));
-	}
 }
