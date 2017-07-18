@@ -7,13 +7,17 @@ import java.util.regex.Pattern;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
-import org.slf4j.LoggerFactory;
 
 public class DescriptionHelper {
 
 	public static final Pattern TAG_PATTERN = Pattern.compile("^.*\\((.*)\\)$");
 	public static final Pattern FULL_TAG_PATTERN = Pattern.compile("^.*(\\s\\([^\\)]+\\))$");
 	public static final Pattern FIRST_WORD_PATTERN = Pattern.compile("([^\\s]*).*$");
+	private static final Pattern UNICODE_INVALID_CHARACTERS = Pattern.compile(".*[\\u0000-\\u0008|\\u000A-\\u000C|\\u000E-\\u001F].*", Pattern.UNICODE_CHARACTER_CLASS);
+
+	public static boolean hasUnicodeInvalidCharacters(String term) {
+		return UNICODE_INVALID_CHARACTERS.matcher(term).matches();
+	}
 
 	public static Collection<Description> filterByActiveTypeAndDialectPreferred(Concept concept, boolean active,
 			String typeId, String dialectPreferred) {
