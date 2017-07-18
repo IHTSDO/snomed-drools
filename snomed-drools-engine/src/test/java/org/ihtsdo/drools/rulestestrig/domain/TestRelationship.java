@@ -1,5 +1,6 @@
 package org.ihtsdo.drools.rulestestrig.domain;
 
+import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Relationship;
 
 public class TestRelationship implements Relationship, TestComponent {
@@ -17,6 +18,7 @@ public class TestRelationship implements Relationship, TestComponent {
 
 	public TestRelationship() {
 		active = true;
+		characteristicTypeId = Constants.STATED_RELATIONSHIP;
 	}
 
 	@Override
