@@ -156,17 +156,36 @@ public class DescriptionHelper {
 	 */
 	public static boolean isCaseSignificanceValidBetweenTerms(Concept concept, Description description) {
 
+		
 		String fw1 = getFirstWord(description.getTerm());
 		for (Description d : concept.getDescriptions()) {
-			String fw2 = getFirstWord(d.getTerm());
+			if (d.isActive()) {
+				String fw2 = getFirstWord(d.getTerm());
 
-			// if first words are equal and case significance not equal, return
-			// false - exclude text definitions
-			if (fw1 != null && fw2 != null && fw1.toLowerCase().equals(fw2.toLowerCase())
-					&& !Constants.TEXT_DEFINITION.equals(d.getTypeId())
-					&& !Constants.TEXT_DEFINITION.equals(description.getTypeId()) && d.getCaseSignificanceId() != null
-					&& !d.getCaseSignificanceId().equals(description.getCaseSignificanceId())) {
-				return false;
+				// if first words are equal and case significance not equal, return
+				// false - exclude text definitions
+				if (fw1 != null && fw2 != null && fw1.toLowerCase().equals(fw2.toLowerCase())
+						&& !Constants.TEXT_DEFINITION.equals(d.getTypeId())
+						&& !Constants.TEXT_DEFINITION.equals(description.getTypeId()) && d.getCaseSignificanceId() != null
+						&& !d.getCaseSignificanceId().equals(description.getCaseSignificanceId())) {
+					
+					// Will check the rest of term if share the same first word
+					String restDescription = d.getTerm().substring(fw2.length(), d.getTerm().length());
+					
+					if(restDescription.isEmpty())
+						return true;
+					
+					// Case 'cl' : The rest of term contain an upper case letter, will not display warning
+					if (Constants.ONLY_INITIAL_CHARACTER_CASE_INSENSITIVE.equals(d.getCaseSignificanceId()) 
+							&& !restDescription.matches(".*[A-Z]+.*")) {
+						return false;
+					}
+					// Case 'ci' : The rest of term are in lower case, will not display warning
+					else if (Constants.ENTIRE_TERM_CASE_INSENSITIVE.equals(d.getCaseSignificanceId())
+							&& !restDescription.matches(".*[a-z]+.*")) {
+						return false;
+					}
+				}
 			}
 		}
 
