@@ -197,6 +197,8 @@ public class DescriptionHelper {
 					else if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(description.getCaseSignificanceId())
 							&& Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(d.getCaseSignificanceId())) {
 						return true;
+					} else {
+						return false;
 					}
 				}
 			}
