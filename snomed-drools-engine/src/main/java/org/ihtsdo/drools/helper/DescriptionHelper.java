@@ -169,37 +169,34 @@ public class DescriptionHelper {
 				if (null != description.getTerm() && null != d.getTerm() && description.getTerm().equals(d.getTerm()) && d.getCaseSignificanceId().equals(description.getCaseSignificanceId())) {
 					continue;
 				}
-				
 				String fw2 = getFirstWord(d.getTerm());
 
 				// if first words are equal and case significance not equal, return
 				// false - exclude text definitions
 				if (fw1 != null && fw2 != null && fw1.toLowerCase().equals(fw2.toLowerCase())
 						&& !Constants.TEXT_DEFINITION.equals(d.getTypeId())
-						&& !Constants.TEXT_DEFINITION.equals(description.getTypeId()) && d.getCaseSignificanceId() != null) {
+						&& !Constants.TEXT_DEFINITION.equals(description.getTypeId()) && d.getCaseSignificanceId() != null && description.getCaseSignificanceId() != null) {
 					
-					if (!d.getCaseSignificanceId().equals(description.getCaseSignificanceId())) {
-						
-						// Case 'cl' : The rest of term contain an upper case letter, will not display warning
-						if (Constants.ONLY_INITIAL_CHARACTER_CASE_INSENSITIVE.equals(description.getCaseSignificanceId()) 
-								&& restDescription.matches(".*[A-Z]+.*")) {
-							return false;
-						}
-						// Case 'ci' : The rest of term are in lower case, will not display warning
-						else if (Constants.ENTIRE_TERM_CASE_INSENSITIVE.equals(description.getCaseSignificanceId())
-								&& restDescription.equals(restDescription.toLowerCase())) {
-							return false;
-						} else if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(description.getCaseSignificanceId())) {
+					// Case 'cl' : The rest of term contain an upper case letter, will not display warning
+					if (Constants.ONLY_INITIAL_CHARACTER_CASE_INSENSITIVE.equals(description.getCaseSignificanceId()) 
+							&& restDescription.matches(".*[A-Z]+.*")) {
+						return false;
+					}
+					
+					// Case 'ci' : The rest of term are in lower case, will not display warning
+					else if (Constants.ENTIRE_TERM_CASE_INSENSITIVE.equals(description.getCaseSignificanceId())
+							&& restDescription.equals(restDescription.toLowerCase())) {
+						return false;
+					} 
+					
+					// Case 'CS' : the first word is identical, both descriptions must be CS. So there should be a warning
+					else if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(description.getCaseSignificanceId())) {
+						if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(d.getCaseSignificanceId())) {
+							return true;
+						} else {
 							return false;
 						}
 					} 
-					// Case 'CS' : the first word is identical, both descriptions must be CS. So there should be a warning
-					else if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(description.getCaseSignificanceId())
-							&& Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(d.getCaseSignificanceId())) {
-						return true;
-					} else {
-						return false;
-					}
 				}
 			}
 		}
