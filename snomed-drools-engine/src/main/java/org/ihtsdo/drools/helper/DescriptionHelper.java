@@ -162,7 +162,10 @@ public class DescriptionHelper {
 		if(restDescription.isEmpty())
 			return false;
 		
-		for (Description d : concept.getDescriptions()) {
+		List<Description> lstDescription = (List)concept.getDescriptions();
+		Description d;
+		for (int i = 0; i < lstDescription.size(); i++) {
+			d = lstDescription.get(i);
 			if (d.isActive()) {
 				
 				// Ignore checking duplicated content of description
@@ -193,8 +196,10 @@ public class DescriptionHelper {
 					else if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(description.getCaseSignificanceId())) {
 						if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(d.getCaseSignificanceId())) {
 							return true;
-						} else {
+						} else if ( i == (lstDescription.size() - 2)) { // number 2 means include duplicated description
 							return false;
+						} else {
+							continue;
 						}
 					} 
 				}
