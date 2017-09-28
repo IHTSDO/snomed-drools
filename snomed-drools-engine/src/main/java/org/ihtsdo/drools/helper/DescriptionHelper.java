@@ -170,11 +170,7 @@ public class DescriptionHelper {
 				
 				// Ignore checking duplicated content of description
 				if (null != description.getTerm() && null != d.getTerm() && description.getTerm().equals(d.getTerm()) && d.getCaseSignificanceId().equals(description.getCaseSignificanceId())) {
-					if (i == (lstDescription.size() - 1)) {
-						return false;
-					} else {
-						continue;
-					}
+					continue;
 				}
 				String fw2 = getFirstWord(d.getTerm());
 
@@ -186,22 +182,20 @@ public class DescriptionHelper {
 					
 					// Case 'cl' : The rest of term contain an upper case letter, will not display warning
 					if (Constants.ONLY_INITIAL_CHARACTER_CASE_INSENSITIVE.equals(description.getCaseSignificanceId()) 
-							&& restDescription.matches(".*[A-Z]+.*")) {
-						return false;
+							&& !restDescription.matches(".*[A-Z]+.*")) {
+						return true;
 					}
 					
 					// Case 'ci' : The rest of term are in lower case, will not display warning
 					else if (Constants.ENTIRE_TERM_CASE_INSENSITIVE.equals(description.getCaseSignificanceId())
-							&& restDescription.equals(restDescription.toLowerCase())) {
-						return false;
+							&& !restDescription.equals(restDescription.toLowerCase())) {
+						return true;
 					} 
 					
 					// Case 'CS' : the first word is identical, both descriptions must be CS. So there should be a warning
 					else if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(description.getCaseSignificanceId())) {
 						if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(d.getCaseSignificanceId())) {
 							return true;
-						} else if ( i == (lstDescription.size() - 1)) { 
-							return false;
 						} else {
 							continue;
 						}
@@ -209,7 +203,7 @@ public class DescriptionHelper {
 				}
 			}
 		}
-		return true;
+		return false;
 	}
 
 	public static String getTag(String term) {
