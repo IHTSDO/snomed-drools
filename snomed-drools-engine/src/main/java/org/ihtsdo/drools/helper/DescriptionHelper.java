@@ -155,56 +155,56 @@ public class DescriptionHelper {
 	 * @return true if all pairs are valid, false if not
 	 */
 	public static boolean isCaseSignificanceValidBetweenTerms(Concept concept, Description description) {
-		String fw1 = getFirstWord(description.getTerm());
-		String restDescription = description.getTerm().substring(fw1.length(), description.getTerm().length());
-		
-		// Will check the rest of term if share the same first word
-		if(restDescription.isEmpty())
-			return false;
-		
-		List<Description> lstDescription = (List)concept.getDescriptions();
-		Description d;
-		for (int i = 0; i < lstDescription.size(); i++) {
-			d = lstDescription.get(i);
-			if (d.isActive()) {
-				
-				// Ignore checking duplicated content of description
-				if (null != description.getTerm() && null != d.getTerm() && description.getTerm().equals(d.getTerm()) && d.getCaseSignificanceId().equals(description.getCaseSignificanceId())) {
-					continue;
-				}
-				String fw2 = getFirstWord(d.getTerm());
-
-				// if first words are equal and case significance not equal, return
-				// false - exclude text definitions
-				if (fw1 != null && fw2 != null && fw1.toLowerCase().equals(fw2.toLowerCase())
-						&& !Constants.TEXT_DEFINITION.equals(d.getTypeId())
-						&& !Constants.TEXT_DEFINITION.equals(description.getTypeId()) && d.getCaseSignificanceId() != null && description.getCaseSignificanceId() != null) {
-					
-					// Case 'cl' : The rest of term contain an upper case letter, will not display warning
-					if (Constants.ONLY_INITIAL_CHARACTER_CASE_INSENSITIVE.equals(description.getCaseSignificanceId()) 
-							&& restDescription.matches(".*[A-Z]+.*")) {
-						return false;
-					}
-					
-					// Case 'ci' : The rest of term are in lower case, will not display warning
-					else if (Constants.ENTIRE_TERM_CASE_INSENSITIVE.equals(description.getCaseSignificanceId())
-							&& restDescription.equals(restDescription.toLowerCase())) {
-						return false;
-					} 
-					
-					// Case 'CS' : the first word is identical, both descriptions must be CS. So there should be a warning
-					else if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(description.getCaseSignificanceId())) {
-						if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(d.getCaseSignificanceId())) {
-							return true;
-						} else if ( i == (lstDescription.size() - 2)) { // number 2 means include duplicated description
-							return false;
-						} else {
-							continue;
-						}
-					} 
-				}
-			}
-		}
+//		String fw1 = getFirstWord(description.getTerm());
+//		String restDescription = description.getTerm().substring(fw1.length(), description.getTerm().length());
+//		
+//		// Will check the rest of term if share the same first word
+//		if(restDescription.isEmpty())
+//			return false;
+//		
+//		List<Description> lstDescription = (List)concept.getDescriptions();
+//		Description d;
+//		for (int i = 0; i < lstDescription.size(); i++) {
+//			d = lstDescription.get(i);
+//			if (d.isActive()) {
+//				
+//				// Ignore checking duplicated content of description
+//				if (null != description.getTerm() && null != d.getTerm() && description.getTerm().equals(d.getTerm()) && d.getCaseSignificanceId().equals(description.getCaseSignificanceId())) {
+//					continue;
+//				}
+//				String fw2 = getFirstWord(d.getTerm());
+//
+//				// if first words are equal and case significance not equal, return
+//				// false - exclude text definitions
+//				if (fw1 != null && fw2 != null && fw1.toLowerCase().equals(fw2.toLowerCase())
+//						&& !Constants.TEXT_DEFINITION.equals(d.getTypeId())
+//						&& !Constants.TEXT_DEFINITION.equals(description.getTypeId()) && d.getCaseSignificanceId() != null && description.getCaseSignificanceId() != null) {
+//					
+//					// Case 'cl' : The rest of term contain an upper case letter, will not display warning
+//					if (Constants.ONLY_INITIAL_CHARACTER_CASE_INSENSITIVE.equals(description.getCaseSignificanceId()) 
+//							&& restDescription.matches(".*[A-Z]+.*")) {
+//						return false;
+//					}
+//					
+//					// Case 'ci' : The rest of term are in lower case, will not display warning
+//					else if (Constants.ENTIRE_TERM_CASE_INSENSITIVE.equals(description.getCaseSignificanceId())
+//							&& restDescription.equals(restDescription.toLowerCase())) {
+//						return false;
+//					} 
+//					
+//					// Case 'CS' : the first word is identical, both descriptions must be CS. So there should be a warning
+//					else if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(description.getCaseSignificanceId())) {
+//						if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(d.getCaseSignificanceId())) {
+//							return true;
+//						} else if ( i == (lstDescription.size() - 1)) { 
+//							return false;
+//						} else {
+//							continue;
+//						}
+//					} 
+//				}
+//			}
+//		}
 		return true;
 	}
 
