@@ -192,11 +192,15 @@ public class DescriptionHelper {
 						return true;
 					} 
 					
-					// Case 'CS' : the first word is identical, both descriptions must be CS. So there should be a warning
+					// Case 'CS'
 					else if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(description.getCaseSignificanceId())) {
-						if (Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(d.getCaseSignificanceId())) {
+						
+						// One description is CS and the other one is not, there should be a warning
+						if (!Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(d.getCaseSignificanceId())) {
 							return true;
-						} else {
+						} 
+						// Will pass if the rest of them were marked 'CS'
+						else {
 							continue;
 						}
 					} 
