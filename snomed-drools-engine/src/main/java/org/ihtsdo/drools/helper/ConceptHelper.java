@@ -23,6 +23,6 @@ public class ConceptHelper {
 				sourceId.add(c.getId());
 			}
 		}
-		return (sourceId.size() > 1);
+		return (sourceId.size() == 2);
 	}
 }
