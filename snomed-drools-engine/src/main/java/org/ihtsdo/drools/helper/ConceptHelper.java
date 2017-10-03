@@ -19,7 +19,7 @@ public class ConceptHelper {
 	public static boolean isMoreThanOneTopLevelHierarchy(List<Concept> concepts, String... restrictConcepts){
 		List<String> sourceId = new ArrayList<String>();
 		for(Concept c : concepts){
-			if (!sourceId.isEmpty() && !sourceId.contains(c.getId())) {
+			if (!sourceId.contains(c.getId())) {
 				sourceId.add(c.getId());
 			}
 		}
