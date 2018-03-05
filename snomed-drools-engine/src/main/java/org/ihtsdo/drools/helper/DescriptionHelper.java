@@ -150,7 +150,7 @@ public class DescriptionHelper {
 	 *            the concept
 	 * @return true if all pairs are valid, false if not
 	 */
-	public static boolean isCaseSignificanceValidBetweenTerms(Concept concept, Description description) {
+	/*public static boolean isCaseSignificanceValidBetweenTerms(Concept concept, Description description) {
 
 		String fw1 = getFirstWord(description.getTerm());
 		for (Description d : concept.getDescriptions()) {
@@ -167,7 +167,7 @@ public class DescriptionHelper {
 		}
 
 		return true;
-	}
+	}*/
 
 	public static String getTag(String term) {
 		final Matcher matcher = TAG_PATTERN.matcher(term);
@@ -199,12 +199,12 @@ public class DescriptionHelper {
 		return description.getTerm() != null && Constants.SEMANTIC_TAGS.contains(getTag(description.getTerm().toLowerCase()));
 	}
 
-	private static String getFirstWord(String term) {
+	public static String getFirstWord(String term) {
 		final Matcher matcher = FIRST_WORD_PATTERN.matcher(term);
 		if (matcher.matches()) {
 			return matcher.group(1);
 		}
-		return null;
+		return "";
 	}
 
 	public static boolean hasMatchingDescriptionByTypeTermLanguage(Concept concept, Description description) {
