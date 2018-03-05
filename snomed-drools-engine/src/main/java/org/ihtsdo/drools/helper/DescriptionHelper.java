@@ -150,7 +150,8 @@ public class DescriptionHelper {
 	 *            the concept
 	 * @return true if all pairs are valid, false if not
 	 */
-	/*public static boolean isCaseSignificanceValidBetweenTerms(Concept concept, Description description) {
+	@Deprecated
+	public static boolean isCaseSignificanceValidBetweenTerms(Concept concept, Description description) {
 
 		String fw1 = getFirstWord(description.getTerm());
 		for (Description d : concept.getDescriptions()) {
@@ -167,7 +168,7 @@ public class DescriptionHelper {
 		}
 
 		return true;
-	}*/
+	}
 
 	public static String getTag(String term) {
 		final Matcher matcher = TAG_PATTERN.matcher(term);
