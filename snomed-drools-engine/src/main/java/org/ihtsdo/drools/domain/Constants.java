@@ -20,6 +20,7 @@ public class Constants {
 	public static final String DEFINED = "900000000000073002";
 	public static final String INFERRED_RELATIONSHIP = "900000000000011006";
 	public static final String STATED_RELATIONSHIP = "900000000000010007";
+	public static final String ROOT_CONCEPT = "138875005";
 	
 	public static final Set<String> SEMANTIC_TAGS = new HashSet<>();
 	static {
