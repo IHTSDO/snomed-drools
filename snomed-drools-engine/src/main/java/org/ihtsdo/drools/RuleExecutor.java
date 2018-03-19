@@ -62,7 +62,7 @@ public class RuleExecutor {
 		}
 	}
 
-	public void addRuleSet(String ruleSetName, File ruleSetDirectory) throws RuleExecutorException {
+	public void addAssertionGroup(String assertionGroupName, File ruleSetDirectory) throws RuleExecutorException {
 		// Create the in-memory File System and add the resources files  to it
 		KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
 
