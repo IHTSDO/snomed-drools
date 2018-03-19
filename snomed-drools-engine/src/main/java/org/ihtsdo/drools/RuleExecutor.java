@@ -3,11 +3,11 @@ package org.ihtsdo.drools;
 import org.ihtsdo.drools.domain.*;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
 import org.ihtsdo.drools.exception.RuleExecutorException;
-import org.ihtsdo.drools.helper.DescriptionHelper;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.service.ConceptService;
 import org.ihtsdo.drools.service.DescriptionService;
 import org.ihtsdo.drools.service.RelationshipService;
+import org.kie.api.KieBase;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
@@ -30,9 +30,10 @@ import java.util.*;
 
 public class RuleExecutor {
 
-	public static final String RULE_FILENAME_EXTENSION = ".drl";
+	private static final String RULE_FILENAME_EXTENSION = ".drl";
 
-	private Map<String, KieContainer> ruleSetContainers;
+	private Map<String, KieContainer> assertionGroupContainers;
+	private Map<String, Integer> assertionGroupRuleCounts;
 	private int totalRulesLoaded = 0;
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
@@ -40,23 +41,24 @@ public class RuleExecutor {
 	private final KieServices kieServices;
 
 	public RuleExecutor() {
-		ruleSetContainers = new HashMap<>();
+		assertionGroupContainers = new HashMap<>();
+		assertionGroupRuleCounts = new HashMap<>();
 		kieServices = KieServices.Factory.get();
 	}
 
-	public RuleExecutor(String directoryOfRuleSets) {
+	public RuleExecutor(String directoryOfAssertionGroups) {
 		this();
 
-		final File rulesDir = new File(directoryOfRuleSets);
+		final File rulesDir = new File(directoryOfAssertionGroups);
 		if (!rulesDir.isDirectory()) {
 			failedToInitialize = true;
 			logger.error("Rules directory does not exist: {}", rulesDir.getAbsolutePath());
 		} else {
 			for (File file : rulesDir.listFiles()) {
 				if (file.isDirectory() && !file.isHidden()) {
-					final String ruleSetName = file.getName();
-					logger.info("Loading Drools rule set {}", ruleSetName);
-					addRuleSet(file.getName(), file);
+					final String assertionGroupName = file.getName();
+					logger.info("Loading Drools assertion group {}", assertionGroupName);
+					addAssertionGroup(assertionGroupName, file);
 				}
 			}
 		}
@@ -76,8 +78,9 @@ public class RuleExecutor {
 				logger.info("{} rules loaded.", ruleLoader.getRulesLoaded());
 				totalRulesLoaded += rulesLoaded;
 			}
+			assertionGroupRuleCounts.put(assertionGroupName, totalRulesLoaded);
 		} catch (IOException e) {
-			throw new RuleExecutorException("Failed to load rule set " + ruleSetName, e);
+			throw new RuleExecutorException("Failed to load rule set " + assertionGroupName, e);
 		}
 
 		// Create the builder for the resources of the File System
@@ -95,7 +98,7 @@ public class RuleExecutor {
 		ReleaseId relId = kieBuilder.getKieModule().getReleaseId();
 
 		// Create the Container, wrapping the KieModule with the given ReleaseId
-		ruleSetContainers.put(ruleSetName, kieServices.newKieContainer(relId));
+		assertionGroupContainers.put(assertionGroupName, kieServices.newKieContainer(relId));
 	}
 
 	/**
@@ -117,7 +120,7 @@ public class RuleExecutor {
 	 * @return A list of content found to be invalid is returned.
 	 */
 	public List<InvalidContent> execute(Set<String> ruleSetNames, Collection<? extends Concept> concepts, ConceptService conceptService, DescriptionService descriptionService, RelationshipService relationshipService,
-			boolean includePublishedComponents, boolean includeInferredRelationships) {
+			boolean includePublishedComponents, boolean includeInferredRelationships) throws RuleExecutorException {
 
 		if (failedToInitialize) throw new RuleExecutorException("Unable to complete request: rule engine failed to initialize.");
 
@@ -130,7 +133,7 @@ public class RuleExecutor {
 
 		final List<InvalidContent> invalidContent = new ArrayList<>();
 		for (String ruleSetName : ruleSetNames) {
-			final KieContainer kieContainer = ruleSetContainers.get(ruleSetName);
+			final KieContainer kieContainer = assertionGroupContainers.get(ruleSetName);
 			if (kieContainer == null) {
 				throw new RuleExecutorException("Rule set not found for name '" + ruleSetName + "'");
 			}
@@ -201,18 +204,13 @@ public class RuleExecutor {
 	}
 
 	private static void addConcept(Set<Component> components, Concept concept, boolean includeInferredRelationships) {
-//	private static void addConcept(Set<Component> components, Collection<? extends Concept> concepts, boolean includeInferredRelationships) {
-//		for (Concept concept : concepts) {
-			components.add(concept);
-			for (Description description : concept.getDescriptions()) {
-				components.add(description);
+		components.add(concept);
+		components.addAll(concept.getDescriptions());
+		for (Relationship relationship : concept.getRelationships()) {
+			if (includeInferredRelationships || !Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
+				components.add(relationship);
 			}
-			for (Relationship relationship : concept.getRelationships()) {
-				if (includeInferredRelationships || !Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
-					components.add(relationship);
-				}
-			}
-//		}
+		}
 	}
 
 	private static final class RuleLoader extends SimpleFileVisitor<Path> {
@@ -220,7 +218,7 @@ public class RuleExecutor {
 		private final KieFileSystem kieFileSystem;
 		private int rulesLoaded;
 
-		public RuleLoader(KieFileSystem kieFileSystem) {
+		RuleLoader(KieFileSystem kieFileSystem) {
 			this.kieFileSystem = kieFileSystem;
 		}
 
@@ -235,14 +233,17 @@ public class RuleExecutor {
 			return FileVisitResult.CONTINUE;
 		}
 
-		public int getRulesLoaded() {
+		int getRulesLoaded() {
 			return rulesLoaded;
 		}
-
 	}
 
 	public int getTotalRulesLoaded() {
 		return totalRulesLoaded;
+	}
+
+	public int getAssertionGroupRuleCount(String assertionGroupName) {
+		return assertionGroupRuleCounts.getOrDefault(assertionGroupName, 0);
 	}
 
 }

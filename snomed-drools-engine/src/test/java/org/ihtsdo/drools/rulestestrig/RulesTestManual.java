@@ -60,7 +60,7 @@ public class RulesTestManual {
 
 	public RulesTestManual(File ruleDirectory) {
 		this.ruleExecutor = new RuleExecutor();
-		this.ruleExecutor.addRuleSet("OneRule", ruleDirectory);
+		this.ruleExecutor.addAssertionGroup("OneRule", ruleDirectory);
 		this.concepts = new HashMap<>();
 		
 		final File testCasesFile = new File(ruleDirectory, "test-cases.json");
