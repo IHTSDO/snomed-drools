@@ -24,7 +24,7 @@ public class DroolsRF2Validator {
 
 	private Logger logger = LoggerFactory.getLogger(DroolsRF2Validator.class);
 
-	private List<InvalidContent> validateSnapshot(InputStream snomedRf2EditionZip, String directoryOfRuleSetsPath, Set<String> ruleSetNamesToRun) throws ReleaseImportException {
+	public List<InvalidContent> validateSnapshot(InputStream snomedRf2EditionZip, String directoryOfRuleSetsPath, Set<String> ruleSetNamesToRun) throws ReleaseImportException {
 		long start = new Date().getTime();
 		Assert.isTrue(new File(directoryOfRuleSetsPath).isDirectory(), "The rules directory is not accessible.");
 		Assert.isTrue(ruleSetNamesToRun != null && !ruleSetNamesToRun.isEmpty(), "The name of at least one rule set must be specified.");
