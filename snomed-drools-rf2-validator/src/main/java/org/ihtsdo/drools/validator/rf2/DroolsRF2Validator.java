@@ -22,11 +22,16 @@ import static org.ihtsdo.drools.response.Severity.ERROR;
 
 public class DroolsRF2Validator {
 
-	private Logger logger = LoggerFactory.getLogger(DroolsRF2Validator.class);
+	private final RuleExecutor ruleExecutor;
+	private final Logger logger = LoggerFactory.getLogger(DroolsRF2Validator.class);
 
-	public List<InvalidContent> validateSnapshot(InputStream snomedRf2EditionZip, String directoryOfRuleSetsPath, Set<String> ruleSetNamesToRun) throws ReleaseImportException {
-		long start = new Date().getTime();
+	public DroolsRF2Validator(String directoryOfRuleSetsPath) {
 		Assert.isTrue(new File(directoryOfRuleSetsPath).isDirectory(), "The rules directory is not accessible.");
+		ruleExecutor = new RuleExecutor(directoryOfRuleSetsPath);
+	}
+
+	public List<InvalidContent> validateSnapshot(InputStream snomedRf2EditionZip, Set<String> ruleSetNamesToRun) throws ReleaseImportException {
+		long start = new Date().getTime();
 		Assert.isTrue(ruleSetNamesToRun != null && !ruleSetNamesToRun.isEmpty(), "The name of at least one rule set must be specified.");
 
 		ReleaseImporter importer = new ReleaseImporter();
@@ -41,7 +46,6 @@ public class DroolsRF2Validator {
 		DroolsDescriptionService descriptionService = new DroolsDescriptionService(repository);
 		DroolsRelationshipService relationshipService = new DroolsRelationshipService(repository);
 
-		RuleExecutor ruleExecutor = new RuleExecutor(directoryOfRuleSetsPath);
 		Collection<DroolsConcept> concepts = repository.getConcepts();
 		logger.info("Running tests");
 		List<InvalidContent> invalidContents = ruleExecutor.execute(ruleSetNamesToRun, concepts, conceptService, descriptionService, relationshipService, true, false);
@@ -50,11 +54,15 @@ public class DroolsRF2Validator {
 		return invalidContents;
 	}
 
+	public RuleExecutor getRuleExecutor() {
+		return ruleExecutor;
+	}
+
 	public static void main(String[] args) throws IOException, ReleaseImportException {
-		String releaseFilePath = "/Users/kai/release/xSnomedCT_InternationalRF2_BETA_20170731T120000Z.zip";
+		String releaseFilePath = "/Users/kai/release/SnomedCT_InternationalRF2_Production_20180216T020000Z.zip";
 		String directoryOfRuleSetsPath = "../snomed-drools-rules";
 		HashSet<String> ruleSetNamesToRun = Sets.newHashSet("common-authoring");
-		List<InvalidContent> invalidContents = new DroolsRF2Validator().validateSnapshot(new FileInputStream(releaseFilePath), directoryOfRuleSetsPath, ruleSetNamesToRun);
+		List<InvalidContent> invalidContents = new DroolsRF2Validator(directoryOfRuleSetsPath).validateSnapshot(new FileInputStream(releaseFilePath), ruleSetNamesToRun);
 
 		// Some extra output when running this main method in development -
 		int outputSize = invalidContents.size() > 50 ? 50 : invalidContents.size();
