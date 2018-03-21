@@ -3,6 +3,7 @@ package org.ihtsdo.drools.rulestestrig.service;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
@@ -70,6 +71,9 @@ public class TestConceptService implements ConceptService {
 	}
 	
 	private Set<String> getStatedParents(Concept concept) {
+		if(concept == null || concept.getId().equals(Constants.ROOT_CONCEPT)) {
+			return Collections.emptySet();
+		}
 		final Set<String> parents = new HashSet<String>();
 		for (Relationship relationship : concept.getRelationships()) {
 			if (relationship.isActive() 
