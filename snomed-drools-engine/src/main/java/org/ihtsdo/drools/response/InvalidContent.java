@@ -5,8 +5,12 @@ import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.domain.Relationship;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class InvalidContent {
 
+	private Logger logger = LoggerFactory.getLogger(getClass());
 	private String conceptId;
 	private Component component;
 	private String message;
@@ -45,6 +49,7 @@ public class InvalidContent {
 	}
 
 	public InvalidContent ignorePublishedCheck() {
+		logger.info("Setting ignorePublishedCheck for rule: {}", this.message);
 		ignorePublishedCheck = true;
 		return this;
 	}

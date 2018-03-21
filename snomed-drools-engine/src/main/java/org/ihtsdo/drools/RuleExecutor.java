@@ -167,7 +167,7 @@ public class RuleExecutor {
 		if (!includePublishedComponents) {
 			Set<InvalidContent> publishedInvalidContent = new HashSet<>();
 			for (InvalidContent invalidContentItem : invalidContent) {
-				logger.info("invalidContentItem : {}, {}, {} ", invalidContentItem.getConceptId(), invalidContentItem.isIgnorePublishedCheck(), invalidContentItem.isPublished());
+				logger.info("invalidContentItem : {}, {}, {}, {}", invalidContentItem.getConceptId(), invalidContentItem.isIgnorePublishedCheck(), invalidContentItem.isPublished(), invalidContentItem.getSeverity(), invalidContentItem.getMessage());
 				if (!invalidContentItem.isIgnorePublishedCheck() && invalidContentItem.isPublished()) {
 					publishedInvalidContent.add(invalidContentItem);
 				}
