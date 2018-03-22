@@ -5,12 +5,8 @@ import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.domain.Relationship;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class InvalidContent {
 
-	private Logger logger = LoggerFactory.getLogger(getClass());
 	private String conceptId;
 	private Component component;
 	private String message;
@@ -48,10 +44,9 @@ public class InvalidContent {
 		this(relationship, message, Severity.ERROR);
 	}
 
-	public InvalidContent ignorePublishedCheck() {
-		logger.info("Setting ignorePublishedCheck for rule: {}", this.message);
+	// This method used to return the object instance in the style of the Builder Pattern but this caused strange drools behaviour so have been removed.
+	public void ignorePublishedCheck() {
 		ignorePublishedCheck = true;
-		return this;
 	}
 
 	public String getConceptId() {
