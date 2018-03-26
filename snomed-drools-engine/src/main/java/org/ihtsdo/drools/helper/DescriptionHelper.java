@@ -90,6 +90,20 @@ public class DescriptionHelper {
 		return isSemanticTagEquivalentToAnother(testTerm, otherTerms, null);
 	}
 
+	public static boolean isAllParentSemanticTagMatchWithTerm(String testTerm, List<String> otherTerms) {
+		String tag = getTag(testTerm);		
+		if (tag != null) {
+			for (String otherTerm : otherTerms) {
+				String parentTag = getTag(otherTerm);
+				if (!tag.equals(parentTag)) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+	
 	public static boolean isSemanticTagEquivalentToAnother(String testTerm, Set<String> otherTerms,
 														   String[][] acceptablePairs) {
 		String tag = getTag(testTerm);
