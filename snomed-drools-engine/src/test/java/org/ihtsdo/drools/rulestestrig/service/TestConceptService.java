@@ -1,13 +1,16 @@
 package org.ihtsdo.drools.rulestestrig.service;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collections;
 
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
+import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.domain.Relationship;
+import org.ihtsdo.drools.helper.DescriptionHelper;
 import org.ihtsdo.drools.service.ConceptService;
 
 public class TestConceptService implements ConceptService {
@@ -83,6 +86,26 @@ public class TestConceptService implements ConceptService {
 			}
 		}
 		return parents;
+	}
+
+	@Override 
+	public Set<String> findSematicTagOfAncestors(List<String> conceptIds) {
+		Set<String> ancestorIds = new HashSet<>();
+		for (String id : conceptIds) {
+			ancestorIds.addAll(findStatedAncestorsOfConcept(concepts.get(id)));
+		}
+		Set<String> tags = new HashSet<>();
+		if(!ancestorIds.isEmpty()) {
+			for (String ancestorId : ancestorIds) {
+				Concept c = concepts.get(ancestorId);
+				for (Description d : c.getDescriptions()) {
+					if(d.isActive() && Constants.FSN.equals(d.getTypeId())) {
+						tags.add(DescriptionHelper.getTag(d.getTerm()));
+					}
+				}
+			}	
+		}
+		return tags;
 	}
 	
 }

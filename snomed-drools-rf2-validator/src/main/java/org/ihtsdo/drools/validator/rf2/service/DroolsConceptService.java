@@ -5,6 +5,7 @@ import org.ihtsdo.drools.service.ConceptService;
 import org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentRepository;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class DroolsConceptService implements ConceptService {
@@ -35,6 +36,12 @@ public class DroolsConceptService implements ConceptService {
 	@Override
 	public Set<String> findTopLevelHierachiesOfConcept(Concept concept) {
 		// TODO: Add support for this
+		return Collections.emptySet();
+	}
+
+	@Override
+	public Set<String> findSematicTagOfAncestors(List<String> conceptIds) {
+		// TODO Auto-generated method stub
 		return Collections.emptySet();
 	}
 }
