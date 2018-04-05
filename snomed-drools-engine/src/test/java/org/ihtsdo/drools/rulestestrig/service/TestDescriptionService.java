@@ -253,7 +253,7 @@ public class TestDescriptionService implements DescriptionService {
 	}
 	
 	@Override
-	public Set<String> findParentsNotContainSematicTag (Concept concept, String termSematicTag)
+	public Set<String> findParentsNotContainSematicTag (Concept concept, String termSematicTag, String... languageRefsetIds)
 	{
 		Set<String> conceptIds = new HashSet<String>();
 		for (Relationship relationship : concept.getRelationships()) {

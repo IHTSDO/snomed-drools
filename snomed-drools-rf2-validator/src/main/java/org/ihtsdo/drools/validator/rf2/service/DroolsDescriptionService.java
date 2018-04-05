@@ -69,7 +69,7 @@ public class DroolsDescriptionService implements DescriptionService {
 	}
 
 	@Override
-	public Set<String> findParentsNotContainSematicTag(Concept concept, String termSematicTag) {
+	public Set<String> findParentsNotContainSematicTag(Concept concept, String termSematicTag, String... languageRefsetIds) {
 		// TODO Auto-generated method stub
 		return Collections.emptySet();
 	}
