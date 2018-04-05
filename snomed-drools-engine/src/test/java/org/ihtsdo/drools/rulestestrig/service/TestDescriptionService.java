@@ -4,6 +4,7 @@ import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.domain.Relationship;
+import org.ihtsdo.drools.helper.DescriptionHelper;
 import org.ihtsdo.drools.service.DescriptionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -249,5 +250,27 @@ public class TestDescriptionService implements DescriptionService {
 		}
 
 		return errorMessage;
+	}
+	
+	@Override
+	public Set<String> findParentsNotContainSematicTag (Concept concept, String termSematicTag)
+	{
+		Set<String> conceptIds = new HashSet<String>();
+		for (Relationship relationship : concept.getRelationships()) {
+			if (Constants.IS_A.equals(relationship.getTypeId()) 
+				&& relationship.isActive() 
+				&& Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
+				Concept parent = concepts.get(relationship.getDestinationId());
+				for (Description description : parent.getDescriptions()) {
+					if (description.isActive() && Constants.FSN.equals(description.getTypeId())) {
+						if(!termSematicTag.equals(DescriptionHelper.getTag(description.getTerm()))) {
+							conceptIds.add(relationship.getDestinationId());
+						}
+					}
+				}
+			}
+		}
+		
+		return conceptIds;
 	}
 }

@@ -40,7 +40,7 @@ public class DroolsConceptService implements ConceptService {
 	}
 
 	@Override
-	public Set<String> findSematicTagOfAncestors(List<String> conceptIds) {
+	public Set<String> findStatedAncestorsOfConcepts(List<String> conceptIds) {
 		// TODO Auto-generated method stub
 		return Collections.emptySet();
 	}

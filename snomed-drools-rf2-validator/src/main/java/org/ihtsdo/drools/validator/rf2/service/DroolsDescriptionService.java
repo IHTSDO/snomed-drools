@@ -67,4 +67,10 @@ public class DroolsDescriptionService implements DescriptionService {
 		// TODO: Add support for this. See TestDescriptionService. Case significant words list to be loaded from external resources.
 		return "";
 	}
+
+	@Override
+	public Set<String> findParentsNotContainSematicTag(Concept concept, String termSematicTag) {
+		// TODO Auto-generated method stub
+		return Collections.emptySet();
+	}
 }

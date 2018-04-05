@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
-import org.slf4j.LoggerFactory;
 
 public class DescriptionHelper {
 
@@ -190,6 +189,17 @@ public class DescriptionHelper {
 			return matcher.group(1);
 		}
 		return null;
+	}
+	
+	public static Set<String> getTags(List<String> terms) {
+		Set<String> tags = new HashSet<String>();
+		for (String term :terms) {
+			String sematicTag = getTag(term);
+			if (sematicTag != null && !tags.contains(sematicTag)) {
+				tags.add(sematicTag);
+			}
+		}
+		return tags;
 	}
 
 	public static String getTagForConcept(Concept concept) {

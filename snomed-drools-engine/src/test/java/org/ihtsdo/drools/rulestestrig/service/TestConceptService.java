@@ -89,23 +89,12 @@ public class TestConceptService implements ConceptService {
 	}
 
 	@Override 
-	public Set<String> findSematicTagOfAncestors(List<String> conceptIds) {
+	public Set<String> findStatedAncestorsOfConcepts(List<String> conceptIds) {
 		Set<String> ancestorIds = new HashSet<>();
 		for (String id : conceptIds) {
 			ancestorIds.addAll(findStatedAncestorsOfConcept(concepts.get(id)));
 		}
-		Set<String> tags = new HashSet<>();
-		if(!ancestorIds.isEmpty()) {
-			for (String ancestorId : ancestorIds) {
-				Concept c = concepts.get(ancestorId);
-				for (Description d : c.getDescriptions()) {
-					if(d.isActive() && Constants.FSN.equals(d.getTypeId())) {
-						tags.add(DescriptionHelper.getTag(d.getTerm()));
-					}
-				}
-			}	
-		}
-		return tags;
+		return ancestorIds;
 	}
 	
 }

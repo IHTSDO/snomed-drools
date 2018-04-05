@@ -11,5 +11,5 @@ public interface ConceptService {
 	Set<String> getAllTopLevelHierachies();
 	Set<String> findStatedAncestorsOfConcept(Concept concept);
 	Set<String> findTopLevelHierachiesOfConcept(Concept concept);
-	Set<String> findSematicTagOfAncestors(List<String> conceptIds);
+	Set<String> findStatedAncestorsOfConcepts(List<String> conceptIds);
 }
