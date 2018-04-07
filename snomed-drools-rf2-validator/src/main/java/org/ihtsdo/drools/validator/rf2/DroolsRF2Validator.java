@@ -58,8 +58,9 @@ public class DroolsRF2Validator {
 		return ruleExecutor;
 	}
 
+	// Dev test method
 	public static void main(String[] args) throws IOException, ReleaseImportException {
-		String releaseFilePath = "/Users/kai/release/SnomedCT_InternationalRF2_Production_20180216T020000Z.zip";
+		String releaseFilePath = "/your-path/SnomedCT_InternationalRF2_Production_20180216T020000Z.zip";
 		String directoryOfRuleSetsPath = "../snomed-drools-rules";
 		HashSet<String> ruleSetNamesToRun = Sets.newHashSet("common-authoring");
 		List<InvalidContent> invalidContents = new DroolsRF2Validator(directoryOfRuleSetsPath).validateSnapshot(new FileInputStream(releaseFilePath), ruleSetNamesToRun);
