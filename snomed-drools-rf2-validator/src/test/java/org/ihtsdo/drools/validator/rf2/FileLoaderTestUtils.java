@@ -1,11 +1,15 @@
 package org.ihtsdo.drools.validator.rf2;
 
+import com.google.gson.Gson;
 import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.ReleaseImporter;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.net.URL;
 
 public class FileLoaderTestUtils {
 
@@ -21,6 +25,13 @@ public class FileLoaderTestUtils {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public static <T> T fileToObject(String filePath, Class<T> clazz) throws FileNotFoundException {
+        URL url = Thread.currentThread().getContextClassLoader().getResource(filePath);
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(url.getFile()));
+        Gson gson = new Gson();
+        return gson.fromJson(bufferedReader, clazz);
     }
 
 

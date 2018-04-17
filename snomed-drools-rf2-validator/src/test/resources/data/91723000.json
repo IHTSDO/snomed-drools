@@ -1,0 +1,288 @@
+{
+  "definitionStatusId": "900000000000074008",
+  "descriptions": [
+    {
+      "conceptId": "91723000",
+      "languageCode": "en",
+      "typeId": "900000000000003001",
+      "term": "Anatomical structure (body structure)",
+      "caseSignificanceId": "900000000000448009",
+      "textDefinition": false,
+      "acceptabilityMap": {
+        "900000000000509007": "900000000000548007",
+        "900000000000508004": "900000000000548007"
+      },
+      "id": "835097018",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "conceptId": "91723000",
+      "languageCode": "en",
+      "typeId": "900000000000013009",
+      "term": "Anatomical structure",
+      "caseSignificanceId": "900000000000448009",
+      "textDefinition": false,
+      "acceptabilityMap": {
+        "900000000000509007": "900000000000548007",
+        "900000000000508004": "900000000000548007"
+      },
+      "id": "151950010",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "relationships": [
+    {
+      "sourceId": "91723000",
+      "destinationId": "91722005",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4087338024",
+      "active": false,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "91723000",
+      "destinationId": "442083009",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4087339027",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "activeInboundStatedRelationships": [
+    {
+      "sourceId": "91689009",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4077316027",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "57312000",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4028491022",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "26864007",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4015378022",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "113343008",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3896040025",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "24486003",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4000473022",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "4421005",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4018444025",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "51576004",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4030657024",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "41751005",
+      "destinationId": "91723000",
+      "group": 1,
+      "typeId": "405813007",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4435370022",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "2969000",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4009903020",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "91722005",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4778774029",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "280542007",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3909370027",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "85756007",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4081868026",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "308762002",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3942965028",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "122453002",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3968082029",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "362884007",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "6477292028",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "91833003",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4770987025",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "52530000",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4029428028",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "699589007",
+      "destinationId": "91723000",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4783946020",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "id": "91723000",
+  "active": true,
+  "moduleId": "900000000000207008",
+  "published": true,
+  "released": true
+}

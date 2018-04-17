@@ -1,9 +1,7 @@
 package org.ihtsdo.drools.validator.rf2.service;
 
-import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
-import org.ihtsdo.drools.domain.Relationship;
 import org.ihtsdo.drools.service.ConceptService;
 import org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentRepository;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
@@ -12,9 +10,7 @@ import org.ihtsdo.drools.validator.rf2.domain.DroolsRelationship;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class DroolsConceptService implements ConceptService {
 
