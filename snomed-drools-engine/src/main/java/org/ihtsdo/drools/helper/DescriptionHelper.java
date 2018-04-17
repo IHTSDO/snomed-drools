@@ -1,8 +1,14 @@
 package org.ihtsdo.drools.helper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
@@ -27,7 +33,7 @@ public class DescriptionHelper {
 		return descriptions;
 	}
 
-	public static boolean hasMoreThanOnePreferredTextDefinitionPerDialect(Concept concept, boolean active, String typeId) {
+	public static boolean isMoreThanOneAcceptabilityPerDialect(Concept concept, boolean active, String typeId, String acceptability) {
 		List<String> dialects = new ArrayList<String>();
 		dialects.add(Constants.US_EN_LANG_REFSET);
 		dialects.add(Constants.GB_EN_LANG_REFSET);
@@ -42,11 +48,17 @@ public class DescriptionHelper {
 			}
 		}
 		
-		for(String dialect : dialects) {
-			if(filterByActiveTypeAndDialectPreferred(concept,active,typeId,dialect).size() > 1) {
+		for(String dialect : dialects) {			
+			List<Description> descriptions = concept.getDescriptions().stream()
+															.filter(desc -> desc.isActive() == active 
+																			&& typeId.equals(desc.getTypeId()) 
+																			&& acceptability.equals(desc.getAcceptabilityMap().get(dialect)))
+															.collect(Collectors.toList());
+			if(descriptions.size() > 1) {
 				return true;
 			}
 		}
+		
 		return false;
 	}
 	
