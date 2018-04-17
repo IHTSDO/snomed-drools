@@ -27,6 +27,29 @@ public class DescriptionHelper {
 		return descriptions;
 	}
 
+	public static boolean hasMoreThanOnePreferredTextDefinitionPerDialect(Concept concept, boolean active, String typeId) {
+		List<String> dialects = new ArrayList<String>();
+		dialects.add(Constants.US_EN_LANG_REFSET);
+		dialects.add(Constants.GB_EN_LANG_REFSET);
+		
+		for (Description description : concept.getDescriptions()) {
+			if (description.isActive() == active && typeId.equals(description.getTypeId())) {
+				for (String key : description.getAcceptabilityMap().keySet()) {
+					if(!dialects.contains(key)) {
+						dialects.add(key);
+					}
+				}				
+			}
+		}
+		
+		for(String dialect : dialects) {
+			if(filterByActiveTypeAndDialectPreferred(concept,active,typeId,dialect).size() > 1) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public static Collection<Description> filterByActiveAndType(Concept concept, boolean active, String typeId) {
 		Collection<Description> descriptions = new HashSet<>();
 		for (Description description : concept.getDescriptions()) {
