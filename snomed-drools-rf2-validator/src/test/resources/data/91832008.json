@@ -1,0 +1,197 @@
+{
+  "definitionStatusId": "900000000000074008",
+  "descriptions": [
+    {
+      "conceptId": "91832008",
+      "languageCode": "en",
+      "typeId": "900000000000013009",
+      "term": "Anatomical organisational pattern",
+      "caseSignificanceId": "900000000000448009",
+      "textDefinition": false,
+      "acceptabilityMap": {
+        "900000000000508004": "900000000000548007"
+      },
+      "id": "509730019",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "conceptId": "91832008",
+      "languageCode": "en",
+      "typeId": "900000000000013009",
+      "term": "Anatomical organizational pattern, NOS",
+      "caseSignificanceId": "900000000000020002",
+      "textDefinition": false,
+      "acceptabilityMap": {},
+      "id": "152109017",
+      "active": false,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "conceptId": "91832008",
+      "languageCode": "en",
+      "typeId": "900000000000013009",
+      "term": "Anatomical organizational pattern",
+      "caseSignificanceId": "900000000000448009",
+      "textDefinition": false,
+      "acceptabilityMap": {
+        "900000000000509007": "900000000000548007"
+      },
+      "id": "152108013",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "conceptId": "91832008",
+      "languageCode": "en",
+      "typeId": "900000000000003001",
+      "term": "Anatomical organizational pattern (body structure)",
+      "caseSignificanceId": "900000000000448009",
+      "textDefinition": false,
+      "acceptabilityMap": {
+        "900000000000509007": "900000000000548007",
+        "900000000000508004": "900000000000548007"
+      },
+      "id": "835229017",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "relationships": [
+    {
+      "sourceId": "91832008",
+      "destinationId": "123037004",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4073779028",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "activeInboundStatedRelationships": [
+    {
+      "sourceId": "46813004",
+      "destinationId": "91832008",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4036813027",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "67146008",
+      "destinationId": "91832008",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4050243021",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "1263005",
+      "destinationId": "91832008",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3976247029",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "44571003",
+      "destinationId": "91832008",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4025439023",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "42235004",
+      "destinationId": "91832008",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4026632029",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "11874005",
+      "destinationId": "91832008",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3946401027",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "20575005",
+      "destinationId": "91832008",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3984820024",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "14632004",
+      "destinationId": "91832008",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3992105029",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "90981002",
+      "destinationId": "91832008",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4091014024",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "id": "91832008",
+  "active": true,
+  "moduleId": "900000000000207008",
+  "published": true,
+  "released": true
+}

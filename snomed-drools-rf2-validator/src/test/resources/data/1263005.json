@@ -1,0 +1,111 @@
+{
+  "definitionStatusId": "900000000000074008",
+  "descriptions": [
+    {
+      "conceptId": "1263005",
+      "languageCode": "en",
+      "typeId": "900000000000013009",
+      "term": "Distinctive arrangement of microtubules",
+      "caseSignificanceId": "900000000000448009",
+      "textDefinition": false,
+      "acceptabilityMap": {
+        "900000000000509007": "900000000000548007",
+        "900000000000508004": "900000000000548007"
+      },
+      "id": "3229017",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "conceptId": "1263005",
+      "languageCode": "en",
+      "typeId": "900000000000003001",
+      "term": "Distinctive arrangement of microtubules (cell structure)",
+      "caseSignificanceId": "900000000000448009",
+      "textDefinition": false,
+      "acceptabilityMap": {
+        "900000000000509007": "900000000000548007",
+        "900000000000508004": "900000000000548007"
+      },
+      "id": "1186141011",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "conceptId": "1263005",
+      "languageCode": "en",
+      "typeId": "900000000000013009",
+      "term": "Distinctive arrangement of microtubules, NOS",
+      "caseSignificanceId": "900000000000020002",
+      "textDefinition": false,
+      "acceptabilityMap": {},
+      "id": "3230010",
+      "active": false,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "conceptId": "1263005",
+      "languageCode": "en",
+      "typeId": "900000000000003001",
+      "term": "Distinctive arrangement of microtubules (body structure)",
+      "caseSignificanceId": "900000000000020002",
+      "textDefinition": false,
+      "acceptabilityMap": {},
+      "id": "730246016",
+      "active": false,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "relationships": [
+    {
+      "sourceId": "1263005",
+      "destinationId": "34783000",
+      "group": 0,
+      "typeId": "123005000",
+      "characteristicTypeId": "900000000000227009",
+      "id": "691754022",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "1263005",
+      "destinationId": "67185001",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3976248023",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "1263005",
+      "destinationId": "91832008",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3976247029",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "activeInboundStatedRelationships": [],
+  "id": "1263005",
+  "active": true,
+  "moduleId": "900000000000207008",
+  "published": true,
+  "released": true
+}

@@ -1,0 +1,66 @@
+{
+  "definitionStatusId": "900000000000074008",
+  "descriptions": [
+    {
+      "conceptId": "1234567890",
+      "languageCode": "en",
+      "typeId": "900000000000013009",
+      "term": "Subcellular structure (cell structure)",
+      "caseSignificanceId": "900000000000448009",
+      "textDefinition": false,
+      "acceptabilityMap": {
+        "900000000000509007": "900000000000548007",
+        "900000000000508004": "900000000000548007"
+      },
+      "id": "00000000",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "relationships": [
+    {
+      "sourceId": "1234567890",
+      "destinationId": "34783000",
+      "group": 0,
+      "typeId": "123005000",
+      "characteristicTypeId": "900000000000227009",
+      "id": "691754022",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "1234567890",
+      "destinationId": "67185001",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3976248023",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "1234567890",
+      "destinationId": "91832008",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3976247029",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "activeInboundStatedRelationships": [],
+  "id": "1234567890",
+  "active": true,
+  "moduleId": "900000000000207008",
+  "published": true,
+  "released": true
+}

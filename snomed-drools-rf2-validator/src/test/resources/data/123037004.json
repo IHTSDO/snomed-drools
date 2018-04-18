@@ -1,0 +1,173 @@
+{
+  "definitionStatusId": "900000000000074008",
+  "descriptions": [
+    {
+      "conceptId": "123037004",
+      "languageCode": "en",
+      "typeId": "900000000000013009",
+      "term": "Body structure",
+      "caseSignificanceId": "900000000000448009",
+      "textDefinition": false,
+      "acceptabilityMap": {
+        "900000000000509007": "900000000000548007",
+        "900000000000508004": "900000000000548007"
+      },
+      "id": "189056010",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "conceptId": "123037004",
+      "languageCode": "en",
+      "typeId": "900000000000003001",
+      "term": "Body structure (body structure)",
+      "caseSignificanceId": "900000000000448009",
+      "textDefinition": false,
+      "acceptabilityMap": {
+        "900000000000509007": "900000000000548007",
+        "900000000000508004": "900000000000548007"
+      },
+      "id": "724699017",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "conceptId": "123037004",
+      "languageCode": "en",
+      "typeId": "900000000000013009",
+      "term": "Body structures",
+      "caseSignificanceId": "900000000000448009",
+      "textDefinition": false,
+      "acceptabilityMap": {
+        "900000000000509007": "900000000000549004",
+        "900000000000508004": "900000000000549004"
+      },
+      "id": "470725012",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "relationships": [
+    {
+      "sourceId": "123037004",
+      "destinationId": "138875005",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3961967028",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "activeInboundStatedRelationships": [
+    {
+      "sourceId": "361083003",
+      "destinationId": "123037004",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3979163029",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "91832008",
+      "destinationId": "123037004",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4073779028",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "87100004",
+      "destinationId": "123037004",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4079735023",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "442083009",
+      "destinationId": "123037004",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4262467021",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "118956008",
+      "destinationId": "123037004",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3959447027",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "21229009",
+      "destinationId": "123037004",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "4002720025",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "278001007",
+      "destinationId": "123037004",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3910568022",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    },
+    {
+      "sourceId": "258331007",
+      "destinationId": "123037004",
+      "group": 0,
+      "typeId": "116680003",
+      "characteristicTypeId": "900000000000010007",
+      "id": "3884163021",
+      "active": true,
+      "moduleId": "900000000000207008",
+      "published": true,
+      "released": true
+    }
+  ],
+  "id": "123037004",
+  "active": true,
+  "moduleId": "900000000000207008",
+  "published": true,
+  "released": true
+}
