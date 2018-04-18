@@ -83,4 +83,8 @@ public class SnomedDroolsComponentRepository {
 	public Collection<DroolsDescription> getDescriptions() {
 		return descriptionMap.values();
 	}
+
+	public DroolsDescription getDescription(String descriptionId) {
+		return descriptionMap.get(parseLong(descriptionId));
+	}
 }

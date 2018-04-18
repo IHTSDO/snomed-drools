@@ -1,6 +1,5 @@
 package org.ihtsdo.drools.validator.rf2;
 
-import com.google.common.collect.Sets;
 import org.ihtsdo.drools.RuleExecutor;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
@@ -14,11 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.ihtsdo.drools.response.Severity.ERROR;
+import java.io.File;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class DroolsRF2Validator {
 

@@ -7,17 +7,14 @@ import org.ihtsdo.drools.domain.Relationship;
 import org.ihtsdo.drools.helper.DescriptionHelper;
 import org.ihtsdo.drools.service.ConceptService;
 import org.ihtsdo.drools.service.DescriptionService;
+import org.ihtsdo.drools.validator.rf2.DroolsDescriptionIndex;
 import org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentRepository;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class DroolsDescriptionService implements DescriptionService {
 
@@ -49,17 +46,33 @@ public class DroolsDescriptionService implements DescriptionService {
 	@Override
 	public Set<Description> findActiveDescriptionByExactTerm(String exactTerm) {
 		if(exactTerm == null || exactTerm.trim().isEmpty()) return Collections.emptySet();
-		return repository.getDescriptions().parallelStream().
-				filter(description -> description.isActive() && exactTerm.equals(description.getTerm()))
-				.collect(Collectors.toSet());
+		//Only load descriptions into Lucene index when this method is called by Drools rules to save memory
+		DroolsDescriptionIndex droolsDescriptionIndex = DroolsDescriptionIndex.getInstance();
+		droolsDescriptionIndex.loadRepository(repository);
+
+		Set<String> idSet = droolsDescriptionIndex.findMatchedDescriptionTerm(exactTerm,true);
+		Set<Description> descriptions = new HashSet<>();
+		for (String id : idSet) {
+			DroolsDescription droolsDescription = repository.getDescription(id);
+			descriptions.add(droolsDescription);
+		}
+		return descriptions;
 	}
 
 	@Override
 	public Set<Description> findInactiveDescriptionByExactTerm(String exactTerm) {
 		if(exactTerm == null || exactTerm.trim().isEmpty()) return Collections.emptySet();
-		return repository.getDescriptions().parallelStream().
-				filter(description -> !description.isActive() && exactTerm.equals(description.getTerm()))
-				.collect(Collectors.toSet());
+		//Only load descriptions into Lucene index when this method is called by Drools rules to save memory
+		DroolsDescriptionIndex droolsDescriptionIndex = DroolsDescriptionIndex.getInstance();
+		droolsDescriptionIndex.loadRepository(repository);
+
+		Set<String> idSet = droolsDescriptionIndex.findMatchedDescriptionTerm(exactTerm,false);
+		Set<Description> descriptions = new HashSet<>();
+		for (String id : idSet) {
+			DroolsDescription droolsDescription = repository.getDescription(id);
+			descriptions.add(droolsDescription);
+		}
+		return descriptions;
 	}
 
 	@Override
@@ -93,7 +106,7 @@ public class DroolsDescriptionService implements DescriptionService {
 	@Override
 	public String getLanguageSpecificErrorMessage(Description description) {
 		// TODO: Add support for this. See TestDescriptionService. Maps to be loaded from external resources.
-		return null;
+		return "";
 	}
 
 	@Override
