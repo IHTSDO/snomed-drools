@@ -145,7 +145,7 @@ public class RuleExecutor {
 			session.setGlobal("relationshipService", relationshipService);
 
 
-			int total = concepts.size();
+			String total = String.format("%,d", concepts.size());
 			int complete = 0;
 			for (Concept concept : concepts) {
 				// Load components into working set
@@ -156,8 +156,8 @@ public class RuleExecutor {
 				session.execute(components);
 
 				complete++;
-				if (complete % 10000 == 0) {
-					logger.info("{} of {} concepts validated.", complete, total);
+				if (complete % 10_000 == 0) {
+					logger.info("{} of {} concepts validated.", String.format("%,d", complete), total);
 				}
 			}
 
