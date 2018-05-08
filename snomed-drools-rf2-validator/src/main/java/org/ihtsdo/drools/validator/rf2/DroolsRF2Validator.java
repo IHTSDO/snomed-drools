@@ -74,6 +74,7 @@ public class DroolsRF2Validator {
 		LoadingProfile loadingProfile = LoadingProfile.complete
 				.withoutAllRefsets()
 				.withIncludedReferenceSetFilenamePattern(".*_cRefset_Language.*")
+				.withIncludedReferenceSetFilenamePattern(".*_OWLAxiom.*");
 
 		importer.loadSnapshotReleaseFiles(snomedRf2EditionDir, loadingProfile, new SnomedDroolsComponentFactory(repository, currentEffectiveTime));
 		logger.info("Components loaded");
