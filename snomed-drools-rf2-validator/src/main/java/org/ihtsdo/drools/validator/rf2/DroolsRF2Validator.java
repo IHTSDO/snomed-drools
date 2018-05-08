@@ -26,8 +26,52 @@ import static org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentFactory.MRCM_
 
 public class DroolsRF2Validator {
 
+	public static final String TAB = "\t";
 	private final RuleExecutor ruleExecutor;
 	private final Logger logger = LoggerFactory.getLogger(DroolsRF2Validator.class);
+
+	public static void main(String[] args) {
+		if (args.length != 4) {
+			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <currentEffectiveTime> <rf2SnapshotDirectory>");
+			System.exit(1);
+		}
+
+		String directoryOfRuleSetsPath = args[0];
+		DroolsRF2Validator rf2Validator = new DroolsRF2Validator(directoryOfRuleSetsPath);
+		String commaSeparatedAssertionGroups = args[1];
+		String snomedSnapshotDirectory = args[2];
+		String currentEffectiveTime = args[3];
+		if (!currentEffectiveTime.matches("\\d{8}")) {
+			System.out.println("Expecting <currentEffectiveTime> using format yyyymmdd");
+			System.exit(1);
+		}
+
+		File report = new File("validation-report-" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + ".txt");
+		try {
+			HashSet<String> ruleSetNamesToRun = Sets.newHashSet(commaSeparatedAssertionGroups.split(","));
+			List<InvalidContent> invalidContents = rf2Validator.validateSnapshot(snomedSnapshotDirectory, ruleSetNamesToRun, currentEffectiveTime);
+			report.createNewFile();
+			try (BufferedWriter reportWriter = new BufferedWriter(new FileWriter(report))) {
+				reportWriter.write("conceptId\tcomponentId\tmessage\tseverity\tignorePublishedCheck");
+				reportWriter.newLine();
+
+				for (InvalidContent invalidContent : invalidContents) {
+					reportWriter.write(invalidContent.getConceptId());
+					reportWriter.write(TAB);
+					reportWriter.write(invalidContent.getComponentId());
+					reportWriter.write(TAB);
+					reportWriter.write(invalidContent.getMessage());
+					reportWriter.write(TAB);
+					reportWriter.write(invalidContent.getSeverity().toString());
+					reportWriter.write(TAB);
+					reportWriter.write(invalidContent.isIgnorePublishedCheck() + "");
+					reportWriter.newLine();
+				}
+			}
+		} catch (ReleaseImportException | IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public DroolsRF2Validator(String directoryOfRuleSetsPath) {
 		Assert.isTrue(new File(directoryOfRuleSetsPath).isDirectory(), "The rules directory is not accessible.");
