@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static java.lang.Long.parseLong;
 
@@ -18,11 +20,14 @@ public class SnomedDroolsComponentRepository {
 
 	private final Map<Long, DroolsConcept> conceptMap;
 	private final Map<Long, DroolsDescription> descriptionMap;
+	private final Set<Long> ungroupedAttributes;
+
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	public SnomedDroolsComponentRepository() {
 		conceptMap = new Long2ObjectOpenHashMap<>();
 		descriptionMap = new Long2ObjectOpenHashMap<>();
+		ungroupedAttributes = new HashSet<>();
 	}
 
 	public void addConcept(DroolsConcept concept) {
@@ -84,5 +89,9 @@ public class SnomedDroolsComponentRepository {
 
 	public DroolsDescription getDescription(String descriptionId) {
 		return descriptionMap.get(parseLong(descriptionId));
+	}
+
+	public Set<Long> getUngroupedAttributes() {
+		return ungroupedAttributes;
 	}
 }
