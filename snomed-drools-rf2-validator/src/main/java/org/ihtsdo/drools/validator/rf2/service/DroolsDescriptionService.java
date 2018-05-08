@@ -34,8 +34,9 @@ public class DroolsDescriptionService implements DescriptionService {
 			for (DroolsDescription description : descriptions) {
 				if (description.isActive() && description.getTypeId().equals(FULLY_SPECIFIED_NAME)) {
 					for (String languageRefsetId : languageRefsetIds) {
-						PREFERRED_ACCEPTABILITY.equals(description.getAcceptabilityMap().get(languageRefsetId));
-						fsns.add(description.getTerm());
+						if (PREFERRED_ACCEPTABILITY.equals(description.getAcceptabilityMap().get(languageRefsetId))) {
+							fsns.add(description.getTerm());
+						}
 					}
 				}
 			}

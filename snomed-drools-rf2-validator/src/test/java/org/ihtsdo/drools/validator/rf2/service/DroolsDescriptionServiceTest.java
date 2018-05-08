@@ -4,6 +4,7 @@ import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.validator.rf2.FileLoaderTestUtils;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
+import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +16,7 @@ import java.util.Set;
 public class DroolsDescriptionServiceTest extends BaseServiceTest{
 
 
+    public static final String PREFERRED = "900000000000548007";
     private DroolsDescriptionService droolsDescriptionService;
 
     @Before
@@ -27,9 +29,13 @@ public class DroolsDescriptionServiceTest extends BaseServiceTest{
 
     @Test
     public void testFindFSNs() {
+        repository.getConcept("1263005").getDescriptions().stream()
+                .filter(d -> ConceptConstants.FSN.equals(d.getTypeId()))
+                .forEach(d -> d.getAcceptabilityMap().put(ConceptConstants.US_EN_LANGUAGE_REFERENCE_SET, PREFERRED));
+
         Set<String> conceptsIds = new HashSet<>();
         conceptsIds.add("1263005");
-        Set<String> results = droolsDescriptionService.getFSNs(conceptsIds,"900000000000548007");
+        Set<String> results = droolsDescriptionService.getFSNs(conceptsIds, ConceptConstants.US_EN_LANGUAGE_REFERENCE_SET);
         Assert.assertEquals(1, results.size());
         for (String result : results) {
             Assert.assertEquals("Distinctive arrangement of microtubules (cell structure)", result);
