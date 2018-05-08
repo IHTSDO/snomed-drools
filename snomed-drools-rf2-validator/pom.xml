@@ -7,10 +7,15 @@
 		<artifactId>snomed-drools</artifactId>
 		<version>1.6.0-SNAPSHOT</version>
 	</parent>
-	
+
 	<artifactId>snomed-drools-rf2-validator</artifactId>
 
+	<properties>
+		<lucene.version>7.3.0</lucene.version>
+	</properties>
+
 	<dependencies>
+		<!-- Snomed Dependencies -->
 		<dependency>
 			<groupId>org.ihtsdo.drools</groupId>
 			<artifactId>snomed-drools-engine</artifactId>
@@ -21,6 +26,35 @@
 			<artifactId>snomed-boot</artifactId>
 			<version>1.5.0</version>
 		</dependency>
+
+		<!-- Lucene -->
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-memory</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analyzers-common</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queryparser</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queries</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+
+		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -31,37 +65,14 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
+
+		<!-- Test -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
-			<version>7.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-memory</artifactId>
-			<version>7.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-common</artifactId>
-			<version>7.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-queryparser</artifactId>
-			<version>7.3.0</version>
-		</dependency>
-      <dependency>
-         <groupId>org.apache.lucene</groupId>
-         <artifactId>lucene-queries</artifactId>
-         <version>7.3.0</version>
-      </dependency>
 	</dependencies>
 
 </project>
