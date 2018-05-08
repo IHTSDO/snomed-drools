@@ -19,10 +19,8 @@ public class FileLoaderTestUtils {
         LoadingProfile loadingProfile = LoadingProfile.complete;
         loadingProfile.getIncludedReferenceSetFilenamePatterns().add(".*_cRefset_Language.*");
         try {
-            importer.loadSnapshotReleaseFiles(new FileInputStream(releaseFilePath), loadingProfile, new SnomedDroolsComponentFactory(repository));
-        } catch (ReleaseImportException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
+            importer.loadSnapshotReleaseFiles(new FileInputStream(releaseFilePath), loadingProfile, new SnomedDroolsComponentFactory(repository, ""));
+        } catch (ReleaseImportException | FileNotFoundException e) {
             e.printStackTrace();
         }
     }

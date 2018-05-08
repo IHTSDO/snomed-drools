@@ -22,7 +22,7 @@ public class IntegrationManualTest {
         String releaseFilePath = "../path-to-snapshot-or-release";
         String directoryOfRuleSetsPath = "../../path-to-drools-rules";
         HashSet<String> ruleSetNamesToRun = Sets.newHashSet("common-authoring");
-        List<InvalidContent> invalidContents = new DroolsRF2Validator(directoryOfRuleSetsPath).validateSnapshot(new FileInputStream(releaseFilePath), ruleSetNamesToRun);
+        List<InvalidContent> invalidContents = new DroolsRF2Validator(directoryOfRuleSetsPath).validateSnapshot(new FileInputStream(releaseFilePath), ruleSetNamesToRun, "");
 
         // Some extra output when running this main method in development -
         int outputSize = invalidContents.size() > 50 ? 50 : invalidContents.size();
