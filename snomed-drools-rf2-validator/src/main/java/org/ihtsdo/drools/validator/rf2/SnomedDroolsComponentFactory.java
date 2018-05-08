@@ -5,6 +5,8 @@ import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsRelationship;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.snomed.otf.owltoolkit.conversion.AxiomRelationshipConversionService;
 import org.snomed.otf.owltoolkit.conversion.ConversionException;
 import org.snomed.otf.owltoolkit.domain.AxiomRepresentation;
@@ -19,12 +21,15 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 
 	private static final String TEXT_DEFINITION = "900000000000550004";
 	private static final String INFERRED_RELATIONSHIP = "900000000000011006";
-	public static final String OWL_AXIOM_REFSET = "733073007";
-	public static final String MRCM_ATTRIBUTE_DOMAIN_INTERNATIONAL_REFSET = "723561005";
+	private static final String OWL_AXIOM_REFSET = "733073007";
+	static final String MRCM_ATTRIBUTE_DOMAIN_INTERNATIONAL_REFSET = "723561005";
 
 	private final SnomedDroolsComponentRepository repository;
 	private final AxiomRelationshipConversionService axiomConverter;
 	private final String currentEffectiveTime;
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+
+	private boolean axiomParsingError = false;
 
 	SnomedDroolsComponentFactory(SnomedDroolsComponentRepository repository, String currentEffectiveTime) {
 		this.repository = repository;
@@ -68,7 +73,10 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 					}
 				}
 			} catch (ConversionException e) {
-				e.printStackTrace();
+				logger.error("Axiom conversion failed for refset member " + id, e);
+				synchronized (SnomedDroolsComponentFactory.class) {
+					axiomParsingError = true;
+				}
 			}
 
 		} else if (isActive(active) && fieldNames.length == 7 && fieldNames[6].equals("acceptabilityId")) {
@@ -76,6 +84,10 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 			String acceptabilityId = otherValues[0];
 			repository.addLanguageReferenceSetMember(id, referencedComponentId, refsetId, acceptabilityId);
 		}
+	}
+
+	boolean isAxiomParsingError() {
+		return axiomParsingError;
 	}
 
 	private void addRelationships(Map<Integer, List<Relationship>> groups, AxiomRepresentation axiom, String moduleId, String effectiveTime) {

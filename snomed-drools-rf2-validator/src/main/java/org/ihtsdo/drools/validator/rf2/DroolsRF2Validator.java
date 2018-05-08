@@ -76,7 +76,12 @@ public class DroolsRF2Validator {
 				.withIncludedReferenceSetFilenamePattern(".*_cRefset_Language.*")
 				.withIncludedReferenceSetFilenamePattern(".*_OWLAxiom.*");
 
-		importer.loadSnapshotReleaseFiles(snomedRf2EditionDir, loadingProfile, new SnomedDroolsComponentFactory(repository, currentEffectiveTime));
+		SnomedDroolsComponentFactory componentFactory = new SnomedDroolsComponentFactory(repository, currentEffectiveTime);
+		importer.loadSnapshotReleaseFiles(snomedRf2EditionDir, loadingProfile, componentFactory);
+		if (componentFactory.isAxiomParsingError()) {
+			throw new ReleaseImportException("Failed to parse one or more OWL Axioms. Check logs for details.");
+		}
+
 		logger.info("Components loaded");
 
 		DroolsConceptService conceptService = new DroolsConceptService(repository);
