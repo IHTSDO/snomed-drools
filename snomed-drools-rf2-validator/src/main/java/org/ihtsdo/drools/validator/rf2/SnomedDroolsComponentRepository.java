@@ -1,6 +1,5 @@
 package org.ihtsdo.drools.validator.rf2;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
@@ -10,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 import static java.lang.Long.parseLong;
 

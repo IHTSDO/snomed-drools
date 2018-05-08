@@ -2,6 +2,7 @@ package org.ihtsdo.drools.validator.rf2.domain;
 
 import org.ihtsdo.drools.domain.Description;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class DroolsDescription extends DroolsComponent implements Description {
@@ -14,7 +15,7 @@ public class DroolsDescription extends DroolsComponent implements Description {
 	private boolean textDefinition;
 	private Map<String, String> acceptabilityMap;
 
-	public DroolsDescription(String id, boolean active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId, boolean textDefinition, Map<String, String> acceptabilityMap, boolean published, boolean released) {
+	public DroolsDescription(String id, boolean active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId, boolean textDefinition, boolean published, boolean released) {
 		super(id, active, moduleId, published, released);
 		this.conceptId = conceptId;
 		this.languageCode = languageCode;
@@ -22,7 +23,7 @@ public class DroolsDescription extends DroolsComponent implements Description {
 		this.term = term;
 		this.caseSignificanceId = caseSignificanceId;
 		this.textDefinition = textDefinition;
-		this.acceptabilityMap = acceptabilityMap;
+		this.acceptabilityMap = new HashMap<>();
 	}
 
 	@Override

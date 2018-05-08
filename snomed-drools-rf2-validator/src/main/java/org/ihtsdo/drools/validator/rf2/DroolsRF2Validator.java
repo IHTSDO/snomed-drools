@@ -37,8 +37,10 @@ public class DroolsRF2Validator {
 		ReleaseImporter importer = new ReleaseImporter();
 		SnomedDroolsComponentRepository repository = new SnomedDroolsComponentRepository();
 		logger.info("Loading components from RF2");
-		LoadingProfile loadingProfile = LoadingProfile.complete;
+		LoadingProfile loadingProfile = LoadingProfile.complete
+				.withoutAllRefsets();
 		loadingProfile.getIncludedReferenceSetFilenamePatterns().add(".*_cRefset_Language.*");
+
 		importer.loadSnapshotReleaseFiles(snomedRf2EditionZip, loadingProfile, new SnomedDroolsComponentFactory(repository));
 		logger.info("Components loaded");
 

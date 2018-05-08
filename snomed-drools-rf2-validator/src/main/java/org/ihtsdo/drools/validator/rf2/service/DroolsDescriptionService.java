@@ -76,6 +76,8 @@ public class DroolsDescriptionService implements DescriptionService {
 	}
 
 	@Override
+	// FIXME: Currently only finds matching description in ancestors.
+	// Should search all descendants of the second highest ancestor (the ancestor which is a direct child of root).
 	public Set<Description> findMatchingDescriptionInHierarchy(Concept concept, Description description) {
 		if(concept == null || concept.getId().equals(Constants.ROOT_CONCEPT)) {
 			return Collections.emptySet();
@@ -117,7 +119,7 @@ public class DroolsDescriptionService implements DescriptionService {
 
 	@Override
 	public Set<String> findParentsNotContainSematicTag(Concept concept, String termSematicTag, String... languageRefsetIds) {
-		Set<String> conceptIds = new HashSet<String>();
+		Set<String> conceptIds = new HashSet<>();
 		for (Relationship relationship : concept.getRelationships()) {
 			if (relationship.isActive()
 					&& Constants.IS_A.equals(relationship.getTypeId())
