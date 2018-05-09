@@ -32,7 +32,7 @@ public class DroolsRF2Validator {
 
 	public static void main(String[] args) {
 		if (args.length != 4) {
-			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <currentEffectiveTime> <rf2SnapshotDirectory>");
+			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <rf2SnapshotDirectory> <currentEffectiveTime>");
 			System.exit(1);
 		}
 
