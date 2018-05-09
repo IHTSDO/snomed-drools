@@ -42,12 +42,12 @@ public class DroolsDescriptionIndex {
 
     private DroolsDescriptionIndex() {}
 
-    public static DroolsDescriptionIndex getInstance() {
+    public synchronized static DroolsDescriptionIndex getInstance() {
         if (droolsDescriptionIndex == null) droolsDescriptionIndex = new DroolsDescriptionIndex();
         return droolsDescriptionIndex;
     }
 
-    public void loadRepository(SnomedDroolsComponentRepository repository) {
+    public synchronized void loadRepository(SnomedDroolsComponentRepository repository) {
         //Only load repository at first time
         if (index == null) {
             index = new RAMDirectory();
