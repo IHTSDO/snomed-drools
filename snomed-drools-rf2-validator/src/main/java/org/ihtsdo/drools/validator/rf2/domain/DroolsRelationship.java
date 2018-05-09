@@ -43,4 +43,15 @@ public class DroolsRelationship extends DroolsComponent implements Relationship 
 	public String getCharacteristicTypeId() {
 		return characteristicTypeId;
 	}
+
+	@Override
+	public String toString() {
+		return "DroolsRelationship{" +
+				"sourceId='" + sourceId + '\'' +
+				", destinationId='" + destinationId + '\'' +
+				", group=" + group +
+				", typeId='" + typeId + '\'' +
+				", characteristicTypeId='" + characteristicTypeId + '\'' +
+				'}';
+	}
 }

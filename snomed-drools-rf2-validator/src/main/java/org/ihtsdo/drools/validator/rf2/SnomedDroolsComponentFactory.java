@@ -92,10 +92,12 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 
 	private void addRelationships(Map<Integer, List<Relationship>> groups, AxiomRepresentation axiom, String moduleId, String effectiveTime) {
 		groups.forEach((group, relationships) -> relationships.forEach(relationship -> {
+			DroolsRelationship relationship1 = new DroolsRelationship(null, true, moduleId, axiom.getLeftHandSideNamedConcept().toString(),
+					relationship.getDestinationId() + "", group,
+					relationship.getTypeId() + "", ConceptConstants.STATED_RELATIONSHIP, published(effectiveTime), published(effectiveTime));
+			logger.info("Add axiom relationship {}", relationship);
 			repository.addRelationship(
-					new DroolsRelationship(null, true, moduleId, axiom.getLeftHandSideNamedConcept().toString(),
-							relationship.getDestinationId() + "", group,
-							relationship.getTypeId() + "", ConceptConstants.STATED_RELATIONSHIP, published(effectiveTime), published(effectiveTime)));
+					relationship1);
 		}));
 	}
 
