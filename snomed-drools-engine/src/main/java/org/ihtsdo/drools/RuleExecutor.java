@@ -1,5 +1,6 @@
 package org.ihtsdo.drools;
 
+import org.drools.core.impl.StatelessKnowledgeSessionImpl;
 import org.ihtsdo.drools.domain.*;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
 import org.ihtsdo.drools.exception.RuleExecutorException;
@@ -27,6 +28,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class RuleExecutor {
 
@@ -129,7 +133,6 @@ public class RuleExecutor {
 		}
 
 		Date start = new Date();
-		Set<Component> components = new HashSet<>();
 
 		final List<InvalidContent> invalidContent = new ArrayList<>();
 		for (String ruleSetName : ruleSetNames) {
@@ -137,29 +140,42 @@ public class RuleExecutor {
 			if (kieContainer == null) {
 				throw new RuleExecutorException("Rule set not found for name '" + ruleSetName + "'");
 			}
-			final StatelessKieSession session = kieContainer.newStatelessKieSession();
 
-			session.setGlobal("invalidContent", invalidContent);
-			session.setGlobal("conceptService", conceptService);
-			session.setGlobal("descriptionService", descriptionService);
-			session.setGlobal("relationshipService", relationshipService);
-
-
+			int threads = concepts.size() == 1 ? 1 : 10;
+			ExecutorService executorService = Executors.newFixedThreadPool(threads);
+			List<StatelessKieSession> sessions = new ArrayList<>();
+			for (int s = 0; s < threads; s++) {
+				sessions.add(newStatelessKieSession(kieContainer, conceptService, descriptionService, relationshipService, invalidContent));
+			}
+			List<Concept> conceptList = new ArrayList<>(concepts);
+			List<Callable<String>> tasks = new ArrayList<>();
 			String total = String.format("%,d", concepts.size());
-			int complete = 0;
-			for (Concept concept : concepts) {
-				// Load components into working set
-				components.clear();
-				addConcept(components, concept, includeInferredRelationships);
+			int i = 0;
+			while (i < concepts.size()) {
+				Set<Component> components = new HashSet<>();
+				addConcept(components, conceptList.get(i++), includeInferredRelationships);
+				int sessionIndex = tasks.size();
+				tasks.add(() -> {
+					StatelessKieSession statelessKieSession = sessions.get(sessionIndex);
+					statelessKieSession.execute(components);
+					components.clear();
+					((StatelessKnowledgeSessionImpl) statelessKieSession).newWorkingMemory();
+					return null;
+				});
 
-				// Execute rules on working set
-				session.execute(components);
-
-				complete++;
-				if (complete % 10_000 == 0) {
-					logger.info("{} of {} concepts validated.", String.format("%,d", complete), total);
+				if (tasks.size() == threads) {
+					runTasks(executorService, tasks);
+					tasks.clear();
+				}
+				if (i % 10_000 == 0) {
+					logger.info("Validated {} of {}", String.format("%,d", i), total);
 				}
 			}
+			if (!tasks.isEmpty()) {
+				runTasks(executorService, tasks);
+			}
+			logger.info("Validated {} of {}", String.format("%,d", i), total);
+			executorService.shutdown();
 
 			logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
 		}
@@ -176,6 +192,24 @@ public class RuleExecutor {
 		}
 
 		return invalidContent;
+	}
+
+	private StatelessKieSession newStatelessKieSession(KieContainer kieContainer, ConceptService conceptService, DescriptionService descriptionService, RelationshipService relationshipService, List<InvalidContent> invalidContent) {
+		final StatelessKieSession session = kieContainer.newStatelessKieSession();
+
+		session.setGlobal("invalidContent", invalidContent);
+		session.setGlobal("conceptService", conceptService);
+		session.setGlobal("descriptionService", descriptionService);
+		session.setGlobal("relationshipService", relationshipService);
+		return session;
+	}
+
+	private void runTasks(ExecutorService executorService, List<Callable<String>> tasks) {
+		try {
+			executorService.invokeAll(tasks);
+		} catch (InterruptedException e) {
+			throw new RuleExecutorException("Validation tasks were interrupted.", e);
+		}
 	}
 
 	private void assertComponentIdsPresent(Concept concept) {
