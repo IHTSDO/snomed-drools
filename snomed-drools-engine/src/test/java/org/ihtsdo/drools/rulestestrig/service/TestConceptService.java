@@ -23,7 +23,8 @@ public class TestConceptService implements ConceptService {
 
 	@Override
 	public boolean isActive(String conceptId) {
-		return concepts.get(conceptId).isActive();
+		Concept concept = concepts.get(conceptId);
+		return concept != null && concept.isActive();
 	}
 	
 	@Override

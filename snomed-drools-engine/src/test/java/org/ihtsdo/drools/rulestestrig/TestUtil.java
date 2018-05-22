@@ -1,19 +1,24 @@
 package org.ihtsdo.drools.rulestestrig;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
+import org.ihtsdo.drools.domain.OntologyAxiom;
 import org.ihtsdo.drools.domain.Relationship;
 import org.ihtsdo.drools.rulestestrig.domain.TestConcept;
 import org.ihtsdo.drools.rulestestrig.domain.TestDescription;
+import org.ihtsdo.drools.rulestestrig.domain.TestOntologyAxiom;
 import org.ihtsdo.drools.rulestestrig.domain.TestRelationship;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -24,22 +29,35 @@ public class TestUtil {
 
 	static {
 		gson = new GsonBuilder()
-				.registerTypeAdapter(Concept.class, new InstanceCreator<Concept>() {
+				.registerTypeAdapter(Concept.class, (InstanceCreator<Concept>) type -> new TestConcept<TestDescription, TestRelationship>())
+				.registerTypeAdapter(Description.class, (InstanceCreator<Description>) type -> new TestDescription())
+				.registerTypeAdapter(Relationship.class, (InstanceCreator<Relationship>) type -> new TestRelationship())
+				.registerTypeAdapter(OntologyAxiom.class, new TypeAdapter<OntologyAxiom>() {
 					@Override
-					public Concept createInstance(Type type) {
-						return new TestConcept<TestDescription, TestRelationship>();
+					public OntologyAxiom read(JsonReader jsonReader) throws IOException {
+						TestOntologyAxiom ontologyAxiom = new TestOntologyAxiom();
+						jsonReader.beginObject();
+						while (jsonReader.hasNext()) {
+							String name = jsonReader.nextName();
+							if (name.equals("active")) {
+								ontologyAxiom.setActive(jsonReader.nextBoolean());
+							} else if (name.equals("owlExpressionNamedConcepts")) {
+								jsonReader.beginArray();
+								HashSet<String> concept = new HashSet<>();
+								ontologyAxiom.setOwlExpressionNamedConcepts(concept);
+								while (jsonReader.hasNext()) {
+									concept.add(jsonReader.nextString());
+								}
+								jsonReader.endArray();
+							}
+						}
+						jsonReader.endObject();
+						return ontologyAxiom;
 					}
-				})
-				.registerTypeAdapter(Description.class, new InstanceCreator<Description>() {
+
 					@Override
-					public Description createInstance(Type type) {
-						return new TestDescription();
-					}
-				})
-				.registerTypeAdapter(Relationship.class, new InstanceCreator<Relationship>() {
-					@Override
-					public Relationship createInstance(Type type) {
-						return new TestRelationship();
+					public void write(JsonWriter jsonWriter, OntologyAxiom ontologyAxiom) throws IOException {
+
 					}
 				})
 				.create();

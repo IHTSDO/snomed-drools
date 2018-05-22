@@ -3,11 +3,9 @@ package org.ihtsdo.drools.rulestestrig;
 import org.ihtsdo.drools.RuleExecutor;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
+import org.ihtsdo.drools.domain.OntologyAxiom;
 import org.ihtsdo.drools.response.InvalidContent;
-import org.ihtsdo.drools.rulestestrig.domain.TestComponent;
-import org.ihtsdo.drools.rulestestrig.domain.TestConcept;
-import org.ihtsdo.drools.rulestestrig.domain.TestDescription;
-import org.ihtsdo.drools.rulestestrig.domain.TestRelationship;
+import org.ihtsdo.drools.rulestestrig.domain.*;
 import org.ihtsdo.drools.rulestestrig.service.TestConceptService;
 import org.ihtsdo.drools.rulestestrig.service.TestDescriptionService;
 import org.ihtsdo.drools.rulestestrig.service.TestRelationshipService;
@@ -121,6 +119,11 @@ public class RulesTestManual {
 						description.setTypeId(Constants.TEXT_DEFINITION);
 					}
 				}
+				for (OntologyAxiom ontologyAxiom : concept.getOntologyAxioms()) {
+					TestOntologyAxiom testOntologyAxiom = (TestOntologyAxiom) ontologyAxiom;
+					setTempIdIfMissing(testOntologyAxiom);
+					testOntologyAxiom.setReferencedComponentId(id);
+				}
 			}
 		}
 	}
@@ -131,16 +134,20 @@ public class RulesTestManual {
 		}
 	}
 
-	private void executeRulesAndAssertExpectations(RuleExecutor ruleExecutor, List<TestConcept<TestDescription, TestRelationship>> conceptsThatShouldFail, boolean expectPass) throws JSONException {
-		for (TestConcept<TestDescription, TestRelationship> concept : conceptsThatShouldFail) {
+	private void executeRulesAndAssertExpectations(RuleExecutor ruleExecutor, List<TestConcept<TestDescription, TestRelationship>> conceptsToTest, boolean expectPass) throws JSONException {
+		for (TestConcept<TestDescription, TestRelationship> concept : conceptsToTest) {
 			final HashSet<String> ruleSetNames = new HashSet<>();
 			ruleSetNames.add("OneRule");
-			final List<InvalidContent> invalidContent = ruleExecutor.execute(ruleSetNames, Collections.singleton(concept), conceptService, descriptionService, relationshipService, false, false);
-			
+			try {
+				final List<InvalidContent> invalidContent = ruleExecutor.execute(ruleSetNames, Collections.singleton(concept), conceptService, descriptionService, relationshipService, false, false);
+
 			if (expectPass) {
 				Assert.assertEquals("A concept from the " + ASSERT_CONCEPTS_PASS + " set actually failed! " + invalidContent.toString(), 0, invalidContent.size());
 			} else {
 				Assert.assertNotEquals("A concept from the " + ASSERT_CONCEPTS_FAIL + " set actually passed! " + concept.toString(), 0, invalidContent.size());
+			}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}

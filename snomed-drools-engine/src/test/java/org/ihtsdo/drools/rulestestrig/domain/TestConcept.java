@@ -2,6 +2,7 @@ package org.ihtsdo.drools.rulestestrig.domain;
 
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
+import org.ihtsdo.drools.domain.OntologyAxiom;
 import org.ihtsdo.drools.domain.Relationship;
 
 import java.util.ArrayList;
@@ -17,11 +18,13 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	private String definitionStatusId;
 	private Collection<D> descriptions;
 	private Collection<R> relationships;
+	private Collection<OntologyAxiom> ontologyAxioms;
 
 	public TestConcept() {
 		active = true;
 		descriptions = new ArrayList<>();
 		relationships = new ArrayList<>();
+		ontologyAxioms = new ArrayList<>();
 	}
 
 	@Override
@@ -68,6 +71,11 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 		return relationships;
 	}
 
+	@Override
+	public Collection<OntologyAxiom> getOntologyAxioms() {
+		return ontologyAxioms;
+	}
+
 	public void setId(String id) {
 		this.id = id;
 	}
@@ -96,6 +104,10 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 		this.relationships = relationships;
 	}
 
+	public void setOntologyAxioms(Collection<OntologyAxiom> ontologyAxioms) {
+		this.ontologyAxioms = ontologyAxioms;
+	}
+
 	@Override
 	public String toString() {
 		return "TestConcept{" +
@@ -105,6 +117,7 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 				", definitionStatusId=" + definitionStatusId +
 				", descriptions=" + descriptions +
 				", relationships=" + relationships +
+				", ontologyAxioms=" + ontologyAxioms +
 				'}';
 	}
 }

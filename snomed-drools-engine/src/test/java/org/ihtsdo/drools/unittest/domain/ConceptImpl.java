@@ -2,10 +2,12 @@ package org.ihtsdo.drools.unittest.domain;
 
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Description;
+import org.ihtsdo.drools.domain.OntologyAxiom;
 import org.ihtsdo.drools.domain.Relationship;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 public class ConceptImpl implements Concept {
 
@@ -14,12 +16,14 @@ public class ConceptImpl implements Concept {
 	private String definitionStatusId;
 	private Collection<Description> descriptions;
 	private Collection<Relationship> relationships;
+	private Collection<OntologyAxiom> ontologyAxioms;
 	private boolean released;
 
 	public ConceptImpl(String id) {
 		this.id = id;
 		descriptions = new HashSet<>();
 		relationships = new HashSet<>();
+		ontologyAxioms = new HashSet<>();
 	}
 
 	@Override
@@ -88,6 +92,11 @@ public class ConceptImpl implements Concept {
 	@Override
 	public Collection<Relationship> getRelationships() {
 		return relationships;
+	}
+
+	@Override
+	public Collection<? extends OntologyAxiom> getOntologyAxioms() {
+		return ontologyAxioms;
 	}
 
 	@Override
