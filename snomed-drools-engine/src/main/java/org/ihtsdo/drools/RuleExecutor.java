@@ -236,6 +236,14 @@ public class RuleExecutor {
 				throw new BadRequestRuleExecutorException("For validation relationship sourceId must be the ID of the concept.");
 			}
 		}
+		for (OntologyAxiom ontologyAxiom : concept.getOntologyAxioms()) {
+			if (ontologyAxiom.getId() == null || ontologyAxiom.getId().isEmpty()) {
+				throw new BadRequestRuleExecutorException("For validation ontology axioms must have an SCTID or some temporary ID.");
+			}
+			if (!conceptId.equals(ontologyAxiom.getReferencedComponentId())) {
+				throw new BadRequestRuleExecutorException("For validation ontology axiom referencedComponentId must be the ID of the concept.");
+			}
+		}
 	}
 
 	private static void addConcept(Set<Component> components, Concept concept, boolean includeInferredRelationships) {
@@ -246,6 +254,7 @@ public class RuleExecutor {
 				components.add(relationship);
 			}
 		}
+		components.addAll(concept.getOntologyAxioms());
 	}
 
 	private static final class RuleLoader extends SimpleFileVisitor<Path> {

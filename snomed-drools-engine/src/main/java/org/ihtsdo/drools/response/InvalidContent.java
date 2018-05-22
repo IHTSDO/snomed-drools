@@ -1,9 +1,6 @@
 package org.ihtsdo.drools.response;
 
-import org.ihtsdo.drools.domain.Component;
-import org.ihtsdo.drools.domain.Concept;
-import org.ihtsdo.drools.domain.Description;
-import org.ihtsdo.drools.domain.Relationship;
+import org.ihtsdo.drools.domain.*;
 
 public class InvalidContent {
 
@@ -42,6 +39,14 @@ public class InvalidContent {
 
 	public InvalidContent(Relationship relationship, String message) {
 		this(relationship, message, Severity.ERROR);
+	}
+
+	public InvalidContent(OntologyAxiom ontologyAxiom, String message, Severity severity) {
+		this(ontologyAxiom.getReferencedComponentId(), ontologyAxiom, message, severity);
+	}
+
+	public InvalidContent(OntologyAxiom ontologyAxiom, String message) {
+		this(ontologyAxiom, message, Severity.ERROR);
 	}
 
 	// This method used to return the object instance in the style of the Builder Pattern but this caused strange drools behaviour so have been removed.
