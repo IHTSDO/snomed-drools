@@ -4,11 +4,11 @@ import org.ihtsdo.drools.domain.Relationship;
 
 public class DroolsRelationship extends DroolsComponent implements Relationship {
 
-	private String sourceId;
-	private String destinationId;
-	private int group;
-	private String typeId;
-	private String characteristicTypeId;
+	private final String sourceId;
+	private final String destinationId;
+	private final int group;
+	private final String typeId;
+	private final String characteristicTypeId;
 
 	public DroolsRelationship(String id, boolean active, String moduleId, String sourceId, String destinationId, int group, String typeId, String characteristicTypeId, boolean published, boolean released) {
 		super(id, active, moduleId, published, released);

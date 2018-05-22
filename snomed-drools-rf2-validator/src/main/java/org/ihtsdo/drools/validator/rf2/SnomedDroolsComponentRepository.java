@@ -1,8 +1,10 @@
 package org.ihtsdo.drools.validator.rf2;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import org.ihtsdo.drools.domain.Component;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
+import org.ihtsdo.drools.validator.rf2.domain.DroolsOntologyAxiom;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsRelationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,8 @@ public class SnomedDroolsComponentRepository {
 	private final Map<Long, DroolsConcept> conceptMap;
 	private final Map<Long, DroolsDescription> descriptionMap;
 	private final Set<Long> ungroupedAttributes;
+	private final Set<DroolsOntologyAxiom> ontologyAxioms;
+
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -28,6 +32,7 @@ public class SnomedDroolsComponentRepository {
 		conceptMap = new Long2ObjectOpenHashMap<>();
 		descriptionMap = new Long2ObjectOpenHashMap<>();
 		ungroupedAttributes = new HashSet<>();
+		ontologyAxioms = new HashSet<>();
 	}
 
 	public void addConcept(DroolsConcept concept) {
@@ -35,11 +40,7 @@ public class SnomedDroolsComponentRepository {
 	}
 
 	public void addDescription(DroolsDescription description) {
-		long conceptId = parseLong(description.getConceptId());
-		DroolsConcept concept = conceptMap.get(conceptId);
-		if (concept == null) {
-			throw new RuntimeException("Description " + description.getId() + " is part of Concept " + description.getConceptId() + " which can not be found.");
-		}
+		DroolsConcept concept = getConceptOrThrow(parseLong(description.getConceptId()), description);
 		concept.getDescriptions().add(description);
 		synchronized (descriptionMap) {
 			descriptionMap.put(parseLong(description.getId()), description);
@@ -57,11 +58,7 @@ public class SnomedDroolsComponentRepository {
 	}
 
 	public void addRelationship(DroolsRelationship relationship) {
-		long conceptId = parseLong(relationship.getSourceId());
-		DroolsConcept concept = conceptMap.get(conceptId);
-		if (concept == null) {
-			throw new RuntimeException("Relationship " + relationship.getId() + " is part of Concept " + relationship.getSourceId() + " which can not be found.");
-		}
+		DroolsConcept concept = getConceptOrThrow(parseLong(relationship.getSourceId()), relationship);
 		concept.getRelationships().add(relationship);
 
 		if (relationship.isActive() && relationship.getCharacteristicTypeId().equals(STATED_RELATIONSHIP_CHARACTERISTIC_TYPE_ID)) {
@@ -73,6 +70,20 @@ public class SnomedDroolsComponentRepository {
 			}
 			destinationConcept.getActiveInboundStatedRelationships().add(relationship);
 		}
+	}
+
+	public void addOntologyAxiom(DroolsOntologyAxiom droolsOntologyAxiom) {
+		ontologyAxioms.add(droolsOntologyAxiom);
+		DroolsConcept concept = getConceptOrThrow(parseLong(droolsOntologyAxiom.getReferencedComponentId()), droolsOntologyAxiom);
+		concept.getOntologyAxioms().add(droolsOntologyAxiom);
+	}
+
+	private DroolsConcept getConceptOrThrow(long conceptId, Component component) {
+		DroolsConcept concept = conceptMap.get(conceptId);
+		if (concept == null) {
+			throw new RuntimeException(component.getClass().getSimpleName() + " " + component.getId() + " is part of Concept " + conceptId + " which can not be found.");
+		}
+		return concept;
 	}
 
 	public DroolsConcept getConcept(String conceptId) {
@@ -93,5 +104,9 @@ public class SnomedDroolsComponentRepository {
 
 	public Set<Long> getUngroupedAttributes() {
 		return ungroupedAttributes;
+	}
+
+	public Set<DroolsOntologyAxiom> getOntologyAxioms() {
+		return ontologyAxioms;
 	}
 }

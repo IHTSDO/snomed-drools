@@ -4,11 +4,11 @@ import org.ihtsdo.drools.domain.Component;
 
 public class DroolsComponent implements Component {
 
-	private String id;
-	private boolean active;
-	private String moduleId;
-	private boolean published;
-	private boolean released;
+	private final String id;
+	private final boolean active;
+	private final String moduleId;
+	private final boolean published;
+	private final boolean released;
 
 	public DroolsComponent(String id, boolean active, String moduleId, boolean published, boolean released) {
 		this.id = id;

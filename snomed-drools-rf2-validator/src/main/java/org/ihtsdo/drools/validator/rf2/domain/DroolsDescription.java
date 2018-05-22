@@ -7,13 +7,13 @@ import java.util.Map;
 
 public class DroolsDescription extends DroolsComponent implements Description {
 
-	private String conceptId;
-	private String languageCode;
-	private String typeId;
-	private String term;
-	private String caseSignificanceId;
-	private boolean textDefinition;
-	private Map<String, String> acceptabilityMap;
+	private final String conceptId;
+	private final String languageCode;
+	private final String typeId;
+	private final String term;
+	private final String caseSignificanceId;
+	private final boolean textDefinition;
+	private final Map<String, String> acceptabilityMap;
 
 	public DroolsDescription(String id, boolean active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId, boolean textDefinition, boolean published, boolean released) {
 		super(id, active, moduleId, published, released);

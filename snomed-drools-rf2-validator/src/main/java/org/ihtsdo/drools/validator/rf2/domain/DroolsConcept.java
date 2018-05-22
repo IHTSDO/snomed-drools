@@ -8,10 +8,11 @@ import java.util.Set;
 
 public class DroolsConcept extends DroolsComponent implements Concept {
 
-	private String definitionStatusId;
-	private Set<DroolsDescription> descriptions;
-	private Set<DroolsRelationship> relationships;
-	private Set<DroolsRelationship> activeInboundStatedRelationships;
+	private final String definitionStatusId;
+	private final Set<DroolsDescription> descriptions;
+	private final Set<DroolsRelationship> relationships;
+	private final Set<DroolsRelationship> activeInboundStatedRelationships;
+	private final Set<DroolsOntologyAxiom> ontologyAxioms;
 
 	public DroolsConcept(String id, boolean active, String moduleId, String definitionStatusId, boolean published, boolean released) {
 		super(id, active, moduleId, published, released);
@@ -19,6 +20,7 @@ public class DroolsConcept extends DroolsComponent implements Concept {
 		descriptions = new HashSet<>();
 		relationships = new HashSet<>();
 		activeInboundStatedRelationships = new HashSet<>();
+		ontologyAxioms = new HashSet<>();
 	}
 
 	@Override
@@ -34,6 +36,11 @@ public class DroolsConcept extends DroolsComponent implements Concept {
 	@Override
 	public Collection<DroolsRelationship> getRelationships() {
 		return relationships;
+	}
+
+	@Override
+	public Collection<DroolsOntologyAxiom> getOntologyAxioms() {
+		return ontologyAxioms;
 	}
 
 	public Set<DroolsRelationship> getActiveInboundStatedRelationships() {

@@ -22,7 +22,8 @@ public class DroolsConceptService implements ConceptService {
 
 	@Override
 	public boolean isActive(String conceptId) {
-		return repository.getConcept(conceptId).isActive();
+		DroolsConcept concept = repository.getConcept(conceptId);
+		return concept != null && concept.isActive();
 	}
 
 	@Override

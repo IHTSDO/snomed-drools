@@ -2,6 +2,7 @@ package org.ihtsdo.drools.validator.rf2;
 
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
+import org.ihtsdo.drools.validator.rf2.domain.DroolsOntologyAxiom;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsRelationship;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
@@ -14,6 +15,8 @@ import org.snomed.otf.owltoolkit.domain.Relationship;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.lang.Long.parseLong;
 
@@ -56,8 +59,9 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 
 	@Override
 	public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
-		if (isActive(active) && refsetId.equals(OWL_AXIOM_REFSET)) {
-			// OWL Axiom reference set
+		boolean activeBool = isActive(active);
+		if (activeBool && refsetId.equals(OWL_AXIOM_REFSET)) {
+			// OWL OntologyAxiom reference set
 
 			// Fields: id	effectiveTime	active	moduleId	refsetId	referencedComponentId	owlExpression
 			String owlExpression = otherValues[0];
@@ -68,18 +72,22 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 						// Regular axiom
 						addRelationships(axiom.getRightHandSideRelationships(), axiom, moduleId, effectiveTime);
 					} else if (axiom.getRightHandSideNamedConcept() != null && axiom.getLeftHandSideRelationships() != null) {
-						// GCI Axiom
+						// GCI OntologyAxiom
 						addRelationships(axiom.getLeftHandSideRelationships(), axiom, moduleId, effectiveTime);
 					}
+				} else {
+					// Can't be converted to relationships
+					Set<String> namedConceptIds = axiomConverter.getIdsOfConceptsNamedInAxiom(owlExpression).stream().map(Object::toString).collect(Collectors.toSet());
+					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, activeBool, moduleId, referencedComponentId, owlExpression, namedConceptIds, published(effectiveTime), published(effectiveTime)));
 				}
 			} catch (ConversionException e) {
-				logger.error("Axiom conversion failed for refset member " + id, e);
+				logger.error("OntologyAxiom conversion failed for refset member " + id, e);
 				synchronized (SnomedDroolsComponentFactory.class) {
 					axiomParsingError = true;
 				}
 			}
 
-		} else if (isActive(active) && fieldNames.length == 7 && fieldNames[6].equals("acceptabilityId")) {
+		} else if (activeBool && fieldNames.length == 7 && fieldNames[6].equals("acceptabilityId")) {
 			// Language reference set
 			String acceptabilityId = otherValues[0];
 			repository.addLanguageReferenceSetMember(id, referencedComponentId, refsetId, acceptabilityId);
