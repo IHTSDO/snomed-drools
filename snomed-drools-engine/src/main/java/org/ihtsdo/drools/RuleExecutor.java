@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class RuleExecutor {
 
@@ -134,7 +135,7 @@ public class RuleExecutor {
 
 		Date start = new Date();
 
-		final List<InvalidContent> invalidContent = new ArrayList<>();
+		final List<List<InvalidContent>> sessionInvalidContent = new ArrayList<>();
 		for (String ruleSetName : ruleSetNames) {
 			final KieContainer kieContainer = assertionGroupContainers.get(ruleSetName);
 			if (kieContainer == null) {
@@ -145,6 +146,8 @@ public class RuleExecutor {
 			ExecutorService executorService = Executors.newFixedThreadPool(threads);
 			List<StatelessKieSession> sessions = new ArrayList<>();
 			for (int s = 0; s < threads; s++) {
+				ArrayList<InvalidContent> invalidContent = new ArrayList<>();// List per thread to avoid concurrency issues.
+				sessionInvalidContent.add(invalidContent);
 				sessions.add(newStatelessKieSession(kieContainer, conceptService, descriptionService, relationshipService, invalidContent));
 			}
 			List<Concept> conceptList = new ArrayList<>(concepts);
@@ -179,6 +182,8 @@ public class RuleExecutor {
 
 			logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
 		}
+
+		List<InvalidContent> invalidContent = sessionInvalidContent.stream().flatMap(Collection::stream).collect(Collectors.toList());
 
 		if (!includePublishedComponents) {
 			Set<InvalidContent> publishedInvalidContent = new HashSet<>();
