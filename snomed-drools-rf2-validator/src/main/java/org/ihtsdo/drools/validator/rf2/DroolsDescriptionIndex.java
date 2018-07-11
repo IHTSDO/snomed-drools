@@ -59,6 +59,7 @@ public class DroolsDescriptionIndex {
                 for (DroolsDescription description : descriptions) {
                     addDoc(indexWriter, description.getTerm(), description.getId(), description.isActive());
                 }
+                indexWriter.commit();
                 indexWriter.close();
             } catch (IOException e) {
                 LOGGER.error("Encounter error when loading repository", e);
