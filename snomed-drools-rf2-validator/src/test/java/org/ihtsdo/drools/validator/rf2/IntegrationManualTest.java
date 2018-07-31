@@ -8,10 +8,12 @@ import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.ihtsdo.drools.response.Severity.ERROR;
@@ -19,10 +21,15 @@ import static org.ihtsdo.drools.response.Severity.ERROR;
 public class IntegrationManualTest {
     
     public static void main(String[] args) throws IOException, ReleaseImportException {
-        String releaseFilePath = "../path-to-snapshot-or-release";
-        String directoryOfRuleSetsPath = "../../path-to-drools-rules";
-        HashSet<String> ruleSetNamesToRun = Sets.newHashSet("common-authoring");
-        List<InvalidContent> invalidContents = new DroolsRF2Validator(directoryOfRuleSetsPath).validateSnapshot(new FileInputStream(releaseFilePath), ruleSetNamesToRun, "");
+        String releaseFilePath = "/path/to/release1,/path/to/release2";
+        String directoryOfRuleSetsPath = "path/to/rules";
+        HashSet<String> ruleSetNamesToRun = Sets.newHashSet("common-authoring,int-authoring".split(","));
+        Set<InputStream> inputStreams = new HashSet<>();
+        HashSet<String> releasesFiles = Sets.newHashSet(releaseFilePath.split(","));
+        for (String releasesFile : releasesFiles) {
+            inputStreams.add(new FileInputStream(releasesFile));
+        }
+        List<InvalidContent> invalidContents = new DroolsRF2Validator(directoryOfRuleSetsPath).validateSnapshotStreams(inputStreams, ruleSetNamesToRun, "");
 
         // Some extra output when running this main method in development -
         int outputSize = invalidContents.size() > 50 ? 50 : invalidContents.size();
