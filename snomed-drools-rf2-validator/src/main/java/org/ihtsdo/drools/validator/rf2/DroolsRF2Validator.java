@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.lang.Long.parseLong;
 import static org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentFactory.MRCM_ATTRIBUTE_DOMAIN_INTERNATIONAL_REFSET;
@@ -37,8 +38,8 @@ public class DroolsRF2Validator {
 	private final Logger logger = LoggerFactory.getLogger(DroolsRF2Validator.class);
 
 	public static void main(String[] args) {
-		if (args.length != 4) {
-			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <rf2SnapshotDirectory> <currentEffectiveTime>");
+		if (args.length != 4 && args.length != 5) {
+			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <rf2SnapshotDirectory> <currentEffectiveTime> <includedModules>");
 			System.exit(1);
 		}
 
@@ -47,6 +48,16 @@ public class DroolsRF2Validator {
 		String commaSeparatedAssertionGroups = args[1];
 		String commaSeparationSnomedSnapshotDirectory = args[2];
 		String currentEffectiveTime = args[3];
+		Set<String> includedModuleSets = null;
+		try {
+			String includedModules = args[4];
+			if(includedModules != null && !includedModules.isEmpty()) {
+				includedModuleSets = Sets.newHashSet(includedModules.split(","));
+			}
+
+		} catch (ArrayIndexOutOfBoundsException e) {
+		}
+
 		if (!currentEffectiveTime.matches("\\d{8}")) {
 			System.out.println("Expecting <currentEffectiveTime> using format yyyymmdd");
 			System.exit(1);
@@ -56,7 +67,7 @@ public class DroolsRF2Validator {
 		try {
 			HashSet<String> ruleSetNamesToRun = Sets.newHashSet(commaSeparatedAssertionGroups.split(","));
 			HashSet<String> snomedSnapshotDirectories = Sets.newHashSet(commaSeparationSnomedSnapshotDirectory.split(","));
-			List<InvalidContent> invalidContents = rf2Validator.validateSnapshots(snomedSnapshotDirectories, ruleSetNamesToRun, currentEffectiveTime);
+			List<InvalidContent> invalidContents = rf2Validator.validateSnapshots(snomedSnapshotDirectories, ruleSetNamesToRun, currentEffectiveTime, includedModuleSets);
 			report.createNewFile();
 			try (BufferedWriter reportWriter = new BufferedWriter(new FileWriter(report))) {
 				reportWriter.write("conceptId\tcomponentId\tmessage\tseverity\tignorePublishedCheck");
@@ -85,18 +96,18 @@ public class DroolsRF2Validator {
 		ruleExecutor = new RuleExecutor(directoryOfRuleSetsPath);
 	}
 
-	public List<InvalidContent> validateSnapshotStreams(Set<InputStream> snomedRf2EditionZips, Set<String> ruleSetNamesToRun, String currentEffectiveTime) throws ReleaseImportException {
+	public List<InvalidContent> validateSnapshotStreams(Set<InputStream> snomedRf2EditionZips, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {
 		Set<String> directoryPaths = new HashSet<>();
 		// Unzip RF2 archive for reuse
 		for (InputStream snomedRf2EditionZip : snomedRf2EditionZips) {
 			String snapshotDirectoryPath = new ReleaseImporter().unzipRelease(snomedRf2EditionZip, ReleaseImporter.ImportType.SNAPSHOT).getAbsolutePath();
 			directoryPaths.add(snapshotDirectoryPath);
 		}
-		return validateSnapshots(directoryPaths, ruleSetNamesToRun, currentEffectiveTime);
+		return validateSnapshots(directoryPaths, ruleSetNamesToRun, currentEffectiveTime, includedModules);
 	}
 
 
-	public List<InvalidContent> validateSnapshots(Set<String> snomedRf2EditionDir, Set<String> ruleSetNamesToRun, String currentEffectiveTime) throws ReleaseImportException {
+	public List<InvalidContent> validateSnapshots(Set<String> snomedRf2EditionDir, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {
 		long start = new Date().getTime();
 		Assert.isTrue(ruleSetNamesToRun != null && !ruleSetNamesToRun.isEmpty(), "The name of at least one rule set must be specified.");
 
@@ -148,6 +159,11 @@ public class DroolsRF2Validator {
 		logger.info("Running tests");
 		List<InvalidContent> invalidContents = ruleExecutor.execute(ruleSetNamesToRun, concepts, conceptService, descriptionService, relationshipService, true, false);
 		logger.info("Tests complete. Total run time {} seconds", (new Date().getTime() - start) / 1000);
+
+		//Filter only invalid components that are in the specified modules list, if modules list is not specified, return all invalid components
+		if(includedModules != null && !includedModules.isEmpty()) {
+			invalidContents = invalidContents.stream().filter(content -> includedModules.contains(content.getComponent().getModuleId())).collect(Collectors.toList());
+		}
 		logger.info("invalidContent count {}", invalidContents.size());
 		return invalidContents;
 	}
