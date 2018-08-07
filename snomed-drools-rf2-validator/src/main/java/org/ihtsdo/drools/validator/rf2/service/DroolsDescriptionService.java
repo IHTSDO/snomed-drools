@@ -47,10 +47,7 @@ public class DroolsDescriptionService implements DescriptionService {
 	@Override
 	public Set<Description> findActiveDescriptionByExactTerm(String exactTerm) {
 		if(exactTerm == null || exactTerm.trim().isEmpty()) return Collections.emptySet();
-		//Only load descriptions into Lucene index when this method is called by Drools rules to save memory
 		DroolsDescriptionIndex droolsDescriptionIndex = DroolsDescriptionIndex.getInstance();
-		droolsDescriptionIndex.loadRepository(repository);
-
 		Set<String> idSet = droolsDescriptionIndex.findMatchedDescriptionTerm(exactTerm,true);
 		Set<Description> descriptions = new HashSet<>();
 		for (String id : idSet) {
@@ -63,10 +60,7 @@ public class DroolsDescriptionService implements DescriptionService {
 	@Override
 	public Set<Description> findInactiveDescriptionByExactTerm(String exactTerm) {
 		if(exactTerm == null || exactTerm.trim().isEmpty()) return Collections.emptySet();
-		//Only load descriptions into Lucene index when this method is called by Drools rules to save memory
 		DroolsDescriptionIndex droolsDescriptionIndex = DroolsDescriptionIndex.getInstance();
-		droolsDescriptionIndex.loadRepository(repository);
-
 		Set<String> idSet = droolsDescriptionIndex.findMatchedDescriptionTerm(exactTerm,false);
 		Set<Description> descriptions = new HashSet<>();
 		for (String id : idSet) {

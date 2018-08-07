@@ -2,9 +2,7 @@ package org.ihtsdo.drools.validator.rf2;
 
 import com.google.common.collect.Sets;
 import org.ihtsdo.drools.RuleExecutor;
-import org.ihtsdo.drools.domain.Component;
 import org.ihtsdo.drools.response.InvalidContent;
-import org.ihtsdo.drools.response.Severity;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
 import org.ihtsdo.drools.validator.rf2.service.DroolsConceptService;
 import org.ihtsdo.drools.validator.rf2.service.DroolsDescriptionService;
@@ -17,9 +15,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.lang.Long.parseLong;
 import static org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentFactory.MRCM_ATTRIBUTE_DOMAIN_INTERNATIONAL_REFSET;
@@ -31,16 +38,26 @@ public class DroolsRF2Validator {
 	private final Logger logger = LoggerFactory.getLogger(DroolsRF2Validator.class);
 
 	public static void main(String[] args) {
-		if (args.length != 4) {
-			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <rf2SnapshotDirectory> <currentEffectiveTime>");
+		if (args.length != 4 && args.length != 5) {
+			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <rf2SnapshotDirectory> <currentEffectiveTime> <includedModules>");
 			System.exit(1);
 		}
 
 		String directoryOfRuleSetsPath = args[0];
 		DroolsRF2Validator rf2Validator = new DroolsRF2Validator(directoryOfRuleSetsPath);
 		String commaSeparatedAssertionGroups = args[1];
-		String snomedSnapshotDirectory = args[2];
+		String commaSeparationSnomedSnapshotDirectory = args[2];
 		String currentEffectiveTime = args[3];
+		Set<String> includedModuleSets = null;
+		try {
+			String includedModules = args[4];
+			if(includedModules != null && !includedModules.isEmpty()) {
+				includedModuleSets = Sets.newHashSet(includedModules.split(","));
+			}
+
+		} catch (ArrayIndexOutOfBoundsException e) {
+		}
+
 		if (!currentEffectiveTime.matches("\\d{8}")) {
 			System.out.println("Expecting <currentEffectiveTime> using format yyyymmdd");
 			System.exit(1);
@@ -49,7 +66,8 @@ public class DroolsRF2Validator {
 		File report = new File("validation-report-" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + ".txt");
 		try {
 			HashSet<String> ruleSetNamesToRun = Sets.newHashSet(commaSeparatedAssertionGroups.split(","));
-			List<InvalidContent> invalidContents = rf2Validator.validateSnapshot(snomedSnapshotDirectory, ruleSetNamesToRun, currentEffectiveTime);
+			HashSet<String> snomedSnapshotDirectories = Sets.newHashSet(commaSeparationSnomedSnapshotDirectory.split(","));
+			List<InvalidContent> invalidContents = rf2Validator.validateSnapshots(snomedSnapshotDirectories, ruleSetNamesToRun, currentEffectiveTime, includedModuleSets);
 			report.createNewFile();
 			try (BufferedWriter reportWriter = new BufferedWriter(new FileWriter(report))) {
 				reportWriter.write("conceptId\tcomponentId\tmessage\tseverity\tignorePublishedCheck");
@@ -78,13 +96,18 @@ public class DroolsRF2Validator {
 		ruleExecutor = new RuleExecutor(directoryOfRuleSetsPath);
 	}
 
-	public List<InvalidContent> validateSnapshot(InputStream snomedRf2EditionZip, Set<String> ruleSetNamesToRun, String currentEffectiveTime) throws ReleaseImportException {
+	public List<InvalidContent> validateSnapshotStreams(Set<InputStream> snomedRf2EditionZips, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {
+		Set<String> directoryPaths = new HashSet<>();
 		// Unzip RF2 archive for reuse
-		String snapshotDirectoryPath = new ReleaseImporter().unzipRelease(snomedRf2EditionZip, ReleaseImporter.ImportType.SNAPSHOT).getAbsolutePath();
-		return validateSnapshot(snapshotDirectoryPath, ruleSetNamesToRun, currentEffectiveTime);
+		for (InputStream snomedRf2EditionZip : snomedRf2EditionZips) {
+			String snapshotDirectoryPath = new ReleaseImporter().unzipRelease(snomedRf2EditionZip, ReleaseImporter.ImportType.SNAPSHOT).getAbsolutePath();
+			directoryPaths.add(snapshotDirectoryPath);
+		}
+		return validateSnapshots(directoryPaths, ruleSetNamesToRun, currentEffectiveTime, includedModules);
 	}
 
-	public List<InvalidContent> validateSnapshot(String snomedRf2EditionDir, Set<String> ruleSetNamesToRun, String currentEffectiveTime) throws ReleaseImportException {
+
+	public List<InvalidContent> validateSnapshots(Set<String> snomedRf2EditionDir, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {
 		long start = new Date().getTime();
 		Assert.isTrue(ruleSetNamesToRun != null && !ruleSetNamesToRun.isEmpty(), "The name of at least one rule set must be specified.");
 
@@ -96,7 +119,7 @@ public class DroolsRF2Validator {
 		Set<Long> ungroupedAttributes = new HashSet<>();
 		LoadingProfile justMRCM = new LoadingProfile()
 				.withIncludedReferenceSetFilenamePattern(".*_MRCMAttributeDomain.*");
-		importer.loadSnapshotReleaseFiles(snomedRf2EditionDir, justMRCM, new ImpotentComponentFactory() {
+		importer.loadEffectiveSnapshotReleaseFiles(snomedRf2EditionDir, justMRCM, new ImpotentComponentFactory() {
 			@Override
 			public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
 				if ("1".equals(active) && refsetId.equals(MRCM_ATTRIBUTE_DOMAIN_INTERNATIONAL_REFSET)) {
@@ -121,7 +144,7 @@ public class DroolsRF2Validator {
 				.withIncludedReferenceSetFilenamePattern(".*_OWLAxiom.*");
 
 		SnomedDroolsComponentFactory componentFactory = new SnomedDroolsComponentFactory(repository, currentEffectiveTime);
-		importer.loadSnapshotReleaseFiles(snomedRf2EditionDir, loadingProfile, componentFactory);
+		importer.loadEffectiveSnapshotReleaseFiles(snomedRf2EditionDir, loadingProfile, componentFactory);
 		if (componentFactory.isAxiomParsingError()) {
 			throw new ReleaseImportException("Failed to parse one or more OWL Axioms. Check logs for details.");
 		}
@@ -131,11 +154,17 @@ public class DroolsRF2Validator {
 		DroolsConceptService conceptService = new DroolsConceptService(repository);
 		DroolsDescriptionService descriptionService = new DroolsDescriptionService(repository);
 		DroolsRelationshipService relationshipService = new DroolsRelationshipService(repository);
-
+		DroolsDescriptionIndex.getInstance().loadRepository(repository);
 		Collection<DroolsConcept> concepts = repository.getConcepts();
 		logger.info("Running tests");
 		List<InvalidContent> invalidContents = ruleExecutor.execute(ruleSetNamesToRun, concepts, conceptService, descriptionService, relationshipService, true, false);
 		logger.info("Tests complete. Total run time {} seconds", (new Date().getTime() - start) / 1000);
+
+		//Filter only invalid components that are in the specified modules list, if modules list is not specified, return all invalid components
+		if(includedModules != null && !includedModules.isEmpty()) {
+			logger.info("Filtering invalid contents for included module ids: {}", String.join(",", includedModules));
+			invalidContents = invalidContents.stream().filter(content -> includedModules.contains(content.getComponent().getModuleId())).collect(Collectors.toList());
+		}
 		logger.info("invalidContent count {}", invalidContents.size());
 		return invalidContents;
 	}

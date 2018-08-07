@@ -9,7 +9,6 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
@@ -31,6 +30,8 @@ public class DroolsDescriptionIndex {
 
     private static DroolsDescriptionIndex droolsDescriptionIndex;
     private Directory index;
+    private IndexSearcher indexSearcher;
+    private IndexReader indexReader;
     private static final String FIELD_TERM = "term";
     private static final String FIELD_ID = "id";
     private static final String FIELD_IS_ACTIVE = "isActive";
@@ -42,12 +43,12 @@ public class DroolsDescriptionIndex {
 
     private DroolsDescriptionIndex() {}
 
-    public synchronized static DroolsDescriptionIndex getInstance() {
+    public static DroolsDescriptionIndex getInstance() {
         if (droolsDescriptionIndex == null) droolsDescriptionIndex = new DroolsDescriptionIndex();
         return droolsDescriptionIndex;
     }
 
-    public synchronized void loadRepository(SnomedDroolsComponentRepository repository) {
+    public void loadRepository(SnomedDroolsComponentRepository repository) {
         //Only load repository at first time
         if (index == null) {
             index = new RAMDirectory();
@@ -61,6 +62,8 @@ public class DroolsDescriptionIndex {
                 }
                 indexWriter.commit();
                 indexWriter.close();
+                indexReader = DirectoryReader.open(index);
+                indexSearcher = new IndexSearcher(indexReader);
             } catch (IOException e) {
                 LOGGER.error("Encounter error when loading repository", e);
             }
@@ -71,19 +74,16 @@ public class DroolsDescriptionIndex {
         Set<String> results = new HashSet<>();
         try {
             BooleanQuery.Builder builder = new BooleanQuery.Builder();
-            builder.add(new TermQuery(new Term(FIELD_TERM, term)), BooleanClause.Occur.MUST);
-            builder.add(new TermQuery(new Term(FIELD_IS_ACTIVE, getBooleanValue(isActive))), BooleanClause.Occur.MUST);
-            int hitsPerPage = 100;
-            IndexReader reader = DirectoryReader.open(index);
-            IndexSearcher searcher = new IndexSearcher(reader);
-            TopDocs docs = searcher.search(builder.build(), hitsPerPage);
+            builder.add(new TermQuery(new Term(FIELD_IS_ACTIVE, getBooleanValue(isActive))), BooleanClause.Occur.FILTER);
+            builder.add(new TermQuery(new Term(FIELD_TERM, term)), BooleanClause.Occur.FILTER);
+            int preView = indexReader.docFreq(new Term(FIELD_TERM, term));
+            TopDocs docs = indexSearcher.search(builder.build(), preView == 0 ? 1 : preView);
             ScoreDoc[] hits = docs.scoreDocs;
             for (int i = 0; i < hits.length; ++i) {
-                Document document = searcher.doc(hits[i].doc);
-                if (document.get(FIELD_ID) != null) {
-                    results.add(document.get(FIELD_ID));
-                }
+                Document document = indexSearcher.doc(hits[i].doc);
+                results.add(document.get(FIELD_ID));
             }
+
         } catch (IOException e) {
             LOGGER.error("Encounter error when finding matching term", e);
         }
@@ -92,8 +92,8 @@ public class DroolsDescriptionIndex {
 
     private static void addDoc(IndexWriter w, String term, String id, boolean isActive) throws IOException {
         Document doc = new Document();
-        doc.add(new StringField(FIELD_TERM, term, Field.Store.YES));
-        doc.add(new StringField(FIELD_IS_ACTIVE, getBooleanValue(isActive), Field.Store.YES));
+        doc.add(new StringField(FIELD_IS_ACTIVE, getBooleanValue(isActive), Field.Store.NO));
+        doc.add(new StringField(FIELD_TERM, term, Field.Store.NO));
         doc.add(new StringField(FIELD_ID, id, Field.Store.YES));
         w.addDocument(doc);
     }
