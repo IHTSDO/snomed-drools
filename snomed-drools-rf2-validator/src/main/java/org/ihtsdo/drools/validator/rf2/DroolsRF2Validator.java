@@ -154,7 +154,7 @@ public class DroolsRF2Validator {
 		DroolsConceptService conceptService = new DroolsConceptService(repository);
 		DroolsDescriptionService descriptionService = new DroolsDescriptionService(repository);
 		DroolsRelationshipService relationshipService = new DroolsRelationshipService(repository);
-
+		DroolsDescriptionIndex.getInstance().loadRepository(repository);
 		Collection<DroolsConcept> concepts = repository.getConcepts();
 		logger.info("Running tests");
 		List<InvalidContent> invalidContents = ruleExecutor.execute(ruleSetNamesToRun, concepts, conceptService, descriptionService, relationshipService, true, false);
@@ -162,6 +162,7 @@ public class DroolsRF2Validator {
 
 		//Filter only invalid components that are in the specified modules list, if modules list is not specified, return all invalid components
 		if(includedModules != null && !includedModules.isEmpty()) {
+			logger.info("Filtering invalid contents for included module ids: {}", String.join(",", includedModules));
 			invalidContents = invalidContents.stream().filter(content -> includedModules.contains(content.getComponent().getModuleId())).collect(Collectors.toList());
 		}
 		logger.info("invalidContent count {}", invalidContents.size());

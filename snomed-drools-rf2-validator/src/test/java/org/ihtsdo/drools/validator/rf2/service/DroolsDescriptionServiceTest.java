@@ -1,6 +1,7 @@
 package org.ihtsdo.drools.validator.rf2.service;
 
 import org.ihtsdo.drools.domain.Description;
+import org.ihtsdo.drools.validator.rf2.DroolsDescriptionIndex;
 import org.ihtsdo.drools.validator.rf2.FileLoaderTestUtils;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
@@ -24,6 +25,7 @@ public class DroolsDescriptionServiceTest extends BaseServiceTest{
         loadConceptsIntoRepository();
         loadDescriptionsIntoRepository();
         droolsDescriptionService = new DroolsDescriptionService(repository);
+        DroolsDescriptionIndex.getInstance().loadRepository(repository);
 
     }
 

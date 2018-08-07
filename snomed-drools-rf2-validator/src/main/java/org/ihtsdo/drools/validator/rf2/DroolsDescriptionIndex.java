@@ -43,12 +43,12 @@ public class DroolsDescriptionIndex {
 
     private DroolsDescriptionIndex() {}
 
-    public synchronized static DroolsDescriptionIndex getInstance() {
+    public static DroolsDescriptionIndex getInstance() {
         if (droolsDescriptionIndex == null) droolsDescriptionIndex = new DroolsDescriptionIndex();
         return droolsDescriptionIndex;
     }
 
-    public synchronized void loadRepository(SnomedDroolsComponentRepository repository) {
+    public void loadRepository(SnomedDroolsComponentRepository repository) {
         //Only load repository at first time
         if (index == null) {
             index = new RAMDirectory();
@@ -74,16 +74,14 @@ public class DroolsDescriptionIndex {
         Set<String> results = new HashSet<>();
         try {
             BooleanQuery.Builder builder = new BooleanQuery.Builder();
-            builder.add(new TermQuery(new Term(FIELD_IS_ACTIVE, getBooleanValue(isActive))), BooleanClause.Occur.MUST);
-            builder.add(new TermQuery(new Term(FIELD_TERM, term)), BooleanClause.Occur.MUST);
+            builder.add(new TermQuery(new Term(FIELD_IS_ACTIVE, getBooleanValue(isActive))), BooleanClause.Occur.FILTER);
+            builder.add(new TermQuery(new Term(FIELD_TERM, term)), BooleanClause.Occur.FILTER);
             int preView = indexReader.docFreq(new Term(FIELD_TERM, term));
             TopDocs docs = indexSearcher.search(builder.build(), preView == 0 ? 1 : preView);
             ScoreDoc[] hits = docs.scoreDocs;
             for (int i = 0; i < hits.length; ++i) {
                 Document document = indexSearcher.doc(hits[i].doc);
-                if (document.get(FIELD_ID) != null) {
-                    results.add(document.get(FIELD_ID));
-                }
+                results.add(document.get(FIELD_ID));
             }
 
         } catch (IOException e) {
