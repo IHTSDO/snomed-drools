@@ -28,7 +28,6 @@ import java.util.Set;
 
 public class DroolsDescriptionIndex {
 
-    private static DroolsDescriptionIndex droolsDescriptionIndex;
     private Directory index;
     private IndexSearcher indexSearcher;
     private IndexReader indexReader;
@@ -41,14 +40,11 @@ public class DroolsDescriptionIndex {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DroolsDescriptionIndex.class);
 
-    private DroolsDescriptionIndex() {}
-
-    public static DroolsDescriptionIndex getInstance() {
-        if (droolsDescriptionIndex == null) droolsDescriptionIndex = new DroolsDescriptionIndex();
-        return droolsDescriptionIndex;
+    public DroolsDescriptionIndex(SnomedDroolsComponentRepository repository) {
+        loadRepository(repository);
     }
 
-    public void loadRepository(SnomedDroolsComponentRepository repository) {
+    private void loadRepository(SnomedDroolsComponentRepository repository) {
         //Only load repository at first time
         if (index == null) {
             index = new RAMDirectory();
@@ -100,6 +96,18 @@ public class DroolsDescriptionIndex {
 
     private static String getBooleanValue(boolean value) {
         return value ? BOOLEAN_TRUE_VALUE : BOOLEAN_FALSE_VALUE;
+    }
+
+    public void cleanup() {
+        try {
+            indexReader.close();
+            index.close();
+            index = null;
+            indexSearcher = null;
+        } catch (IOException e) {
+            LOGGER.error("Encounter error when cleaning up DroolsDescriptionIndex", e);
+        }
+
     }
 
 }

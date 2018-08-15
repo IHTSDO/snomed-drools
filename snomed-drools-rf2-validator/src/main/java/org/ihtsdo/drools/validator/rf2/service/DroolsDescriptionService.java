@@ -21,10 +21,13 @@ public class DroolsDescriptionService implements DescriptionService {
 	private static final String FULLY_SPECIFIED_NAME = "900000000000003001";
 	private static final String PREFERRED_ACCEPTABILITY = "900000000000548007";
 	private final SnomedDroolsComponentRepository repository;
+	private final DroolsDescriptionIndex droolsDescriptionIndex;
 
 	public DroolsDescriptionService(SnomedDroolsComponentRepository repository) {
 		this.repository = repository;
+		this.droolsDescriptionIndex = new DroolsDescriptionIndex(repository);
 	}
+
 
 	@Override
 	public Set<String> getFSNs(Set<String> conceptIds, String... languageRefsetIds) {
@@ -47,7 +50,6 @@ public class DroolsDescriptionService implements DescriptionService {
 	@Override
 	public Set<Description> findActiveDescriptionByExactTerm(String exactTerm) {
 		if(exactTerm == null || exactTerm.trim().isEmpty()) return Collections.emptySet();
-		DroolsDescriptionIndex droolsDescriptionIndex = DroolsDescriptionIndex.getInstance();
 		Set<String> idSet = droolsDescriptionIndex.findMatchedDescriptionTerm(exactTerm,true);
 		Set<Description> descriptions = new HashSet<>();
 		for (String id : idSet) {
@@ -60,7 +62,6 @@ public class DroolsDescriptionService implements DescriptionService {
 	@Override
 	public Set<Description> findInactiveDescriptionByExactTerm(String exactTerm) {
 		if(exactTerm == null || exactTerm.trim().isEmpty()) return Collections.emptySet();
-		DroolsDescriptionIndex droolsDescriptionIndex = DroolsDescriptionIndex.getInstance();
 		Set<String> idSet = droolsDescriptionIndex.findMatchedDescriptionTerm(exactTerm,false);
 		Set<Description> descriptions = new HashSet<>();
 		for (String id : idSet) {
@@ -130,5 +131,9 @@ public class DroolsDescriptionService implements DescriptionService {
 			}
 		}
 		return conceptIds;
+	}
+
+	public DroolsDescriptionIndex getDroolsDescriptionIndex() {
+		return droolsDescriptionIndex;
 	}
 }

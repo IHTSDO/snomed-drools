@@ -109,4 +109,11 @@ public class SnomedDroolsComponentRepository {
 	public Set<DroolsOntologyAxiom> getOntologyAxioms() {
 		return ontologyAxioms;
 	}
+
+	public void cleanup() {
+		conceptMap.clear();
+		descriptionMap.clear();
+		ungroupedAttributes.clear();
+		ontologyAxioms.clear();
+	}
 }

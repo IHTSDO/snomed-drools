@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -154,10 +155,13 @@ public class DroolsRF2Validator {
 		DroolsConceptService conceptService = new DroolsConceptService(repository);
 		DroolsDescriptionService descriptionService = new DroolsDescriptionService(repository);
 		DroolsRelationshipService relationshipService = new DroolsRelationshipService(repository);
-		DroolsDescriptionIndex.getInstance().loadRepository(repository);
+
 		Collection<DroolsConcept> concepts = repository.getConcepts();
 		logger.info("Running tests");
 		List<InvalidContent> invalidContents = ruleExecutor.execute(ruleSetNamesToRun, concepts, conceptService, descriptionService, relationshipService, true, false);
+		//Free resources after getting validation results
+		repository.cleanup();
+		descriptionService.getDroolsDescriptionIndex().cleanup();
 		logger.info("Tests complete. Total run time {} seconds", (new Date().getTime() - start) / 1000);
 
 		//Filter only invalid components that are in the specified modules list, if modules list is not specified, return all invalid components

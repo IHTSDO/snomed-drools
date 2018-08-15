@@ -25,8 +25,6 @@ public class DroolsDescriptionServiceTest extends BaseServiceTest{
         loadConceptsIntoRepository();
         loadDescriptionsIntoRepository();
         droolsDescriptionService = new DroolsDescriptionService(repository);
-        DroolsDescriptionIndex.getInstance().loadRepository(repository);
-
     }
 
     @Test
