@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import org.ihtsdo.drools.RuleExecutor;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
+import org.ihtsdo.drools.validator.rf2.domain.Constants;
 import org.ihtsdo.drools.validator.rf2.service.DroolsConceptService;
 import org.ihtsdo.drools.validator.rf2.service.DroolsDescriptionService;
 import org.ihtsdo.drools.validator.rf2.service.DroolsRelationshipService;
@@ -94,7 +95,7 @@ public class DroolsRF2Validator {
 
 	public DroolsRF2Validator(String directoryOfRuleSetsPath) {
 		Assert.isTrue(new File(directoryOfRuleSetsPath).isDirectory(), "The rules directory is not accessible.");
-		ruleExecutor = new RuleExecutor(directoryOfRuleSetsPath);
+		ruleExecutor = new RuleExecutor(directoryOfRuleSetsPath, Constants.SEMANTIC_TAGS);
 	}
 
 	public List<InvalidContent> validateSnapshotStreams(Set<InputStream> snomedRf2EditionZips, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {

@@ -57,7 +57,8 @@ public class RulesTestManual {
 	}
 
 	public RulesTestManual(File ruleDirectory) {
-		this.ruleExecutor = new RuleExecutor();
+		
+		this.ruleExecutor = new RuleExecutor(org.ihtsdo.drools.rulestestrig.domain.Constants.SEMANTIC_TAGS);
 		this.ruleExecutor.addAssertionGroup("OneRule", ruleDirectory);
 		this.concepts = new HashMap<>();
 		

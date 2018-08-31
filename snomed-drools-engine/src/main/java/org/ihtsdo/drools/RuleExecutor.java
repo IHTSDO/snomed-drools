@@ -2,6 +2,7 @@ package org.ihtsdo.drools;
 
 import org.drools.core.impl.StatelessKnowledgeSessionImpl;
 import org.ihtsdo.drools.domain.*;
+import org.ihtsdo.drools.helper.DescriptionHelper;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
 import org.ihtsdo.drools.exception.RuleExecutorException;
 import org.ihtsdo.drools.response.InvalidContent;
@@ -51,9 +52,14 @@ public class RuleExecutor {
 		kieServices = KieServices.Factory.get();
 	}
 
-	public RuleExecutor(String directoryOfAssertionGroups) {
-		this();
-
+	public RuleExecutor(Set<String> semanticTags) {
+		this();		
+		DescriptionHelper.setSemanticTags(semanticTags);
+	}
+	
+	public RuleExecutor(String directoryOfAssertionGroups, Set<String> semanticTags) {
+		this(semanticTags);
+		
 		final File rulesDir = new File(directoryOfAssertionGroups);
 		if (!rulesDir.isDirectory()) {
 			failedToInitialize = true;
@@ -69,6 +75,29 @@ public class RuleExecutor {
 		}
 	}
 
+	public RuleExecutor(String directoryOfAssertionGroups, String accessKey, String secretKey, String bucketName, String path, boolean releadSemanticTags) {
+		this();
+		
+		if (releadSemanticTags) {
+			DescriptionHelper.clearSemanticTags();
+		}
+		
+		DescriptionHelper.initSemanticTags(accessKey, secretKey, bucketName, path);
+		final File rulesDir = new File(directoryOfAssertionGroups);
+		if (!rulesDir.isDirectory()) {
+			failedToInitialize = true;
+			logger.error("Rules directory does not exist: {}", rulesDir.getAbsolutePath());
+		} else {
+			for (File file : rulesDir.listFiles()) {
+				if (file.isDirectory() && !file.isHidden()) {
+					final String assertionGroupName = file.getName();
+					logger.info("Loading Drools assertion group {}", assertionGroupName);
+					addAssertionGroup(assertionGroupName, file);
+				}
+			}
+		}
+	}
+	
 	public void addAssertionGroup(String assertionGroupName, File ruleSetDirectory) throws RuleExecutorException {
 		// Create the in-memory File System and add the resources files  to it
 		KieFileSystem kieFileSystem = kieServices.newKieFileSystem();

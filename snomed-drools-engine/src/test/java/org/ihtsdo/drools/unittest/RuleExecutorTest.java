@@ -14,6 +14,7 @@ import org.ihtsdo.drools.unittest.domain.RelationshipImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.ihtsdo.drools.rulestestrig.domain.Constants;
 
 import java.util.*;
 
@@ -31,12 +32,12 @@ public class RuleExecutorTest {
 		conceptService = new TestConceptService(concepts);
 		descriptionService = new TestDescriptionService(concepts);
 		relationshipService = new TestRelationshipService(concepts);
-		ruleExecutor = new RuleExecutor("src/test/resources/rules");
+		ruleExecutor = new RuleExecutor("src/test/resources/rules", Constants.SEMANTIC_TAGS);
 	}
 
 	@Test
 	public void testInitFailure() {
-		final RuleExecutor ruleExecutor1 = new RuleExecutor("non-existant-directory");
+		final RuleExecutor ruleExecutor1 = new RuleExecutor("non-existant-directory", Constants.SEMANTIC_TAGS);
 
 		try {
 			ruleExecutor1.execute(RULE_SET_NAMES, Collections.singleton(new ConceptImpl("1")), conceptService, descriptionService, relationshipService, true, false);

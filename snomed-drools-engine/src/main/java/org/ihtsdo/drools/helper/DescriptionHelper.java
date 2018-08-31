@@ -1,5 +1,8 @@
 package org.ihtsdo.drools.helper;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,13 +16,59 @@ import java.util.stream.Collectors;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
+import org.ihtsdo.otf.dao.s3.S3ClientImpl;
+
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 
 public class DescriptionHelper {
 
 	public static final Pattern TAG_PATTERN = Pattern.compile("^.*\\((.*)\\)$");
 	public static final Pattern FULL_TAG_PATTERN = Pattern.compile("^.*(\\s\\([^\\)]+\\))$");
 	public static final Pattern FIRST_WORD_PATTERN = Pattern.compile("([^\\s]*).*$");
+	public static Set<String> SEMANTIC_TAGS = new HashSet<>();
+	
+	private DescriptionHelper () {}
+	
+	public static void initSemanticTags(final String accessKey, final String secretKey, final String bucketName, final String path) {
+		if (!SEMANTIC_TAGS.isEmpty()) {
+			return;
+		}
+		synchronized(SEMANTIC_TAGS){
+			if (SEMANTIC_TAGS.isEmpty()) {
+				S3ClientImpl s3Client = new S3ClientImpl(new BasicAWSCredentials(accessKey, secretKey));
+				S3Object object = s3Client.getObject(new GetObjectRequest(bucketName, path));
 
+				BufferedReader reader = new BufferedReader(new InputStreamReader(object.getObjectContent()));
+				String line;
+				try {
+					while ((line = reader.readLine()) != null) {
+						SEMANTIC_TAGS.add(line.trim());
+					}
+					object.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}			   
+	    }
+	}
+	
+	public static void setSemanticTags(final Set<String> semanticTags) {
+		if (!SEMANTIC_TAGS.isEmpty()) {
+			return;
+		}
+		synchronized(SEMANTIC_TAGS){
+			if (SEMANTIC_TAGS.isEmpty()) {
+				SEMANTIC_TAGS = semanticTags;
+			}
+	    }
+	}
+	
+	public static void clearSemanticTags() {
+		SEMANTIC_TAGS.clear();
+	}
+	
 	public static Collection<Description> filterByActiveTypeAndDialectPreferred(Concept concept, boolean active,
 			String typeId, String dialectPreferred) {
 		Collection<Description> descriptions = new HashSet<>();
@@ -256,7 +305,7 @@ public class DescriptionHelper {
 	}
 	
 	public static boolean hasSemanticTag(Description description) {
-		return description.getTerm() != null && Constants.SEMANTIC_TAGS.contains(getTag(description.getTerm().toLowerCase()));
+		return description.getTerm() != null && SEMANTIC_TAGS.contains(getTag(description.getTerm().toLowerCase()));
 	}
 
 	public static String getFirstWord(String term) {
