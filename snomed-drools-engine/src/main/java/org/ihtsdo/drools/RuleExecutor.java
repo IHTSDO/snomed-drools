@@ -1,15 +1,39 @@
 package org.ihtsdo.drools;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+
 import org.drools.core.impl.StatelessKnowledgeSessionImpl;
-import org.ihtsdo.drools.domain.*;
-import org.ihtsdo.drools.helper.DescriptionHelper;
+import org.ihtsdo.drools.domain.Component;
+import org.ihtsdo.drools.domain.Concept;
+import org.ihtsdo.drools.domain.Constants;
+import org.ihtsdo.drools.domain.Description;
+import org.ihtsdo.drools.domain.OntologyAxiom;
+import org.ihtsdo.drools.domain.Relationship;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
 import org.ihtsdo.drools.exception.RuleExecutorException;
+import org.ihtsdo.drools.helper.DescriptionHelper;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.service.ConceptService;
 import org.ihtsdo.drools.service.DescriptionService;
 import org.ihtsdo.drools.service.RelationshipService;
-import org.kie.api.KieBase;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
@@ -21,18 +45,7 @@ import org.kie.internal.io.ResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
+import com.google.common.base.Strings;
 
 public class RuleExecutor {
 
@@ -81,8 +94,8 @@ public class RuleExecutor {
 		if (releadSemanticTags) {
 			DescriptionHelper.clearSemanticTags();
 		}
-		if (accessKey != null && secretKey != null && bucketName != null && path != null
-			&& !accessKey.isEmpty() && !secretKey.isEmpty() && !bucketName.isEmpty() && !path.isEmpty()) {
+		if (!Strings.isNullOrEmpty(accessKey) && !Strings.isNullOrEmpty(secretKey) 
+			&& !Strings.isNullOrEmpty(bucketName) && !Strings.isNullOrEmpty(path)) {
 			DescriptionHelper.initSemanticTags(accessKey, secretKey, bucketName, path);
 		} else {
 			failedToInitialize = true;
