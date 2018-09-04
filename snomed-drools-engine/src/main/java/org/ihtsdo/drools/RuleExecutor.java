@@ -81,10 +81,8 @@ public class RuleExecutor {
 		if (releadSemanticTags) {
 			DescriptionHelper.clearSemanticTags();
 		}
-		if (!accessKey.isEmpty() 
-			&& !secretKey.isEmpty() 
-			&& !bucketName.isEmpty() 
-			&& !path.isEmpty()) {
+		if (accessKey != null && secretKey != null && bucketName != null && path != null
+			&& !accessKey.isEmpty() && !secretKey.isEmpty() && !bucketName.isEmpty() && !path.isEmpty()) {
 			DescriptionHelper.initSemanticTags(accessKey, secretKey, bucketName, path);
 		} else {
 			failedToInitialize = true;
