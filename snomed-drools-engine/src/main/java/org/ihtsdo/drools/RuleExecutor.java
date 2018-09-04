@@ -81,8 +81,16 @@ public class RuleExecutor {
 		if (releadSemanticTags) {
 			DescriptionHelper.clearSemanticTags();
 		}
+		if (!accessKey.isEmpty() 
+			&& !secretKey.isEmpty() 
+			&& !bucketName.isEmpty() 
+			&& !path.isEmpty()) {
+			DescriptionHelper.initSemanticTags(accessKey, secretKey, bucketName, path);
+		} else {
+			failedToInitialize = true;
+			logger.error("AWS configurations are not specified");
+		}
 		
-		DescriptionHelper.initSemanticTags(accessKey, secretKey, bucketName, path);
 		final File rulesDir = new File(directoryOfAssertionGroups);
 		if (!rulesDir.isDirectory()) {
 			failedToInitialize = true;
