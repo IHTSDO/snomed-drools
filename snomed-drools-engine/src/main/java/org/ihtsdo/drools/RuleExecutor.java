@@ -98,7 +98,7 @@ public class RuleExecutor {
 			&& !Strings.isNullOrEmpty(bucketName) && !Strings.isNullOrEmpty(path)) {
 			DescriptionHelper.initSemanticTags(accessKey, secretKey, bucketName, path);
 		} else {
-			failedToInitialize = true;
+			DescriptionHelper.setSemanticTags(Constants.SEMANTIC_TAGS);
 			logger.error("AWS configurations are not specified");
 		}
 		
