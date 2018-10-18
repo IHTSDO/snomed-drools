@@ -60,7 +60,7 @@ public class DescriptionHelper {
 		}
 		synchronized(SEMANTIC_TAGS){
 			if (SEMANTIC_TAGS.isEmpty()) {
-				SEMANTIC_TAGS = semanticTags;
+				SEMANTIC_TAGS.addAll(semanticTags);
 			}
 	    }
 	}
