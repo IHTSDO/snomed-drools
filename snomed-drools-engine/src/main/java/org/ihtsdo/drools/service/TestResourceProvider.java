@@ -24,14 +24,14 @@ public class TestResourceProvider {
 
 	private final ResourceManager resourceManager;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private Set<String> semanticTags;
-	private Set<String> caseSignificantWords;
-	private Map<String, String> usToGbTermMap;
+	private final Set<String> semanticTags;
+	private final Set<String> caseSignificantWords;
+	private final Map<String, String> usToGbTermMap;
 
 	public TestResourceProvider(ResourceManager resourceManager) throws IOException {
 		this.resourceManager = resourceManager;
-		semanticTags = getStringsFromFile(SEMANTIC_TAG_FILENAME);
-		caseSignificantWords = getStringsFromFile(CASE_SIGNIFICANT_WORDS_FILENAME);
+		semanticTags = loadSemanticTags();
+		caseSignificantWords = loadCaseSignificantWords();
 		usToGbTermMap = doGetUsToGbTermMap();
 	}
 
@@ -65,6 +65,31 @@ public class TestResourceProvider {
 		return usToGbTermMap;
 	}
 
+	private Set<String> loadSemanticTags() throws IOException {
+		Set<String> terms = new HashSet<>();
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceManager.readResourceStream(SEMANTIC_TAG_FILENAME)))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				terms.add(line.trim());
+			}
+		}
+		return terms;
+	}
+
+	private Set<String> loadCaseSignificantWords() throws IOException {
+		Set<String> terms = new HashSet<>();
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceManager.readResourceStream(CASE_SIGNIFICANT_WORDS_FILENAME)))) {
+			String line;
+			reader.readLine();// Discard header line
+			while ((line = reader.readLine()) != null) {
+				if (line.endsWith("1")) {
+					terms.add(line.trim());
+				}
+			}
+		}
+		return terms;
+	}
+
 	private Map<String, String> doGetUsToGbTermMap() throws IOException {
 		Map<String, String> usToGbTermMap = new HashMap<>();
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceManager.readResourceStream(US_TO_GB_TERMS_MAP_FILENAME)))) {
@@ -86,14 +111,4 @@ public class TestResourceProvider {
 		return usToGbTermMap;
 	}
 
-	private Set<String> getStringsFromFile(String filename) throws IOException {
-		Set<String> terms = new HashSet<>();
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceManager.readResourceStream(filename)))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				terms.add(line.trim());
-			}
-		}
-		return terms;
-	}
 }
