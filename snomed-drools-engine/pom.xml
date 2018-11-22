@@ -118,7 +118,14 @@
 						<Build-Name>IHTSDO SNOMED-CT Drools</Build-Name>
 						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
-						<Export-Package>org.ihtsdo.drools.*</Export-Package>
+						<Export-Package>
+							org.ihtsdo.drools.*,
+							org.ihtsdo.otf.resourcemanager,
+							org.springframework.core.io,
+							org.springframework.cloud.aws.core.io.s3,
+							com.amazonaws.services.s3,
+							com.amazonaws.auth
+						</Export-Package>
 						<Require-Capability>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"</Require-Capability>
 						<Import-Package>
 							org.drools.compiler.*,
