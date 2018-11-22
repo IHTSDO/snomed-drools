@@ -8,9 +8,7 @@ import java.util.Set;
 
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
-import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.domain.Relationship;
-import org.ihtsdo.drools.helper.DescriptionHelper;
 import org.ihtsdo.drools.service.ConceptService;
 
 public class TestConceptService implements ConceptService {
@@ -28,25 +26,24 @@ public class TestConceptService implements ConceptService {
 	}
 	
 	@Override
-	public Set<String> getAllTopLevelHierachies(){
-		Set<String> allTopLevelHierachies = new HashSet<String>();
+	public Set<String> getAllTopLevelHierarchies(){
+		Set<String> allTopLevelHierarchies = new HashSet<>();
 		for (Concept concept : concepts.values()) {
 			for (Relationship relationship : concept.getRelationships()) {
 				if (relationship.isActive()
 					&& Constants.IS_A.equals(relationship.getTypeId()) 
 					&& Constants.ROOT_CONCEPT.equals(relationship.getDestinationId())) {
-					allTopLevelHierachies.add(concept.getId());
+					allTopLevelHierarchies.add(concept.getId());
 				}
 			}
 		}
-		return allTopLevelHierachies;
+		return allTopLevelHierarchies;
 	}
 	
 	@Override
 	public Set<String> findStatedAncestorsOfConcept(Concept c){
-		Set<String> statedAncestors = new HashSet<String>();
 		Set<String> directParent = getStatedParents(c);
-		statedAncestors.addAll(directParent);
+		Set<String> statedAncestors = new HashSet<>(directParent);
 		
 		for (String parentId : directParent) {
 			Set<String> parentOfParent = findStatedAncestorsOfConcept(concepts.get(parentId));
@@ -57,8 +54,8 @@ public class TestConceptService implements ConceptService {
 	}
 	
 	@Override
-	public Set<String> findTopLevelHierachiesOfConcept(Concept c){
-		Set<String> topLevelConcepts = new HashSet<String>();
+	public Set<String> findTopLevelHierarchiesOfConcept(Concept c){
+		Set<String> topLevelConcepts = new HashSet<>();
 		for (Relationship relationship : c.getRelationships()) {
 			if (relationship.isActive()
 				&& Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())	 
@@ -66,7 +63,7 @@ public class TestConceptService implements ConceptService {
 				if (Constants.ROOT_CONCEPT.equals(relationship.getDestinationId())) {
 					topLevelConcepts.add(relationship.getSourceId());
 				} else {
-					topLevelConcepts.addAll(findTopLevelHierachiesOfConcept(concepts.get(relationship.getDestinationId())));
+					topLevelConcepts.addAll(findTopLevelHierarchiesOfConcept(concepts.get(relationship.getDestinationId())));
 				}
 			}
 		}
@@ -78,7 +75,7 @@ public class TestConceptService implements ConceptService {
 		if(concept == null || concept.getId().equals(Constants.ROOT_CONCEPT)) {
 			return Collections.emptySet();
 		}
-		final Set<String> parents = new HashSet<String>();
+		final Set<String> parents = new HashSet<>();
 		for (Relationship relationship : concept.getRelationships()) {
 			if (relationship.isActive() 
 				&& Constants.IS_A.equals(relationship.getTypeId()) 

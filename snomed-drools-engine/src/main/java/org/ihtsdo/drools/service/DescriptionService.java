@@ -19,6 +19,8 @@ public interface DescriptionService {
 
 	String getCaseSensitiveWordsErrorMessage(Description description);
 	
-	Set<String> findParentsNotContainSematicTag(Concept concept, String termSematicTag, String... languageRefsetIds);
-	
+	Set<String> findParentsNotContainingSemanticTag(Concept concept, String termSematicTag, String... languageRefsetIds);
+
+	boolean isRecognisedSemanticTag(String termSemanticTag);
+
 }

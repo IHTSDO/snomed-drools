@@ -1,73 +1,21 @@
 package org.ihtsdo.drools.helper;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
-import org.ihtsdo.otf.dao.s3.S3ClientImpl;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class DescriptionHelper {
 
 	public static final Pattern TAG_PATTERN = Pattern.compile("^.*\\((.*)\\)$");
 	public static final Pattern FULL_TAG_PATTERN = Pattern.compile("^.*(\\s\\([^\\)]+\\))$");
 	public static final Pattern FIRST_WORD_PATTERN = Pattern.compile("([^\\s]*).*$");
-	public static Set<String> SEMANTIC_TAGS = new HashSet<>();
-	
-	private DescriptionHelper () {}
-	
-	public static void initSemanticTags(final String accessKey, final String secretKey, final String bucketName, final String path) {
-		if (!SEMANTIC_TAGS.isEmpty()) {
-			return;
-		}
-		synchronized(SEMANTIC_TAGS){
-			if (SEMANTIC_TAGS.isEmpty()) {
-				S3ClientImpl s3Client = new S3ClientImpl(new BasicAWSCredentials(accessKey, secretKey));
-				S3Object object = s3Client.getObject(new GetObjectRequest(bucketName, path));
 
-				BufferedReader reader = new BufferedReader(new InputStreamReader(object.getObjectContent()));
-				String line;
-				try {
-					while ((line = reader.readLine()) != null) {
-						SEMANTIC_TAGS.add(line.trim());
-					}
-					object.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}			   
-	    }
-	}
-	
-	public static void setSemanticTags(final Set<String> semanticTags) {
-		if (!SEMANTIC_TAGS.isEmpty()) {
-			return;
-		}
-		synchronized(SEMANTIC_TAGS){
-			if (SEMANTIC_TAGS.isEmpty()) {
-				SEMANTIC_TAGS.addAll(semanticTags);
-			}
-	    }
-	}
-	
-	public static void clearSemanticTags() {
-		SEMANTIC_TAGS.clear();
-	}
+	private DescriptionHelper () {}
 	
 	public static Collection<Description> filterByActiveTypeAndDialectPreferred(Concept concept, boolean active,
 			String typeId, String dialectPreferred) {
@@ -99,10 +47,10 @@ public class DescriptionHelper {
 		
 		for(String dialect : dialects) {			
 			List<Description> descriptions = concept.getDescriptions().stream()
-															.filter(desc -> desc.isActive() == active 
-																			&& typeId.equals(desc.getTypeId()) 
-																			&& acceptability.equals(desc.getAcceptabilityMap().get(dialect)))
-															.collect(Collectors.toList());
+					.filter(desc -> desc.isActive() == active
+							&& typeId.equals(desc.getTypeId())
+							&& acceptability.equals(desc.getAcceptabilityMap().get(dialect)))
+					.collect(Collectors.toList());
 			if(descriptions.size() > 1) {
 				return true;
 			}
@@ -276,11 +224,11 @@ public class DescriptionHelper {
 	}
 	
 	public static Set<String> getTags(List<String> terms) {
-		Set<String> tags = new HashSet<String>();
-		for (String term :terms) {
-			String sematicTag = getTag(term);
-			if (sematicTag != null && !tags.contains(sematicTag)) {
-				tags.add(sematicTag);
+		Set<String> tags = new HashSet<>();
+		for (String term : terms) {
+			String semanticTag = getTag(term);
+			if (semanticTag != null) {
+				tags.add(semanticTag);
 			}
 		}
 		return tags;
@@ -303,9 +251,13 @@ public class DescriptionHelper {
 		return null;
 
 	}
-	
-	public static boolean hasSemanticTag(Description description) {
-		return description.getTerm() != null && SEMANTIC_TAGS.contains(getTag(description.getTerm().toLowerCase()));
+
+	@Deprecated
+	/**
+	 * TestResourceProvider should now be used to load the semantic tags into the DescriptionService implementation.
+	 */
+	public boolean hasSemanticTag(Description description) {
+		return true;
 	}
 
 	public static String getFirstWord(String term) {
@@ -324,6 +276,65 @@ public class DescriptionHelper {
 			}
 		}
 		return false;
+	}
+
+	public static String getCaseSensitiveWordsErrorMessage(Description description, Set<String> caseSignificantWords) {
+		StringBuilder result = new StringBuilder();
+
+		// return immediately if description null
+		if (description == null) {
+			return result.toString();
+		}
+
+		String[] words = description.getTerm().split("\\s+");
+
+		for (String word : words) {
+
+			// NOTE: Simple test to see if a case-sensitive term exists as
+			// written. Original check for mis-capitalization, but false
+			// positives, e.g. "oF" appears in list but spuriously reports "of"
+			// Map preserved for lower-case matching in future
+			if (caseSignificantWords.contains(word) && !Constants.ENTIRE_TERM_CASE_SENSITIVE.equals(description.getCaseSignificanceId())) {
+				result.append("Description contains case-sensitive words but is not marked case sensitive: ")
+						.append(caseSignificantWords.contains(word)).append(".\n");
+			}
+		}
+
+		return result.toString();
+	}
+
+	public static String getLanguageSpecificErrorMessage(Description description, Map<String, String> usToGbTermMap) {
+		StringBuilder errorMessage = new StringBuilder();
+
+		// null checks
+		if (description == null || description.getAcceptabilityMap() == null || description.getTerm() == null) {
+			return errorMessage.toString();
+		}
+
+		// Only check active synonyms
+		if (!description.getTypeId().equals(Constants.SYNONYM) || !description.isActive()) {
+			return errorMessage.toString();
+		}
+
+		String[] words = description.getTerm().split("\\s+");
+
+		String usAcc = description.getAcceptabilityMap().get(Constants.US_EN_LANG_REFSET);
+		String gbAcc = description.getAcceptabilityMap().get(Constants.GB_EN_LANG_REFSET);
+
+		// NOTE: Supports international only at this point
+		for (String word : words) {
+
+			// Step 1: Check en-us preferred synonyms for en-gb spellings
+			if (usAcc != null && usToGbTermMap.containsValue(word.toLowerCase())) {
+				errorMessage.append("Synonym is preferred in the en-us refset but refers to a word that has en-gb spelling: ").append(word).append("\n");
+			}
+
+			// Step 2: Check en-gb preferred synonyms for en-us spellings
+			if (gbAcc != null && usToGbTermMap.containsKey(word.toLowerCase())) {
+				errorMessage.append("Synonym is preferred in the en-gb refset but refers to a word that has en-us spelling: ").append(word).append("\n");
+			}
+		}
+		return errorMessage.toString();
 	}
 
 }

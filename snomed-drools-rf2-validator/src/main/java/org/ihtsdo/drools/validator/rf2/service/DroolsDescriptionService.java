@@ -7,6 +7,7 @@ import org.ihtsdo.drools.domain.Relationship;
 import org.ihtsdo.drools.helper.DescriptionHelper;
 import org.ihtsdo.drools.service.ConceptService;
 import org.ihtsdo.drools.service.DescriptionService;
+import org.ihtsdo.drools.service.TestResourceProvider;
 import org.ihtsdo.drools.validator.rf2.DroolsDescriptionIndex;
 import org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentRepository;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
@@ -22,10 +23,12 @@ public class DroolsDescriptionService implements DescriptionService {
 	private static final String PREFERRED_ACCEPTABILITY = "900000000000548007";
 	private final SnomedDroolsComponentRepository repository;
 	private final DroolsDescriptionIndex droolsDescriptionIndex;
+	private final TestResourceProvider testResourceProvider;
 
-	public DroolsDescriptionService(SnomedDroolsComponentRepository repository) {
+	public DroolsDescriptionService(SnomedDroolsComponentRepository repository, TestResourceProvider testResourceProvider) {
 		this.repository = repository;
 		this.droolsDescriptionIndex = new DroolsDescriptionIndex(repository);
+		this.testResourceProvider = testResourceProvider;
 	}
 
 
@@ -99,22 +102,18 @@ public class DroolsDescriptionService implements DescriptionService {
 	}
 
 
-
+	@Override
+	public String getCaseSensitiveWordsErrorMessage(Description description) {
+		return DescriptionHelper.getCaseSensitiveWordsErrorMessage(description, testResourceProvider.getCaseSignificantWords());
+	}
 
 	@Override
 	public String getLanguageSpecificErrorMessage(Description description) {
-		// TODO: Add support for this. See TestDescriptionService. Maps to be loaded from external resources.
-		return "";
+		return DescriptionHelper.getLanguageSpecificErrorMessage(description, testResourceProvider.getUsToGbTermMap());
 	}
 
 	@Override
-	public String getCaseSensitiveWordsErrorMessage(Description description) {
-		// TODO: Add support for this. See TestDescriptionService. Case significant words list to be loaded from external resources.
-		return "";
-	}
-
-	@Override
-	public Set<String> findParentsNotContainSematicTag(Concept concept, String termSematicTag, String... languageRefsetIds) {
+	public Set<String> findParentsNotContainingSemanticTag(Concept concept, String termSematicTag, String... languageRefsetIds) {
 		Set<String> conceptIds = new HashSet<>();
 		for (Relationship relationship : concept.getRelationships()) {
 			if (relationship.isActive()
@@ -131,6 +130,11 @@ public class DroolsDescriptionService implements DescriptionService {
 			}
 		}
 		return conceptIds;
+	}
+
+	@Override
+	public boolean isRecognisedSemanticTag(String termSemanticTag) {
+		return testResourceProvider.getSemanticTags().contains(termSemanticTag);
 	}
 
 	public DroolsDescriptionIndex getDroolsDescriptionIndex() {

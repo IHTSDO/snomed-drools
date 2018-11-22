@@ -34,7 +34,7 @@ public class DroolsConceptServiceTest extends BaseServiceTest {
         Set<String> expectedRootChildren = rootConcept.getActiveInboundStatedRelationships().stream()
                 .filter(relationship -> relationship.isActive() && Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())
                         && Constants.IS_A.equals(relationship.getTypeId())).map(DroolsRelationship::getSourceId).collect(Collectors.toSet());
-        Set<String> results = droolsConceptService.getAllTopLevelHierachies();
+        Set<String> results = droolsConceptService.getAllTopLevelHierarchies();
         Assert.assertEquals(expectedRootChildren.size(), results.size());
         for (String expectedRootChild : expectedRootChildren) {
             Assert.assertTrue("Actual result does not contains concept " + expectedRootChild, results.contains(expectedRootChild));
@@ -55,7 +55,7 @@ public class DroolsConceptServiceTest extends BaseServiceTest {
     @Test
     public void testFindTopLevelHierachiesOfConcept() {
         Concept concept = new DroolsConcept("1263005", true, "900000000000207008", "900000000000073002", true, true);
-        Set<String> results = droolsConceptService.findTopLevelHierachiesOfConcept(concept);
+        Set<String> results = droolsConceptService.findTopLevelHierarchiesOfConcept(concept);
         Assert.assertEquals(1, results.size());
         Assert.assertTrue(results.contains("123037004"));
     }

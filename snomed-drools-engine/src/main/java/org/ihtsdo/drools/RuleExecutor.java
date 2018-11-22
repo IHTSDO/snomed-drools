@@ -1,157 +1,56 @@
 package org.ihtsdo.drools;
 
-import java.io.File;
+import org.drools.core.impl.StatelessKnowledgeSessionImpl;
+import org.ihtsdo.drools.domain.*;
+import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
+import org.ihtsdo.drools.exception.RuleExecutorException;
+import org.ihtsdo.drools.response.InvalidContent;
+import org.ihtsdo.drools.service.ConceptService;
+import org.ihtsdo.drools.service.DescriptionService;
+import org.ihtsdo.drools.service.RelationshipService;
+import org.ihtsdo.drools.service.TestResourceProvider;
+import org.ihtsdo.otf.resourcemanager.ResourceManager;
+import org.kie.api.runtime.KieContainer;
+import org.kie.api.runtime.StatelessKieSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import org.drools.core.impl.StatelessKnowledgeSessionImpl;
-import org.ihtsdo.drools.domain.Component;
-import org.ihtsdo.drools.domain.Concept;
-import org.ihtsdo.drools.domain.Constants;
-import org.ihtsdo.drools.domain.Description;
-import org.ihtsdo.drools.domain.OntologyAxiom;
-import org.ihtsdo.drools.domain.Relationship;
-import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
-import org.ihtsdo.drools.exception.RuleExecutorException;
-import org.ihtsdo.drools.helper.DescriptionHelper;
-import org.ihtsdo.drools.response.InvalidContent;
-import org.ihtsdo.drools.service.ConceptService;
-import org.ihtsdo.drools.service.DescriptionService;
-import org.ihtsdo.drools.service.RelationshipService;
-import org.kie.api.KieServices;
-import org.kie.api.builder.KieBuilder;
-import org.kie.api.builder.KieFileSystem;
-import org.kie.api.builder.Message;
-import org.kie.api.builder.ReleaseId;
-import org.kie.api.runtime.KieContainer;
-import org.kie.api.runtime.StatelessKieSession;
-import org.kie.internal.io.ResourceFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Strings;
-
 public class RuleExecutor {
 
-	private static final String RULE_FILENAME_EXTENSION = ".drl";
 
-	private Map<String, KieContainer> assertionGroupContainers;
-	private Map<String, Integer> assertionGroupRuleCounts;
-	private int totalRulesLoaded = 0;
+	private final Map<String, KieContainer> assertionGroupContainers;
+	private final Map<String, Integer> assertionGroupRuleCounts;
+	private boolean testResourcesEmpty;
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private Logger logger = LoggerFactory.getLogger(getClass());
-	private boolean failedToInitialize;
-	private final KieServices kieServices;
-
-	public RuleExecutor() {
-		assertionGroupContainers = new HashMap<>();
-		assertionGroupRuleCounts = new HashMap<>();
-		kieServices = KieServices.Factory.get();
+	protected RuleExecutor(Map<String, KieContainer> assertionGroupContainers, Map<String, Integer> assertionGroupRuleCounts) {
+		this.assertionGroupContainers = assertionGroupContainers;
+		this.assertionGroupRuleCounts = assertionGroupRuleCounts;
 	}
 
-	public RuleExecutor(Set<String> semanticTags) {
-		this();		
-		DescriptionHelper.setSemanticTags(semanticTags);
-	}
-	
-	public RuleExecutor(String directoryOfAssertionGroups, Set<String> semanticTags) {
-		this(semanticTags);
-		
-		final File rulesDir = new File(directoryOfAssertionGroups);
-		if (!rulesDir.isDirectory()) {
-			failedToInitialize = true;
-			logger.error("Rules directory does not exist: {}", rulesDir.getAbsolutePath());
-		} else {
-			for (File file : rulesDir.listFiles()) {
-				if (file.isDirectory() && !file.isHidden()) {
-					final String assertionGroupName = file.getName();
-					logger.info("Loading Drools assertion group {}", assertionGroupName);
-					addAssertionGroup(assertionGroupName, file);
-				}
-			}
-		}
-	}
-
-	public RuleExecutor(String directoryOfAssertionGroups, String accessKey, String secretKey, String bucketName, String path, boolean releadSemanticTags) {
-		this();
-		
-		if (releadSemanticTags) {
-			DescriptionHelper.clearSemanticTags();
-		}
-		if (!Strings.isNullOrEmpty(accessKey) && !Strings.isNullOrEmpty(secretKey) 
-			&& !Strings.isNullOrEmpty(bucketName) && !Strings.isNullOrEmpty(path)) {
-			DescriptionHelper.initSemanticTags(accessKey, secretKey, bucketName, path);
-		} else {
-			DescriptionHelper.setSemanticTags(Constants.SEMANTIC_TAGS);
-			logger.error("AWS configurations are not specified");
-		}
-		
-		final File rulesDir = new File(directoryOfAssertionGroups);
-		if (!rulesDir.isDirectory()) {
-			failedToInitialize = true;
-			logger.error("Rules directory does not exist: {}", rulesDir.getAbsolutePath());
-		} else {
-			for (File file : rulesDir.listFiles()) {
-				if (file.isDirectory() && !file.isHidden()) {
-					final String assertionGroupName = file.getName();
-					logger.info("Loading Drools assertion group {}", assertionGroupName);
-					addAssertionGroup(assertionGroupName, file);
-				}
-			}
-		}
-	}
-	
-	public void addAssertionGroup(String assertionGroupName, File ruleSetDirectory) throws RuleExecutorException {
-		// Create the in-memory File System and add the resources files  to it
-		KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
-
+	/**
+	 * TestResourceProvider should be created once and used by other services to load test resources such as the case significant words list.
+	 * Calling this method again will load the resources again so can be useful if the resources change.
+	 * @param resourceManager The resource manager to use to load the test resource files.
+	 * @return A TestResourceProvider which uses the resourceManager.
+	 * @throws RuleExecutorException if there is a problem loading the test resources.
+	 */
+	public TestResourceProvider newTestResourceProvider(ResourceManager resourceManager) throws RuleExecutorException {
 		try {
-			final RuleLoader ruleLoader = new RuleLoader(kieFileSystem);
-			Files.walkFileTree(ruleSetDirectory.toPath(), ruleLoader);
-			int rulesLoaded = ruleLoader.getRulesLoaded();
-			if (rulesLoaded == 0) {
-				logger.warn("No rules loaded. Rules directory: {}", ruleSetDirectory.getAbsolutePath());
-			} else {
-				logger.info("{} rules loaded.", ruleLoader.getRulesLoaded());
-				totalRulesLoaded += rulesLoaded;
-			}
-			assertionGroupRuleCounts.put(assertionGroupName, totalRulesLoaded);
+			TestResourceProvider testResourceProvider = new TestResourceProvider(resourceManager);
+			testResourcesEmpty = !testResourceProvider.isAnyResourcesLoaded();
+			return testResourceProvider;
 		} catch (IOException e) {
-			throw new RuleExecutorException("Failed to load rule set " + assertionGroupName, e);
+			testResourcesEmpty = true;
+			throw new RuleExecutorException("Failed to load test resources.", e);
 		}
-
-		// Create the builder for the resources of the File System
-		KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
-
-		// Build the KieBases
-		kieBuilder.buildAll();
-
-		// Check for errors
-		if (kieBuilder.getResults().hasMessages(Message.Level.ERROR)) {
-			throw new RuleExecutorException(kieBuilder.getResults().toString());
-		}
-
-		// Get the Release ID (mvn style: groupId, artifactId,version)
-		ReleaseId relId = kieBuilder.getKieModule().getReleaseId();
-
-		// Create the Container, wrapping the KieModule with the given ReleaseId
-		assertionGroupContainers.put(assertionGroupName, kieServices.newKieContainer(relId));
 	}
 
 	/**
@@ -172,10 +71,14 @@ public class RuleExecutor {
 	 *                                     in results if found to be invalid.
 	 * @return A list of content found to be invalid is returned.
 	 */
-	public List<InvalidContent> execute(Set<String> ruleSetNames, Collection<? extends Concept> concepts, ConceptService conceptService, DescriptionService descriptionService, RelationshipService relationshipService,
-			boolean includePublishedComponents, boolean includeInferredRelationships) throws RuleExecutorException {
-
-		if (failedToInitialize) throw new RuleExecutorException("Unable to complete request: rule engine failed to initialize.");
+	public List<InvalidContent> execute(
+			Set<String> ruleSetNames,
+			Collection<? extends Concept> concepts,
+			ConceptService conceptService,
+			DescriptionService descriptionService,
+			RelationshipService relationshipService,
+			boolean includePublishedComponents,
+			boolean includeInferredRelationships) throws RuleExecutorException {
 
 		for (Concept concept : concepts) {
 			assertComponentIdsPresent(concept);
@@ -244,25 +147,8 @@ public class RuleExecutor {
 			invalidContent.removeAll(publishedInvalidContent);
 		}
 
+
 		return invalidContent;
-	}
-
-	private StatelessKieSession newStatelessKieSession(KieContainer kieContainer, ConceptService conceptService, DescriptionService descriptionService, RelationshipService relationshipService, List<InvalidContent> invalidContent) {
-		final StatelessKieSession session = kieContainer.newStatelessKieSession();
-
-		session.setGlobal("invalidContent", invalidContent);
-		session.setGlobal("conceptService", conceptService);
-		session.setGlobal("descriptionService", descriptionService);
-		session.setGlobal("relationshipService", relationshipService);
-		return session;
-	}
-
-	private void runTasks(ExecutorService executorService, List<Callable<String>> tasks) {
-		try {
-			executorService.invokeAll(tasks);
-		} catch (InterruptedException e) {
-			throw new RuleExecutorException("Validation tasks were interrupted.", e);
-		}
 	}
 
 	private void assertComponentIdsPresent(Concept concept) {
@@ -299,6 +185,23 @@ public class RuleExecutor {
 		}
 	}
 
+	private StatelessKieSession newStatelessKieSession(KieContainer kieContainer, ConceptService conceptService, DescriptionService descriptionService, RelationshipService relationshipService, List<InvalidContent> invalidContent) {
+		final StatelessKieSession session = kieContainer.newStatelessKieSession();
+		session.setGlobal("invalidContent", invalidContent);
+		session.setGlobal("conceptService", conceptService);
+		session.setGlobal("descriptionService", descriptionService);
+		session.setGlobal("relationshipService", relationshipService);
+		return session;
+	}
+
+	private void runTasks(ExecutorService executorService, List<Callable<String>> tasks) {
+		try {
+			executorService.invokeAll(tasks);
+		} catch (InterruptedException e) {
+			throw new RuleExecutorException("Validation tasks were interrupted.", e);
+		}
+	}
+
 	private static void addConcept(Set<Component> components, Concept concept, boolean includeInferredRelationships) {
 		components.add(concept);
 		components.addAll(concept.getDescriptions());
@@ -310,33 +213,8 @@ public class RuleExecutor {
 		components.addAll(concept.getOntologyAxioms());
 	}
 
-	private static final class RuleLoader extends SimpleFileVisitor<Path> {
-
-		private final KieFileSystem kieFileSystem;
-		private int rulesLoaded;
-
-		RuleLoader(KieFileSystem kieFileSystem) {
-			this.kieFileSystem = kieFileSystem;
-		}
-
-		@Override
-		public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-			File file = path.toFile();
-			if (file.isFile() && file.getName().endsWith(RULE_FILENAME_EXTENSION)) {
-				kieFileSystem.write(ResourceFactory.newFileResource(file));
-				rulesLoaded++;
-			}
-
-			return FileVisitResult.CONTINUE;
-		}
-
-		int getRulesLoaded() {
-			return rulesLoaded;
-		}
-	}
-
 	public int getTotalRulesLoaded() {
-		return totalRulesLoaded;
+		return assertionGroupRuleCounts.values().stream().mapToInt(Integer::intValue).sum();
 	}
 
 	public int getAssertionGroupRuleCount(String assertionGroupName) {
