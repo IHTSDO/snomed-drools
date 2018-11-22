@@ -147,6 +147,10 @@ public class RuleExecutor {
 			invalidContent.removeAll(publishedInvalidContent);
 		}
 
+		if (testResourcesEmpty) {
+			invalidContent.add(0, InvalidContent.getGeneralWarning("Test resources were not available so assertions like case significance and US specific terms " +
+					"checks will not have run."));
+		}
 
 		return invalidContent;
 	}
