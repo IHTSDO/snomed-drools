@@ -10,6 +10,10 @@ public class InvalidContent {
 	private Severity severity;
 	private boolean ignorePublishedCheck;
 
+	public static InvalidContent getGeneralWarning(String message) {
+		return new InvalidContent(Constants.ROOT_CONCEPT, new DummyComponent(), message, Severity.WARNING);
+	}
+
 	private InvalidContent(String conceptId, Component component, String message, Severity severity) {
 		this.conceptId = conceptId;
 		this.component = component;
@@ -100,5 +104,33 @@ public class InvalidContent {
 				", published='" + isPublished() + '\'' +
 				", message='" + message + '\'' +
 				'}';
+	}
+
+	private static final class DummyComponent implements Component {
+
+		@Override
+		public String getId() {
+			return Constants.ROOT_CONCEPT;
+		}
+
+		@Override
+		public boolean isActive() {
+			return true;
+		}
+
+		@Override
+		public boolean isPublished() {
+			return false;
+		}
+
+		@Override
+		public boolean isReleased() {
+			return false;
+		}
+
+		@Override
+		public String getModuleId() {
+			return Constants.ROOT_CONCEPT;
+		}
 	}
 }
