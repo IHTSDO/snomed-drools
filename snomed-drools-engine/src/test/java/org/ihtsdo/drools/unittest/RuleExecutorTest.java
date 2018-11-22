@@ -1,6 +1,7 @@
 package org.ihtsdo.drools.unittest;
 
 import org.ihtsdo.drools.RuleExecutor;
+import org.ihtsdo.drools.RuleExecutorFactory;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
 import org.ihtsdo.drools.exception.RuleExecutorException;
@@ -8,9 +9,13 @@ import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.rulestestrig.service.TestConceptService;
 import org.ihtsdo.drools.rulestestrig.service.TestDescriptionService;
 import org.ihtsdo.drools.rulestestrig.service.TestRelationshipService;
+import org.ihtsdo.drools.service.TestResourceProvider;
 import org.ihtsdo.drools.unittest.domain.ConceptImpl;
 import org.ihtsdo.drools.unittest.domain.DescriptionImpl;
 import org.ihtsdo.drools.unittest.domain.RelationshipImpl;
+import org.ihtsdo.otf.resourcemanager.ManualResourceConfiguration;
+import org.ihtsdo.otf.resourcemanager.ResourceConfiguration;
+import org.ihtsdo.otf.resourcemanager.ResourceManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +25,7 @@ import java.util.*;
 
 public class RuleExecutorTest {
 
-	public static final Set<String> RULE_SET_NAMES = Collections.singleton("Common");
+	private static final Set<String> RULE_SET_NAMES = Collections.singleton("Common");
 	private RuleExecutor ruleExecutor;
 	private TestConceptService conceptService;
 	private TestDescriptionService descriptionService;
@@ -28,27 +33,23 @@ public class RuleExecutorTest {
 
 	@Before
 	public void setup() {
+		ruleExecutor = new RuleExecutorFactory().createRuleExecutor("src/test/resources/rules");
+		ManualResourceConfiguration resourceConfiguration = new ManualResourceConfiguration(true, false,
+				new ResourceConfiguration.Local("src/test/resources/dummy-test-resources"), null);
+		TestResourceProvider testResourceProvider = ruleExecutor.newTestResourceProvider(new ResourceManager(resourceConfiguration, null));
 		final Map<String, Concept> concepts = new HashMap<>();
 		conceptService = new TestConceptService(concepts);
-		descriptionService = new TestDescriptionService(concepts);
+		descriptionService = new TestDescriptionService(concepts, testResourceProvider);
 		relationshipService = new TestRelationshipService(concepts);
-		ruleExecutor = new RuleExecutor("src/test/resources/rules", Constants.SEMANTIC_TAGS);
 	}
 
-	@Test
+	@Test(expected = RuleExecutorException.class)
 	public void testInitFailure() {
-		final RuleExecutor ruleExecutor1 = new RuleExecutor("non-existant-directory", Constants.SEMANTIC_TAGS);
-
-		try {
-			ruleExecutor1.execute(RULE_SET_NAMES, Collections.singleton(new ConceptImpl("1")), conceptService, descriptionService, relationshipService, true, false);
-			Assert.fail("Should have thrown exception.");
-		} catch (RuleExecutorException e) {
-			// Pass
-		}
+		new RuleExecutorFactory().createRuleExecutor("non-existant-directory");
 	}
 
 	@Test
-	public void testExecute() throws Exception {
+	public void testExecute() {
 		final Concept concept = new ConceptImpl("1")
 				.addDescription(new DescriptionImpl("2", "a  "))
 				.addRelationship(new RelationshipImpl("r1", "3"))

@@ -1,14 +1,20 @@
 package org.ihtsdo.drools.rulestestrig;
 
 import org.ihtsdo.drools.RuleExecutor;
+import org.ihtsdo.drools.RuleExecutorFactory;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.OntologyAxiom;
+import org.ihtsdo.drools.exception.RuleExecutorException;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.rulestestrig.domain.*;
 import org.ihtsdo.drools.rulestestrig.service.TestConceptService;
 import org.ihtsdo.drools.rulestestrig.service.TestDescriptionService;
 import org.ihtsdo.drools.rulestestrig.service.TestRelationshipService;
+import org.ihtsdo.drools.service.TestResourceProvider;
+import org.ihtsdo.otf.resourcemanager.ManualResourceConfiguration;
+import org.ihtsdo.otf.resourcemanager.ResourceConfiguration;
+import org.ihtsdo.otf.resourcemanager.ResourceManager;
 import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,9 +30,9 @@ import java.util.*;
 @RunWith(Parameterized.class)
 public class RulesTestManual {
 
-	public static final String GIVEN_CONCEPTS = "givenConcepts";
-	public static final String ASSERT_CONCEPTS_PASS = "assertConceptsPass";
-	public static final String ASSERT_CONCEPTS_FAIL = "assertConceptsFail";
+	private static final String GIVEN_CONCEPTS = "givenConcepts";
+	private static final String ASSERT_CONCEPTS_PASS = "assertConceptsPass";
+	private static final String ASSERT_CONCEPTS_FAIL = "assertConceptsFail";
 	
 	private RuleExecutor ruleExecutor;
 	private Map<String, Concept> concepts;
@@ -57,9 +63,7 @@ public class RulesTestManual {
 	}
 
 	public RulesTestManual(File ruleDirectory) {
-		
-		this.ruleExecutor = new RuleExecutor(org.ihtsdo.drools.rulestestrig.domain.Constants.SEMANTIC_TAGS);
-		this.ruleExecutor.addAssertionGroup("OneRule", ruleDirectory);
+		this.ruleExecutor = new RuleExecutorFactory().createRuleExecutor(ruleDirectory.getAbsolutePath(), "OneRule");
 		this.concepts = new HashMap<>();
 		
 		final File testCasesFile = new File(ruleDirectory, "test-cases.json");
@@ -86,8 +90,10 @@ public class RulesTestManual {
 	
 	@Before
 	public void setup() {
+		ManualResourceConfiguration resourceConfiguration = new ManualResourceConfiguration(true, false, new ResourceConfiguration.Local("src/test/resources/dummy-test-resources"), null);
+		TestResourceProvider testResourceProvider = this.ruleExecutor.newTestResourceProvider(new ResourceManager(resourceConfiguration, null));
 		conceptService = new TestConceptService(concepts);
-		descriptionService = new TestDescriptionService(concepts);
+		descriptionService = new TestDescriptionService(concepts, testResourceProvider);
 		relationshipService = new TestRelationshipService(concepts);
 	}
 
@@ -135,20 +141,19 @@ public class RulesTestManual {
 		}
 	}
 
-	private void executeRulesAndAssertExpectations(RuleExecutor ruleExecutor, List<TestConcept<TestDescription, TestRelationship>> conceptsToTest, boolean expectPass) throws JSONException {
+	private void executeRulesAndAssertExpectations(RuleExecutor ruleExecutor, List<TestConcept<TestDescription, TestRelationship>> conceptsToTest, boolean expectPass) {
 		for (TestConcept<TestDescription, TestRelationship> concept : conceptsToTest) {
 			final HashSet<String> ruleSetNames = new HashSet<>();
 			ruleSetNames.add("OneRule");
-			try {
-				final List<InvalidContent> invalidContent = ruleExecutor.execute(ruleSetNames, Collections.singleton(concept), conceptService, descriptionService, relationshipService, false, false);
+			final List<InvalidContent> invalidContent = ruleExecutor.execute(
+					ruleSetNames,
+					Collections.singleton(concept),
+					conceptService, descriptionService, relationshipService, false, false);
 
 			if (expectPass) {
 				Assert.assertEquals("A concept from the " + ASSERT_CONCEPTS_PASS + " set actually failed! " + invalidContent.toString(), 0, invalidContent.size());
 			} else {
 				Assert.assertNotEquals("A concept from the " + ASSERT_CONCEPTS_FAIL + " set actually passed! " + concept.toString(), 0, invalidContent.size());
-			}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 		}
 	}

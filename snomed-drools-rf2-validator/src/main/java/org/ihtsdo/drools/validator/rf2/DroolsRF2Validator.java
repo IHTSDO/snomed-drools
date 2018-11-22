@@ -2,12 +2,16 @@ package org.ihtsdo.drools.validator.rf2;
 
 import com.google.common.collect.Sets;
 import org.ihtsdo.drools.RuleExecutor;
+import org.ihtsdo.drools.RuleExecutorFactory;
 import org.ihtsdo.drools.response.InvalidContent;
+import org.ihtsdo.drools.service.TestResourceProvider;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
-import org.ihtsdo.drools.validator.rf2.domain.Constants;
 import org.ihtsdo.drools.validator.rf2.service.DroolsConceptService;
 import org.ihtsdo.drools.validator.rf2.service.DroolsDescriptionService;
 import org.ihtsdo.drools.validator.rf2.service.DroolsRelationshipService;
+import org.ihtsdo.otf.resourcemanager.ManualResourceConfiguration;
+import org.ihtsdo.otf.resourcemanager.ResourceConfiguration;
+import org.ihtsdo.otf.resourcemanager.ResourceManager;
 import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.ReleaseImporter;
 import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
@@ -16,18 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.NumberFormat;
+import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.Long.parseLong;
@@ -35,8 +30,11 @@ import static org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentFactory.MRCM_
 
 public class DroolsRF2Validator {
 
-	public static final String TAB = "\t";
+	public static final ManualResourceConfiguration BLANK_RESOURCES_CONFIGURATION =
+			new ManualResourceConfiguration(true, false, new ResourceConfiguration.Local("classpath:blank-resource-files"), null);
+	private static final String TAB = "\t";
 	private final RuleExecutor ruleExecutor;
+	private final TestResourceProvider testResourceProvider;
 	private final Logger logger = LoggerFactory.getLogger(DroolsRF2Validator.class);
 
 	public static void main(String[] args) {
@@ -51,13 +49,11 @@ public class DroolsRF2Validator {
 		String commaSeparationSnomedSnapshotDirectory = args[2];
 		String currentEffectiveTime = args[3];
 		Set<String> includedModuleSets = null;
-		try {
+		if (args.length > 4) {
 			String includedModules = args[4];
 			if(includedModules != null && !includedModules.isEmpty()) {
 				includedModuleSets = Sets.newHashSet(includedModules.split(","));
 			}
-
-		} catch (ArrayIndexOutOfBoundsException e) {
 		}
 
 		if (!currentEffectiveTime.matches("\\d{8}")) {
@@ -93,9 +89,23 @@ public class DroolsRF2Validator {
 		}
 	}
 
-	public DroolsRF2Validator(String directoryOfRuleSetsPath) {
-		Assert.isTrue(new File(directoryOfRuleSetsPath).isDirectory(), "The rules directory is not accessible.");
-		ruleExecutor = new RuleExecutor(directoryOfRuleSetsPath, Constants.SEMANTIC_TAGS);
+	/**
+	 * Creates a validator with assertions loaded from disk but without any test resource files.
+	 * @param directoryOfAssertionGroups Directory of assertion groups to load.
+	 */
+	public DroolsRF2Validator(String directoryOfAssertionGroups) {
+		this(directoryOfAssertionGroups, new ResourceManager(BLANK_RESOURCES_CONFIGURATION, null));
+	}
+
+	/**
+	 * Creates a validator with assertions loaded from disk and test resources loaded from the testResourcesResourceManager.
+	 * @param directoryOfAssertionGroups Directory of assertion groups to load.
+	 * @param testResourcesResourceManager ResourceManager to load test resources from.
+	 */
+	public DroolsRF2Validator(String directoryOfAssertionGroups, ResourceManager testResourcesResourceManager) {
+		Assert.isTrue(new File(directoryOfAssertionGroups).isDirectory(), "The rules directory is not accessible.");
+		ruleExecutor = new RuleExecutorFactory().createRuleExecutor(directoryOfAssertionGroups);
+		testResourceProvider = ruleExecutor.newTestResourceProvider(testResourcesResourceManager);
 	}
 
 	public List<InvalidContent> validateSnapshotStreams(Set<InputStream> snomedRf2EditionZips, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {
@@ -154,7 +164,7 @@ public class DroolsRF2Validator {
 		logger.info("Components loaded");
 
 		DroolsConceptService conceptService = new DroolsConceptService(repository);
-		DroolsDescriptionService descriptionService = new DroolsDescriptionService(repository);
+		DroolsDescriptionService descriptionService = new DroolsDescriptionService(repository, testResourceProvider);
 		DroolsRelationshipService relationshipService = new DroolsRelationshipService(repository);
 
 		Collection<DroolsConcept> concepts = repository.getConcepts();

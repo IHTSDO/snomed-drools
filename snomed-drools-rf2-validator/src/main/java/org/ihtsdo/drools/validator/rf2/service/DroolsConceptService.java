@@ -27,7 +27,7 @@ public class DroolsConceptService implements ConceptService {
 	}
 
 	@Override
-	public Set<String> getAllTopLevelHierachies() {
+	public Set<String> getAllTopLevelHierarchies() {
 		DroolsConcept rootConcept = repository.getConcept(Constants.ROOT_CONCEPT);
 		Set<String> resultSet = new HashSet<>();
 		for (DroolsRelationship relationship : rootConcept.getActiveInboundStatedRelationships()) {
@@ -44,7 +44,6 @@ public class DroolsConceptService implements ConceptService {
 			return Collections.emptySet();
 		}
 		DroolsConcept droolsConcept = repository.getConcept(concept.getId());
-		Set<String> resultSet = new HashSet<>();
 		Set<String> statedParents = new HashSet<>();
 		for (DroolsRelationship relationship : droolsConcept.getRelationships()) {
 			if(relationship.isActive() && Constants.IS_A.equals(relationship.getTypeId())
@@ -52,7 +51,7 @@ public class DroolsConceptService implements ConceptService {
 				statedParents.add(relationship.getDestinationId());
 			}
 		}
-		resultSet.addAll(statedParents);
+		Set<String> resultSet = new HashSet<>(statedParents);
 		for (String statedParent : statedParents) {
 			resultSet.addAll(findStatedAncestorsOfConcept(repository.getConcept(statedParent)));
 		}
@@ -60,7 +59,7 @@ public class DroolsConceptService implements ConceptService {
 	}
 
 	@Override
-	public Set<String> findTopLevelHierachiesOfConcept(Concept concept) {
+	public Set<String> findTopLevelHierarchiesOfConcept(Concept concept) {
 		DroolsConcept droolsConcept = repository.getConcept(concept.getId());
 		Set<String> resultSet = new HashSet<>();
 		for (DroolsRelationship relationship : droolsConcept.getRelationships()) {
@@ -69,7 +68,7 @@ public class DroolsConceptService implements ConceptService {
 				if(Constants.ROOT_CONCEPT.equals(relationship.getDestinationId())) {
 					resultSet.add(relationship.getSourceId());
 				} else {
-					resultSet.addAll(findTopLevelHierachiesOfConcept(repository.getConcept(relationship.getDestinationId())));
+					resultSet.addAll(findTopLevelHierarchiesOfConcept(repository.getConcept(relationship.getDestinationId())));
 				}
 			}
 		}
