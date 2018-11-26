@@ -41,7 +41,8 @@ public class DroolsRF2Validator {
 
 	public static void main(String[] args) {
 		if (args.length != 4 && args.length != 5) {
-			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <rf2SnapshotDirectory> <currentEffectiveTime> <includedModules>");
+			// NOTE - Keep in sync with README.md file.
+			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <rf2SnapshotDirectory> <currentEffectiveTime> <includedModules(optional)>");
 			System.exit(1);
 		}
 
