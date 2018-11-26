@@ -73,6 +73,7 @@ public class TestResourceProvider {
 				terms.add(line.trim());
 			}
 		}
+		logger.info("{} semantic tags loaded", terms.size());
 		return terms;
 	}
 
@@ -87,6 +88,7 @@ public class TestResourceProvider {
 				}
 			}
 		}
+		logger.info("{} case significant words loaded", terms.size());
 		return terms;
 	}
 
@@ -108,6 +110,7 @@ public class TestResourceProvider {
 				}
 			}
 		}
+		logger.info("{} US to GB term map entries loaded", usToGbTermMap.size());
 		return usToGbTermMap;
 	}
 
