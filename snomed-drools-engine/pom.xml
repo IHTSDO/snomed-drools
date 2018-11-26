@@ -16,6 +16,7 @@
 	</properties>
 
 	<dependencies>
+		<!-- Drools -->
 		<dependency>
 			<groupId>org.kie</groupId>
 			<artifactId>kie-api</artifactId>
@@ -43,11 +44,34 @@
 			<artifactId>jboss-jaas</artifactId>
 			<version>3.2.3</version>
 		</dependency>
+
+		<!-- Resource Loading -->
+		<dependency>
+			<groupId>org.ihtsdo.otf.common</groupId>
+			<artifactId>resource-manager</artifactId>
+			<version>2.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- Others -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.9.7</version>
+		</dependency>
+
+		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
+
+		<!-- Test -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
@@ -65,21 +89,6 @@
 			<artifactId>json</artifactId>
 			<version>20090211</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.ihtsdo.otf.common</groupId>
-			<artifactId>resource-manager</artifactId>
-			<version>2.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-	    <groupId>joda-time</groupId>
-		    <artifactId>joda-time</artifactId>
-		    <version>2.9.7</version>
 		</dependency>
 	</dependencies>
 
