@@ -11,7 +11,7 @@
 	<artifactId>snomed-drools-rf2-validator</artifactId>
 
 	<properties>
-		<lucene.version>5.5.2</lucene.version>
+		<lucene.version>7.5.0</lucene.version>
 	</properties>
 
 	<dependencies>
