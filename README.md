@@ -1,12 +1,25 @@
-# Snomed Drools Engine
+# SNOMED Drools Engine
 A SNOMED CT Concept Validation Engine using Drools (Business Rules Engine).
 
-This component is used in the SNOMED International Authoring Platform to validate the parts of a concept which have changed during authoring. We have made a concious effort to write this project in a way that the code can be reused in any SNOMED authoring tool.
+This library is used in the SNOMED International Authoring Platform to validate the parts of a concept which have changed during authoring.
 
-To integrate this tool with your system please implempent these interfaces:
-- [Domain object inferfaces](https://github.com/IHTSDO/snomed-drools/tree/master/src/main/java/org/ihtsdo/drools/domain)
-- [Service inferfaces](https://github.com/IHTSDO/snomed-drools/tree/master/src/main/java/org/ihtsdo/drools/service)
+## The Engine
+The `snomed-drools-engine` module is responsible for loading sets of assertions and other test resources then executing those assertions on SNOMED CT content as requested.
+The services within the engine, which are used to access SNOMED CT content, are abstract interfaces.
+No implementation for accessing content is provided within the `snomed-drools-engine` module so it can not perform any validation on its own.
+The engine has been written in this way intentionally to allow the same assertions to be run in a wide range of implementations.
 
-These interfaces are implemented in the Authoring Terminology Server. We plan to also implement them in the Release Validation Framework to reuse the rules and reduce rule maintenance.
+The interfaces can be found here:
+- [Domain object interfaces](https://github.com/IHTSDO/snomed-drools/tree/master/src/main/java/org/ihtsdo/drools/domain)
+- [Service interfaces](https://github.com/IHTSDO/snomed-drools/tree/master/src/main/java/org/ihtsdo/drools/service)
 
-The rules for this engine are maintained seperately, the standard set can be found here - https://github.com/IHTSDO/snomed-drools-rules
+## Content Access Implementations
+The following implementations use the SNOMED Drools Engine and implement the interfaces above to give the engine access to SNOMED CT content:
+
+* [SNOMED Drools RF2 Validator](https://github.com/IHTSDO/snomed-drools/tree/master/snomed-drools-rf2-validator)
+* [Snow Owl Terminology Server](https://github.com/IHTSDO/snow-owl) (in production)
+* [Snowstorm Terminology Server](https://github.com/IHTSDO/snowstorm) (in development)
+* SNOMED Release Validation Framework (integration in progress)
+
+## The Assertion Rules
+The rules for this engine are maintained separately in the [snomed-drools-rules project](https://github.com/IHTSDO/snomed-drools-rules).
