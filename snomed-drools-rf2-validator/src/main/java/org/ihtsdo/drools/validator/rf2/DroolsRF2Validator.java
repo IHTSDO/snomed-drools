@@ -1,5 +1,6 @@
 package org.ihtsdo.drools.validator.rf2;
 
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.google.common.collect.Sets;
 import org.ihtsdo.drools.RuleExecutor;
 import org.ihtsdo.drools.RuleExecutorFactory;
@@ -18,6 +19,7 @@ import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.aws.core.io.s3.SimpleStorageResourceLoader;
 import org.springframework.util.Assert;
 
 import java.io.*;
@@ -44,7 +46,7 @@ public class DroolsRF2Validator {
 		}
 
 		String directoryOfRuleSetsPath = args[0];
-		DroolsRF2Validator rf2Validator = new DroolsRF2Validator(directoryOfRuleSetsPath);
+
 		String commaSeparatedAssertionGroups = args[1];
 		String commaSeparationSnomedSnapshotDirectory = args[2];
 		String currentEffectiveTime = args[3];
@@ -63,6 +65,11 @@ public class DroolsRF2Validator {
 
 		File report = new File("validation-report-" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + ".txt");
 		try {
+			// Load test resources from public S3 location
+			ResourceManager testResourcesResourceManager = getTestResourceManager();
+
+			DroolsRF2Validator rf2Validator = new DroolsRF2Validator(directoryOfRuleSetsPath, testResourcesResourceManager);
+
 			HashSet<String> ruleSetNamesToRun = Sets.newHashSet(commaSeparatedAssertionGroups.split(","));
 			HashSet<String> snomedSnapshotDirectories = Sets.newHashSet(commaSeparationSnomedSnapshotDirectory.split(","));
 			List<InvalidContent> invalidContents = rf2Validator.validateSnapshots(snomedSnapshotDirectories, ruleSetNamesToRun, currentEffectiveTime, includedModuleSets);
@@ -186,6 +193,18 @@ public class DroolsRF2Validator {
 
 	public RuleExecutor getRuleExecutor() {
 		return ruleExecutor;
+	}
+
+	private static ResourceManager getTestResourceManager() throws IOException {
+		Properties properties = new Properties();
+		// Load bucket and path for test resources
+		properties.load(DroolsRF2Validator.class.getResourceAsStream("/aws.properties"));
+
+		ManualResourceConfiguration testResourcesConfiguration = new ManualResourceConfiguration(true, true, null,
+				new ResourceConfiguration.Cloud(properties.getProperty("test-resources.cloud.bucket"), properties.getProperty("test-resources.cloud.path")));
+
+		// This uses anonymous access
+		return new ResourceManager(testResourcesConfiguration, new SimpleStorageResourceLoader(AmazonS3ClientBuilder.standard().withRegion("us-east-1").build()));
 	}
 
 }
