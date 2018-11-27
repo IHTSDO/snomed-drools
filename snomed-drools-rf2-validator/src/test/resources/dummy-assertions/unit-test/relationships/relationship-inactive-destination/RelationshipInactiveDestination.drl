@@ -1,0 +1,14 @@
+import org.ihtsdo.drools.domain.Relationship
+import org.ihtsdo.drools.service.ConceptService
+import org.ihtsdo.drools.response.InvalidContent
+
+global java.util.List invalidContent
+global ConceptService conceptService
+
+rule "Active relationship must not have inactive destination"
+	dialect "mvel"
+	when
+		r : Relationship(active && !conceptService.isActive(destinationId))
+	then
+		invalidContent.add(new InvalidContent(r, "Concepts must not have relationships to inactive concepts."));
+end
