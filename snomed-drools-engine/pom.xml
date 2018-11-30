@@ -125,10 +125,13 @@
 						<Export-Package>
 							org.ihtsdo.drools.*,
 							org.ihtsdo.otf.resourcemanager,
+							org.springframework.beans,
 							org.springframework.core.io,
+							org.springframework.core.task,
 							org.springframework.cloud.aws.core.io.s3,
 							com.amazonaws.services.s3,
-							com.amazonaws.auth
+							com.amazonaws.auth,
+							com.amazonaws
 						</Export-Package>
 						<Require-Capability>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"</Require-Capability>
 						<Import-Package>
