@@ -1,5 +1,9 @@
 package org.ihtsdo.drools;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.drools.core.impl.StatelessKnowledgeSessionImpl;
 import org.ihtsdo.drools.domain.*;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
@@ -9,11 +13,14 @@ import org.ihtsdo.drools.service.ConceptService;
 import org.ihtsdo.drools.service.DescriptionService;
 import org.ihtsdo.drools.service.RelationshipService;
 import org.ihtsdo.drools.service.TestResourceProvider;
+import org.ihtsdo.otf.resourcemanager.ManualResourceConfiguration;
+import org.ihtsdo.otf.resourcemanager.ResourceConfiguration;
 import org.ihtsdo.otf.resourcemanager.ResourceManager;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.StatelessKieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.aws.core.io.s3.SimpleStorageResourceLoader;
 
 import java.io.IOException;
 import java.util.*;
@@ -44,6 +51,23 @@ public class RuleExecutor {
 	 */
 	public TestResourceProvider newTestResourceProvider(ResourceManager resourceManager) throws RuleExecutorException {
 		try {
+			TestResourceProvider testResourceProvider = new TestResourceProvider(resourceManager);
+			testResourcesEmpty = !testResourceProvider.isAnyResourcesLoaded();
+			return testResourceProvider;
+		} catch (IOException e) {
+			testResourcesEmpty = true;
+			throw new RuleExecutorException("Failed to load test resources.", e);
+		}
+	}
+
+	public TestResourceProvider newTestResourceProvider(String awsKey, String awsSecretKey, String bucket, String path) throws RuleExecutorException {
+		try {
+			AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
+					.withRegion("us-east-1")
+					.withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(awsKey, awsSecretKey)))
+					.build();
+			ManualResourceConfiguration resourceConfiguration = new ManualResourceConfiguration(true, true, null, new ResourceConfiguration.Cloud(bucket, path));
+			ResourceManager resourceManager = new ResourceManager(resourceConfiguration, new SimpleStorageResourceLoader(amazonS3));
 			TestResourceProvider testResourceProvider = new TestResourceProvider(resourceManager);
 			testResourcesEmpty = !testResourceProvider.isAnyResourcesLoaded();
 			return testResourceProvider;
