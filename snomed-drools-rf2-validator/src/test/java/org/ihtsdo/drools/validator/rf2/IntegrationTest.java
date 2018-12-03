@@ -33,6 +33,7 @@ public class IntegrationTest {
 
         List<InvalidContent> invalidContentsReport = droolsRF2Validator.validateSnapshotStreams(
                 Collections.singleton(new FileInputStream(snomedRF2Zip)),
+                null,
                 Collections.singleton("unit-test"),
                 "20190131",
                 null);

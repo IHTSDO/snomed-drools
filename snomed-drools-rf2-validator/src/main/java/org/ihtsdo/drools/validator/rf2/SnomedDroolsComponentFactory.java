@@ -70,10 +70,10 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 				if (axiom != null) {
 					if (axiom.getLeftHandSideNamedConcept() != null && axiom.getRightHandSideRelationships() != null) {
 						// Regular axiom
-						addRelationships(id, axiom.getRightHandSideRelationships(), axiom, moduleId, effectiveTime);
+						addRelationships(id, axiom.getRightHandSideRelationships(), axiom, axiom.getLeftHandSideNamedConcept(), moduleId, effectiveTime);
 					} else if (axiom.getRightHandSideNamedConcept() != null && axiom.getLeftHandSideRelationships() != null) {
 						// GCI OntologyAxiom
-						addRelationships(id, axiom.getLeftHandSideRelationships(), axiom, moduleId, effectiveTime);
+						addRelationships(id, axiom.getLeftHandSideRelationships(), axiom, axiom.getRightHandSideNamedConcept(), moduleId, effectiveTime);
 					}
 				} else {
 					// Can't be converted to relationships
@@ -98,7 +98,7 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 		return axiomParsingError;
 	}
 
-	private void addRelationships(String axiomId, Map<Integer, List<Relationship>> groups, AxiomRepresentation axiom, String moduleId, String effectiveTime) {
+	private void addRelationships(String axiomId, Map<Integer, List<Relationship>> groups, AxiomRepresentation axiom, Long namedConcept, String moduleId, String effectiveTime) {
 		groups.forEach((group, relationships) -> relationships.forEach(relationship -> {
 
 			long typeId = relationship.getTypeId();
@@ -107,7 +107,7 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 			// Build a composite identifier for this 'relationship' (which is actually a fragment of an axiom expression) because it doesn't have its own component identifier.
 			String compositeIdentifier = axiomId + "/Group_" + group + "/Type_" + typeId + "/Destination_" + destinationId;
 
-			DroolsRelationship relationship1 = new DroolsRelationship(compositeIdentifier, true, moduleId, axiom.getLeftHandSideNamedConcept().toString(),
+			DroolsRelationship relationship1 = new DroolsRelationship(compositeIdentifier, true, moduleId, namedConcept.toString(),
 					destinationId + "", group,
 					typeId + "", ConceptConstants.STATED_RELATIONSHIP, published(effectiveTime), published(effectiveTime));
 			logger.info("Add axiom relationship {}", relationship);

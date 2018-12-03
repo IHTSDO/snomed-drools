@@ -22,6 +22,7 @@ public class IntegrationManualTest {
     
     public static void main(String[] args) throws IOException, ReleaseImportException {
         String releaseFilePath = "/path/to/release1,/path/to/release2";
+        String deltaDirectoryPath = "path/to/delta";
         String directoryOfRuleSetsPath = "path/to/rules";
         HashSet<String> ruleSetNamesToRun = Sets.newHashSet("common-authoring,int-authoring".split(","));
         String includedModules = "";
@@ -31,7 +32,8 @@ public class IntegrationManualTest {
         for (String releasesFile : releasesFiles) {
             inputStreams.add(new FileInputStream(releasesFile));
         }
-        List<InvalidContent> invalidContents = new DroolsRF2Validator(directoryOfRuleSetsPath).validateSnapshotStreams(inputStreams, ruleSetNamesToRun, "", includedModulesSet);
+        InputStream deltaInputStream = new FileInputStream(deltaDirectoryPath);
+        List<InvalidContent> invalidContents = new DroolsRF2Validator(directoryOfRuleSetsPath).validateSnapshotStreams(inputStreams, deltaInputStream, ruleSetNamesToRun, "", includedModulesSet);
 
         // Some extra output when running this main method in development -
         int outputSize = invalidContents.size() > 50 ? 50 : invalidContents.size();
