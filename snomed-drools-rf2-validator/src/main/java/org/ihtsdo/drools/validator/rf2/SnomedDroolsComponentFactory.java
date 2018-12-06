@@ -70,10 +70,10 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 				if (axiom != null) {
 					if (axiom.getLeftHandSideNamedConcept() != null && axiom.getRightHandSideRelationships() != null) {
 						// Regular axiom
-						addRelationships(id, axiom.getRightHandSideRelationships(), axiom, axiom.getLeftHandSideNamedConcept(), moduleId, effectiveTime);
+						addRelationships(id, axiom.getLeftHandSideNamedConcept(), axiom.getRightHandSideRelationships(), moduleId, effectiveTime);
 					} else if (axiom.getRightHandSideNamedConcept() != null && axiom.getLeftHandSideRelationships() != null) {
 						// GCI OntologyAxiom
-						addRelationships(id, axiom.getLeftHandSideRelationships(), axiom, axiom.getRightHandSideNamedConcept(), moduleId, effectiveTime);
+						addRelationships(id, axiom.getRightHandSideNamedConcept(), axiom.getLeftHandSideRelationships(), moduleId, effectiveTime);
 					}
 				} else {
 					// Can't be converted to relationships
@@ -98,7 +98,7 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 		return axiomParsingError;
 	}
 
-	private void addRelationships(String axiomId, Map<Integer, List<Relationship>> groups, AxiomRepresentation axiom, Long namedConcept, String moduleId, String effectiveTime) {
+	private void addRelationships(String axiomId, Long namedConcept, Map<Integer, List<Relationship>> groups, String moduleId, String effectiveTime) {
 		groups.forEach((group, relationships) -> relationships.forEach(relationship -> {
 
 			long typeId = relationship.getTypeId();
