@@ -25,8 +25,8 @@ id	effectiveTime	active	moduleId	refsetId	referencedComponentId	owlExpression
 #    )
 #    :100105001 - Triangle
 #)
-# This GCI axiom should pass
-67fbf1c2-a31f-4bed-969f-fecab36c9e12	20190131	1	900000000000207008	733073007	100105001	EquivalentClasses(ObjectIntersectionOf(:100102001 ObjectSomeValuesFrom(:100104001 :100105001)) 100105001)
+#This GCI axiom should pass
+67fbf1c2-a31f-4bed-969f-fecab36c9e12	20190131	1	900000000000207008	733073007	100105001	EquivalentClasses(ObjectIntersectionOf(:100102001 ObjectSomeValuesFrom(:100104001 :100105001)) :100105001)
 
 # The human readable version of this axiom:
 # EquivalentClasses(
@@ -40,4 +40,4 @@ id	effectiveTime	active	moduleId	refsetId	referencedComponentId	owlExpression
 #    :100102001 - Polygon
 #)
 # This GCI axiom should pass
-67fbf1c2-a31f-4bed-969f-fecab36c9e12	20190131	1	900000000000207008	733073007	100102001	EquivalentClasses(ObjectIntersectionOf(:100102001 ObjectSomeValuesFrom(:100104001 :100105001)) 100102001)
+d2862bc4-02d0-4491-beb7-b3441a14b764	20190131	1	900000000000207008	733073007	100102001	EquivalentClasses(ObjectIntersectionOf(:100102001 ObjectSomeValuesFrom(:100104001 :100105001)) :100102001)
