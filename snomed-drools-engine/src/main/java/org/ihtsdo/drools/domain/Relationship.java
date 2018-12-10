@@ -5,13 +5,19 @@ package org.ihtsdo.drools.domain;
  */
 public interface Relationship extends Component {
 
-	String getSourceId();
+	/**
+	 * UUID of axiom reference set member or null if relationship is from stated or inferred relationships.
+	 * @return Axiom id or null
+	 */
+	String getAxiomId();
 
-	String getDestinationId();
+	String getSourceId();
 
 	int getRelationshipGroup();
 
 	String getTypeId();
+
+	String getDestinationId();
 
 	String getCharacteristicTypeId();
 }

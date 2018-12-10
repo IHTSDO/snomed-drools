@@ -53,3 +53,7 @@ id	effectiveTime	active	moduleId	sourceId	destinationId	relationshipGroup	typeId
 
 # Disorder of endocrine system - Finding site - Structure of endocrine system
 100010001	20170131	1	900000000000207008	362969004	113331007	0	363698007	900000000000010007	900000000000451002
+
+# Triangle - Number of corners - 3
+# The same triple is in the concept axiom to test that it's not found as a duplicate
+100011001	20190131	1	900000000000207008	100105001	100108001	0	100104001	900000000000010007	900000000000451002

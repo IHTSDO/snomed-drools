@@ -30,7 +30,6 @@ public class IntegrationTest {
 
     @Test
     public void testValidateAxiomUsingRelationshipAssertion() throws IOException, ReleaseImportException {
-
         List<InvalidContent> invalidContentsReport = droolsRF2Validator.validateSnapshotStreams(
                 Collections.singleton(new FileInputStream(snomedRF2Zip)),
                 null,
@@ -38,7 +37,7 @@ public class IntegrationTest {
                 "20190131",
                 null);
 
-        System.out.println(invalidContentsReport);
+        invalidContentsReport.forEach(invalidContent -> System.out.println(invalidContent));
 
         assertEquals(2, invalidContentsReport.size());
 

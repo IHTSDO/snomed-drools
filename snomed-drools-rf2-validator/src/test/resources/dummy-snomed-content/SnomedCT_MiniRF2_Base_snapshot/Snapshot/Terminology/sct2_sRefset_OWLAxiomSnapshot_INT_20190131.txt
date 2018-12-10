@@ -7,9 +7,23 @@ id	effectiveTime	active	moduleId	refsetId	referencedComponentId	owlExpression
 #        :100102001 - Polygon
 #        ObjectSomeValuesFrom(
 #            :100104001 - Number of corners
-#            :100107001 - 3
+#            :100107001 - 2
 #        )
 #    )
 #)
-# This axiom should fail validation because the target concept "100107001 | 3 |" is inactive.
+# This axiom should fail validation because the target concept "100107001 | 2 |" is inactive.
 1b6427e7-23de-476f-8f25-423306f180ac	20190131	1	900000000000207008	733073007	100105001	EquivalentClasses(:100105001 ObjectIntersectionOf(:100102001 ObjectSomeValuesFrom(:100104001 :100107001)))
+
+# The human readable version of this axiom:
+# EquivalentClasses(
+#    :100105001 - Triangle
+#    ObjectIntersectionOf(
+#        :100102001 - Polygon
+#        ObjectSomeValuesFrom(
+#            :100104001 - Number of corners
+#            :100108001 - 3
+#        )
+#    )
+#)
+# The same triple is in the concept stated relationships to test that it's not found as a duplicate
+33ab90b2-ceed-4cb8-a04b-b7262657b71d	20190131	1	900000000000207008	733073007	100105001	EquivalentClasses(:100105001 ObjectIntersectionOf(:100102001 ObjectSomeValuesFrom(:100104001 :100108001)))

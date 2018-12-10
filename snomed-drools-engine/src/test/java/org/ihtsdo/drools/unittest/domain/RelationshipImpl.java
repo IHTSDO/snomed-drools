@@ -19,6 +19,12 @@ public class RelationshipImpl implements Relationship {
 	}
 
 	@Override
+	public String getAxiomId() {
+		// We don't have any unit tests using axioms in this module
+		return null;
+	}
+
+	@Override
 	public String getId() {
 		return id;
 	}

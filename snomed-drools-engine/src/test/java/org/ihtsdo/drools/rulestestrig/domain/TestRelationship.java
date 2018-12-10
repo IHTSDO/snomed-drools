@@ -22,6 +22,11 @@ public class TestRelationship implements Relationship, TestComponent {
 	}
 
 	@Override
+	public String getAxiomId() {
+		return null;
+	}
+
+	@Override
 	public String getId() {
 		return id;
 	}

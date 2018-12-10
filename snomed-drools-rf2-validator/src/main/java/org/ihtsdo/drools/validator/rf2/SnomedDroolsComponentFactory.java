@@ -53,7 +53,7 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 	@Override
 	public void newRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
 		if (!characteristicTypeId.equals(INFERRED_RELATIONSHIP)) {
-			repository.addRelationship(new DroolsRelationship(id, isActive(active), moduleId, sourceId, destinationId, Integer.parseInt(relationshipGroup), typeId, characteristicTypeId, published(effectiveTime), published(effectiveTime)));
+			repository.addRelationship(new DroolsRelationship(null, id, isActive(active), moduleId, sourceId, destinationId, Integer.parseInt(relationshipGroup), typeId, characteristicTypeId, published(effectiveTime), published(effectiveTime)));
 		}
 	}
 
@@ -107,7 +107,7 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 			// Build a composite identifier for this 'relationship' (which is actually a fragment of an axiom expression) because it doesn't have its own component identifier.
 			String compositeIdentifier = axiomId + "/Group_" + group + "/Type_" + typeId + "/Destination_" + destinationId;
 
-			DroolsRelationship relationship1 = new DroolsRelationship(compositeIdentifier, true, moduleId, namedConcept.toString(),
+			DroolsRelationship relationship1 = new DroolsRelationship(axiomId, compositeIdentifier, true, moduleId, namedConcept.toString(),
 					destinationId + "", group,
 					typeId + "", ConceptConstants.STATED_RELATIONSHIP, published(effectiveTime), published(effectiveTime));
 			logger.info("Add axiom relationship {}", relationship);

@@ -1,0 +1,18 @@
+import org.ihtsdo.drools.domain.Concept
+import org.ihtsdo.drools.domain.Relationship
+import org.ihtsdo.drools.helper.RelationshipHelper
+import org.ihtsdo.drools.response.InvalidContent
+
+global java.util.List invalidContent
+
+rule "Active Concepts should not have two relationships with the same type, target and group"
+	dialect "mvel"
+	when
+		c : Concept(active)
+		r1 : Relationship(sourceId == c.id)
+		r2 : Relationship(sourceId == c.id && r1.id != id && r1.axiomId == axiomId && typeId == r1.typeId && destinationId == r1.destinationId && relationshipGroup == r1.relationshipGroup
+							&& (!r1.released || (r1.active && r2.active)))
+	then
+		invalidContent.add(new InvalidContent(r1, "An active concept must not have two relationships with the same type, target and group. The duplicate can be an inactive relationship that should be reactivated, or an unreleased new relationship that should be deleted. Please review the following relationship: " + r2.id + "."));
+
+end
