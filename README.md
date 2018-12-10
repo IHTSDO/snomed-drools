@@ -13,6 +13,11 @@ The interfaces can be found here:
 - [Domain object interfaces](https://github.com/IHTSDO/snomed-drools/tree/master/src/main/java/org/ihtsdo/drools/domain)
 - [Service interfaces](https://github.com/IHTSDO/snomed-drools/tree/master/src/main/java/org/ihtsdo/drools/service)
 
+## Axiom validation
+For each OWL axiom to be validated the OWL expression should be deserialized and converted to a Relationship domain object. 
+
+The same SNOMED Drools Rules apply to axiom fragments as to relationships. 
+
 ## Content Access Implementations
 The following implementations use the SNOMED Drools Engine and implement the interfaces above to give the engine access to SNOMED CT content:
 
@@ -22,4 +27,4 @@ The following implementations use the SNOMED Drools Engine and implement the int
 * SNOMED Release Validation Framework (integration in progress)
 
 ## The Assertion Rules
-The rules for this engine are maintained separately in the [snomed-drools-rules project](https://github.com/IHTSDO/snomed-drools-rules).
+The rules for this engine are maintained separately in the [SNOMED Drools Rules project](https://github.com/IHTSDO/snomed-drools-rules).
