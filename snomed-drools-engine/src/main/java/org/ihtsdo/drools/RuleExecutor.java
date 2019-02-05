@@ -158,7 +158,7 @@ public class RuleExecutor {
 			logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
 		}
 
-		List<InvalidContent> invalidContent = sessionInvalidContent.stream().flatMap(Collection::stream).collect(Collectors.toList());
+		List<InvalidContent> invalidContent = sessionInvalidContent.stream().flatMap(Collection::stream).filter(Objects::nonNull).collect(Collectors.toList());
 
 		if (!includePublishedComponents) {
 			Set<InvalidContent> publishedInvalidContent = new HashSet<>();
