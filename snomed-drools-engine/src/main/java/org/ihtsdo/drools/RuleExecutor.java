@@ -7,14 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -231,7 +224,8 @@ public class RuleExecutor {
 			logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
 		}
 
-		List<InvalidContent> invalidContent = sessionInvalidContent.stream().flatMap(Collection::stream).collect(Collectors.toList());
+		List<InvalidContent> invalidContent = sessionInvalidContent.stream().flatMap(Collection::stream).filter(Objects::nonNull).collect(Collectors.toList());
+		invalidContent = removeDuplicates(invalidContent);
 
 		if (!includePublishedComponents) {
 			Set<InvalidContent> publishedInvalidContent = new HashSet<>();
@@ -308,6 +302,19 @@ public class RuleExecutor {
 			}
 		}
 		components.addAll(concept.getOntologyAxioms());
+	}
+
+	private List<InvalidContent> removeDuplicates(List<InvalidContent> invalidContent) {
+		List<InvalidContent> uniqueInvalidContent = new ArrayList<>();
+		Map<String, Map<String, Set<String>>> conceptComponentMessageMap = new HashMap<>();
+		for (InvalidContent content : invalidContent) {
+			Map<String, Set<String>> componentMessages = conceptComponentMessageMap.computeIfAbsent(content.getConceptId(), s -> new HashMap<>());
+			Set<String> messages = componentMessages.computeIfAbsent(content.getComponentId(), s -> new HashSet<>());
+			if (messages.add(content.getMessage())) {
+				uniqueInvalidContent.add(content);
+			}
+		}
+		return uniqueInvalidContent;
 	}
 
 	private static final class RuleLoader extends SimpleFileVisitor<Path> {
