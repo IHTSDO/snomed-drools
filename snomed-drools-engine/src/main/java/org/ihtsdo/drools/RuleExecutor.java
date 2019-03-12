@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class RuleExecutor {
@@ -159,6 +160,7 @@ public class RuleExecutor {
 		}
 
 		List<InvalidContent> invalidContent = sessionInvalidContent.stream().flatMap(Collection::stream).filter(Objects::nonNull).collect(Collectors.toList());
+		invalidContent = removeDuplicates(invalidContent);
 
 		if (!includePublishedComponents) {
 			Set<InvalidContent> publishedInvalidContent = new HashSet<>();
@@ -177,6 +179,19 @@ public class RuleExecutor {
 		}
 
 		return invalidContent;
+	}
+
+	private List<InvalidContent> removeDuplicates(List<InvalidContent> invalidContent) {
+		List<InvalidContent> uniqueInvalidContent = new ArrayList<>();
+		Map<String, Map<String, Set<String>>> conceptComponentMessageMap = new HashMap<>();
+		for (InvalidContent content : invalidContent) {
+			Map<String, Set<String>> componentMessages = conceptComponentMessageMap.computeIfAbsent(content.getConceptId(), s -> new HashMap<>());
+			Set<String> messages = componentMessages.computeIfAbsent(content.getComponentId(), s -> new HashSet<>());
+			if (messages.add(content.getMessage())) {
+				uniqueInvalidContent.add(content);
+			}
+		}
+		return uniqueInvalidContent;
 	}
 
 	private void assertComponentIdsPresent(Concept concept) {

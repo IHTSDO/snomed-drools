@@ -26,6 +26,7 @@ import org.junit.runners.Parameterized.Parameters;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RunWith(Parameterized.class)
 public class RulesTestManual {
@@ -149,6 +150,14 @@ public class RulesTestManual {
 					ruleSetNames,
 					Collections.singleton(concept),
 					conceptService, descriptionService, relationshipService, false, false);
+
+			Set<String> uniqueComponentAssertionSet = new HashSet<>();
+			for (InvalidContent content : invalidContent) {
+				String pair = content.getComponent().getId() + " " + content.getMessage();
+				if (!uniqueComponentAssertionSet.add(pair)) {
+					Assert.fail("Component failures should not be reported multiple times. Duplicate component/message found: " + pair);
+				}
+			}
 
 			if (expectPass) {
 				Assert.assertEquals("A concept from the " + ASSERT_CONCEPTS_PASS + " set actually failed! " + invalidContent.toString(), 0, invalidContent.size());
