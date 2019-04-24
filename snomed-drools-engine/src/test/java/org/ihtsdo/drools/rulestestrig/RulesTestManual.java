@@ -99,8 +99,7 @@ public class RulesTestManual {
 	}
 
 	@Test
-	public void testRulesInDirectory() throws JSONException {
-
+	public void testRulesInDirectory() {
 		final List<TestConcept<TestDescription, TestRelationship>> conceptsThatShouldPass = testConcepts.get(ASSERT_CONCEPTS_PASS);
 		Assert.assertNotNull("The set of concepts '" + ASSERT_CONCEPTS_PASS + "' is required.", conceptsThatShouldPass);
 		executeRulesAndAssertExpectations(ruleExecutor, conceptsThatShouldPass, true);

@@ -6,6 +6,7 @@ import org.ihtsdo.drools.domain.Relationship;
 public class TestRelationship implements Relationship, TestComponent {
 
 	private String id;
+	private String axiomId;
 	private boolean active;
 	private boolean published;
 	private boolean released;
@@ -23,7 +24,7 @@ public class TestRelationship implements Relationship, TestComponent {
 
 	@Override
 	public String getAxiomId() {
-		return null;
+		return axiomId;
 	}
 
 	@Override
@@ -82,6 +83,10 @@ public class TestRelationship implements Relationship, TestComponent {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public void setAxiomId(String axiomId) {
+		this.axiomId = axiomId;
 	}
 
 	public void setActive(boolean active) {
