@@ -130,15 +130,20 @@ public class RuleExecutor {
 			List<Callable<String>> tasks = new ArrayList<>();
 			String total = String.format("%,d", concepts.size());
 			int i = 0;
+			final List<Exception> executionExceptions = new ArrayList<>();
 			while (i < concepts.size()) {
 				Set<Component> components = new HashSet<>();
 				addConcept(components, conceptList.get(i++), includeInferredRelationships);
 				int sessionIndex = tasks.size();
 				tasks.add(() -> {
-					StatelessKieSession statelessKieSession = sessions.get(sessionIndex);
-					statelessKieSession.execute(components);
-					components.clear();
-					((StatelessKnowledgeSessionImpl) statelessKieSession).newWorkingMemory();
+					try {
+						StatelessKieSession statelessKieSession = sessions.get(sessionIndex);
+						statelessKieSession.execute(components);
+						components.clear();
+						((StatelessKnowledgeSessionImpl) statelessKieSession).newWorkingMemory();
+					} catch (Exception e) {
+						executionExceptions.add(e);
+					}
 					return null;
 				});
 
@@ -153,8 +158,11 @@ public class RuleExecutor {
 			if (!tasks.isEmpty()) {
 				runTasks(executorService, tasks);
 			}
-			logger.info("Validated {} of {}", String.format("%,d", i), total);
 			executorService.shutdown();
+			if (!executionExceptions.isEmpty()) {
+				throw new RuleExecutorException(String.format("%s errors were thrown during Drools Rule execution.", executionExceptions.size()), executionExceptions.get(0));
+			}
+			logger.info("Validated {} of {}", String.format("%,d", i), total);
 
 			logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
 		}
