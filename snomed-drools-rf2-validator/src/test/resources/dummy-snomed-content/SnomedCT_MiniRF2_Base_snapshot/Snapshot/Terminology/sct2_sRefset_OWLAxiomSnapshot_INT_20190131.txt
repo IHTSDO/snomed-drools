@@ -1,5 +1,8 @@
 id	effectiveTime	active	moduleId	refsetId	referencedComponentId	owlExpression
 
+# This axiom references a concept which does not exist as the source concept
+53b64d8e-ec40-49e5-bc07-decf7113c7f8	20190131	1	900000000000207008	733073007	123	EquivalentClasses(:123 ObjectIntersectionOf(:100102001 ObjectSomeValuesFrom(:100104001 :100108001)))
+
 # The human readable version of this axiom:
 # EquivalentClasses(
 #    :100105001 - Triangle

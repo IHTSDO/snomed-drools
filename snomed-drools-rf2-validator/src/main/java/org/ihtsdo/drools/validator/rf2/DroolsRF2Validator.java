@@ -182,6 +182,8 @@ public class DroolsRF2Validator {
 			throw new ReleaseImportException("Failed to parse one or more OWL Axioms. Check logs for details.");
 		}
 
+		List<InvalidContent> componentLoadingErrors = repository.getComponentLoadingErrors();
+
 		if(snomedRf2DeltaZip != null) {
 			logger.info("Start loading delta file...");
 			LoadingProfile deltaLoadingProfile = snapshotLoadingProfile.withInactiveRelationships()
@@ -199,6 +201,7 @@ public class DroolsRF2Validator {
 		Collection<DroolsConcept> concepts = repository.getConcepts();
 		logger.info("Running tests");
 		List<InvalidContent> invalidContents = ruleExecutor.execute(ruleSetNamesToRun, concepts, conceptService, descriptionService, relationshipService, true, false);
+		invalidContents.addAll(componentLoadingErrors);
 		//Free resources after getting validation results
 		repository.cleanup();
 		descriptionService.getDroolsDescriptionIndex().cleanup();

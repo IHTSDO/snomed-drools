@@ -39,16 +39,30 @@ public class IntegrationTest {
 
         invalidContentsReport.forEach(invalidContent -> System.out.println(invalidContent));
 
-        assertEquals(2, invalidContentsReport.size());
+        assertEquals(4, invalidContentsReport.size());
 
-        assertEquals(Severity.WARNING, invalidContentsReport.get(0).getSeverity());
+        int index = 0;
+        assertEquals(Severity.WARNING, invalidContentsReport.get(index).getSeverity());
         assertEquals("Test resources were not available so assertions like case significance and US specific terms checks will not have run.",
-                invalidContentsReport.get(0).getMessage());
+                invalidContentsReport.get(index).getMessage());
 
-        assertEquals(Severity.ERROR, invalidContentsReport.get(1).getSeverity());
-        assertEquals("Concepts must not have relationships to inactive concepts.", invalidContentsReport.get(1).getMessage());
-        assertEquals("1b6427e7-23de-476f-8f25-423306f180ac/Group_0/Type_100104001/Destination_100107001", invalidContentsReport.get(1).getComponentId());
-        assertEquals("100105001", invalidContentsReport.get(1).getConceptId());
+        index++;
+        assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
+        assertEquals("Concepts must not have relationships to inactive concepts.", invalidContentsReport.get(index).getMessage());
+        assertEquals("1b6427e7-23de-476f-8f25-423306f180ac/Group_0/Type_100104001/Destination_100107001", invalidContentsReport.get(index).getComponentId());
+        assertEquals("100105001", invalidContentsReport.get(index).getConceptId());
+
+        index++;
+        assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
+        assertEquals("Component references conceptId which does not exist.", invalidContentsReport.get(index).getMessage());
+        assertEquals("53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_116680003/Destination_100102001", invalidContentsReport.get(index).getComponentId());
+        assertEquals("123", invalidContentsReport.get(index).getConceptId());
+
+        index++;
+        assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
+        assertEquals("Component references conceptId which does not exist.", invalidContentsReport.get(index).getMessage());
+        assertEquals("53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_100104001/Destination_100108001", invalidContentsReport.get(index).getComponentId());
+        assertEquals("123", invalidContentsReport.get(index).getConceptId());
     }
 
 }

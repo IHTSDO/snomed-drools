@@ -14,7 +14,7 @@ public class InvalidContent {
 		return new InvalidContent(Constants.ROOT_CONCEPT, new DummyComponent(), message, Severity.WARNING);
 	}
 
-	private InvalidContent(String conceptId, Component component, String message, Severity severity) {
+	public InvalidContent(String conceptId, Component component, String message, Severity severity) {
 		this.conceptId = conceptId;
 		this.component = component;
 		this.message = message;
