@@ -85,12 +85,14 @@ public class SnomedDroolsComponentRepository {
 	private Optional<DroolsConcept> getConceptOrRecordError(long conceptId, Component component) {
 		DroolsConcept concept = conceptMap.get(conceptId);
 		if (concept == null) {
-			synchronized (this) {
-				componentLoadingErrors.add(new InvalidContent(conceptId + "", component, "Component references conceptId which does not exist.", Severity.ERROR));
-			}
+			addComponentLoadingError(conceptId, component, "Component references conceptId which does not exist.");
 			return Optional.empty();
 		}
 		return Optional.of(concept);
+	}
+
+	public synchronized void addComponentLoadingError(long conceptId, Component component, String message) {
+		componentLoadingErrors.add(new InvalidContent(conceptId + "", component, message, Severity.ERROR));
 	}
 
 	public DroolsConcept getConcept(String conceptId) {

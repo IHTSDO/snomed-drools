@@ -1,11 +1,9 @@
 package org.ihtsdo.drools.validator.rf2;
 
-import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
-import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
-import org.ihtsdo.drools.validator.rf2.domain.DroolsOntologyAxiom;
-import org.ihtsdo.drools.validator.rf2.domain.DroolsRelationship;
+import org.ihtsdo.drools.validator.rf2.domain.*;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
+import org.semanticweb.owlapi.io.OWLParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snomed.otf.owltoolkit.conversion.AxiomRelationshipConversionService;
@@ -80,11 +78,10 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 					Set<String> namedConceptIds = axiomConverter.getIdsOfConceptsNamedInAxiom(owlExpression).stream().map(Object::toString).collect(Collectors.toSet());
 					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, activeBool, moduleId, referencedComponentId, owlExpression, namedConceptIds, published(effectiveTime), published(effectiveTime)));
 				}
-			} catch (ConversionException e) {
-				logger.error("OntologyAxiom conversion failed for refset member " + id, e);
-				synchronized (SnomedDroolsComponentFactory.class) {
-					axiomParsingError = true;
-				}
+			} catch (ConversionException | OWLParserException e) {
+				logger.warn("OntologyAxiom conversion failed for refset member " + id, e);
+				repository.addComponentLoadingError(parseLong(referencedComponentId), new DroolsComponent(id, activeBool, moduleId, false, false),
+						"Error parsing Axiom owlExpression.");
 			}
 
 		} else if (activeBool && fieldNames.length == 7 && fieldNames[6].equals("acceptabilityId")) {
