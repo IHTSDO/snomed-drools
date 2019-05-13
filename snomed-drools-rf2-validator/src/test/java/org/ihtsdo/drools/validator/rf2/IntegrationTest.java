@@ -54,19 +54,19 @@ public class IntegrationTest {
 
         index++;
         assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
-        assertEquals("Component references conceptId which does not exist.", invalidContentsReport.get(index).getMessage());
+        assertEquals("Relationship 53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_116680003/Destination_100102001 references conceptId 123 which does not exist", invalidContentsReport.get(index).getMessage());
         assertEquals("53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_116680003/Destination_100102001", invalidContentsReport.get(index).getComponentId());
         assertEquals("123", invalidContentsReport.get(index).getConceptId());
 
         index++;
         assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
-        assertEquals("Component references conceptId which does not exist.", invalidContentsReport.get(index).getMessage());
+        assertEquals("Relationship 53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_100104001/Destination_100108001 references conceptId 123 which does not exist", invalidContentsReport.get(index).getMessage());
         assertEquals("53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_100104001/Destination_100108001", invalidContentsReport.get(index).getComponentId());
         assertEquals("123", invalidContentsReport.get(index).getConceptId());
 
         index++;
         assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
-        assertEquals("Error parsing Axiom owlExpression.", invalidContentsReport.get(index).getMessage());
+        assertEquals("Error parsing Axiom owlExpression for Axiom 990f6779-1475-41ff-aacd-4b1924d4ab9f", invalidContentsReport.get(index).getMessage());
         assertEquals("990f6779-1475-41ff-aacd-4b1924d4ab9f", invalidContentsReport.get(index).getComponentId());
         assertEquals("100105001", invalidContentsReport.get(index).getConceptId());
     }

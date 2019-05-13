@@ -85,7 +85,18 @@ public class SnomedDroolsComponentRepository {
 	private Optional<DroolsConcept> getConceptOrRecordError(long conceptId, Component component) {
 		DroolsConcept concept = conceptMap.get(conceptId);
 		if (concept == null) {
-			addComponentLoadingError(conceptId, component, "Component references conceptId which does not exist.");
+			StringBuilder errorMessageBuilder = new StringBuilder();
+			if (component instanceof DroolsDescription) {
+				errorMessageBuilder.append("Description ");
+			} else if (component instanceof DroolsRelationship) {
+				errorMessageBuilder.append("Relationship ");
+			} else if (component instanceof DroolsOntologyAxiom) {
+				errorMessageBuilder.append("Axiom Refset ");
+			} else {
+				errorMessageBuilder.append("Component ");
+			}
+			errorMessageBuilder.append(component.getId() + " references conceptId " + conceptId + " which does not exist");
+			addComponentLoadingError(conceptId, component, errorMessageBuilder.toString());
 			return Optional.empty();
 		}
 		return Optional.of(concept);

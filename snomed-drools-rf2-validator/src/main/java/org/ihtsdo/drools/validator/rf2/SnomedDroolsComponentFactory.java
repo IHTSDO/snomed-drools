@@ -81,7 +81,7 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 			} catch (ConversionException | OWLParserException e) {
 				logger.warn("OntologyAxiom conversion failed for refset member " + id, e);
 				repository.addComponentLoadingError(parseLong(referencedComponentId), new DroolsComponent(id, activeBool, moduleId, false, false),
-						"Error parsing Axiom owlExpression.");
+						"Error parsing Axiom owlExpression for Axiom " + id);
 			}
 
 		} else if (activeBool && fieldNames.length == 7 && fieldNames[6].equals("acceptabilityId")) {
