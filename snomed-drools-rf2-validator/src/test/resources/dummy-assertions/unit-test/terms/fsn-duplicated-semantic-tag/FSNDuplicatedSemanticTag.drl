@@ -1,0 +1,21 @@
+import org.ihtsdo.drools.domain.Concept
+import org.ihtsdo.drools.domain.Description
+import org.ihtsdo.drools.domain.Constants
+import org.ihtsdo.drools.helper.DescriptionHelper
+import org.ihtsdo.drools.response.InvalidContent
+import org.ihtsdo.drools.response.Severity
+
+global java.util.List invalidContent
+
+rule "Active concept should have only one semantic tag"
+	dialect "mvel"
+	when
+		c : Concept(active)
+		d : Description(active 
+						&& typeId == Constants.FSN
+						&& (tag : DescriptionHelper.getTag(term))
+						&& term matches (".*\\("+ tag +"\\)\\s+\\("+ tag +"\\)")
+						)
+	then
+		invalidContent.add(new InvalidContent(d, "Active FSN should have only one semantic tag.", Severity.WARNING));
+end

@@ -9,6 +9,7 @@ import org.ihtsdo.drools.domain.*;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
 import org.ihtsdo.drools.exception.RuleExecutorException;
 import org.ihtsdo.drools.response.InvalidContent;
+import org.ihtsdo.drools.response.Severity;
 import org.ihtsdo.drools.service.ConceptService;
 import org.ihtsdo.drools.service.DescriptionService;
 import org.ihtsdo.drools.service.RelationshipService;
@@ -112,6 +113,7 @@ public class RuleExecutor {
 		Date start = new Date();
 
 		final List<List<InvalidContent>> sessionInvalidContent = new ArrayList<>();
+		final List<InvalidContent> exceptionContents = new ArrayList<>();
 		for (String ruleSetName : ruleSetNames) {
 			final KieContainer kieContainer = assertionGroupContainers.get(ruleSetName);
 			if (kieContainer == null) {
@@ -130,10 +132,10 @@ public class RuleExecutor {
 			List<Callable<String>> tasks = new ArrayList<>();
 			String total = String.format("%,d", concepts.size());
 			int i = 0;
-			final List<Exception> executionExceptions = new ArrayList<>();
 			while (i < concepts.size()) {
 				Set<Component> components = new HashSet<>();
-				addConcept(components, conceptList.get(i++), includeInferredRelationships);
+				Concept concept = conceptList.get(i++);
+				addConcept(components, concept, includeInferredRelationships);
 				int sessionIndex = tasks.size();
 				tasks.add(() -> {
 					try {
@@ -142,7 +144,7 @@ public class RuleExecutor {
 						components.clear();
 						((StatelessKnowledgeSessionImpl) statelessKieSession).newWorkingMemory();
 					} catch (Exception e) {
-						executionExceptions.add(e);
+						exceptionContents.add(new InvalidContent(concept.getId(),concept, "Exception raised during rule execution: " + e.getMessage(), Severity.ERROR));
 					}
 					return null;
 				});
@@ -159,15 +161,13 @@ public class RuleExecutor {
 				runTasks(executorService, tasks);
 			}
 			executorService.shutdown();
-			if (!executionExceptions.isEmpty()) {
-				throw new RuleExecutorException(String.format("%s errors were thrown during Drools Rule execution.", executionExceptions.size()), executionExceptions.get(0));
-			}
 			logger.info("Validated {} of {}", String.format("%,d", i), total);
 
 			logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
 		}
 
 		List<InvalidContent> invalidContent = sessionInvalidContent.stream().flatMap(Collection::stream).filter(Objects::nonNull).collect(Collectors.toList());
+		invalidContent.addAll(exceptionContents);
 		invalidContent = removeDuplicates(invalidContent);
 
 		if (!includePublishedComponents) {

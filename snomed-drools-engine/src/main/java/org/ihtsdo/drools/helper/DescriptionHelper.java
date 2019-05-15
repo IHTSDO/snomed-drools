@@ -218,7 +218,11 @@ public class DescriptionHelper {
 	public static String getTag(String term) {
 		final Matcher matcher = TAG_PATTERN.matcher(term);
 		if (matcher.matches()) {
-			return matcher.group(1);
+			String result = matcher.group(1);
+			if(result != null && (result.contains("(") || result.contains(")"))) {
+				return null;
+			}
+			return result;
 		}
 		return null;
 	}
