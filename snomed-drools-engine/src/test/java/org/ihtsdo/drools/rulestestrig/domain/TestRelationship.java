@@ -7,6 +7,7 @@ public class TestRelationship implements Relationship, TestComponent {
 
 	private String id;
 	private String axiomId;
+	private boolean isAxiomGCI;
 	private boolean active;
 	private boolean published;
 	private boolean released;
@@ -25,6 +26,11 @@ public class TestRelationship implements Relationship, TestComponent {
 	@Override
 	public String getAxiomId() {
 		return axiomId;
+	}
+
+	@Override
+	public boolean isAxiomGCI() {
+		return isAxiomGCI;
 	}
 
 	@Override

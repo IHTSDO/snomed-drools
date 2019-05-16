@@ -5,15 +5,17 @@ import org.ihtsdo.drools.domain.Relationship;
 public class DroolsRelationship extends DroolsComponent implements Relationship {
 
 	private final String axiomId;
+	private final boolean isAxiomGCI;
 	private final String sourceId;
 	private final String destinationId;
 	private final int group;
 	private final String typeId;
 	private final String characteristicTypeId;
 
-	public DroolsRelationship(String axiomId, String id, boolean active, String moduleId, String sourceId, String destinationId, int group, String typeId, String characteristicTypeId, boolean published, boolean released) {
+	public DroolsRelationship(String axiomId, boolean isAxiomGCI, String id, boolean active, String moduleId, String sourceId, String destinationId, int group, String typeId, String characteristicTypeId, boolean published, boolean released) {
 		super(id, active, moduleId, published, released);
 		this.axiomId = axiomId;
+		this.isAxiomGCI = isAxiomGCI;
 		this.sourceId = sourceId;
 		this.destinationId = destinationId;
 		this.group = group;
@@ -24,6 +26,11 @@ public class DroolsRelationship extends DroolsComponent implements Relationship 
 	@Override
 	public String getAxiomId() {
 		return axiomId;
+	}
+
+	@Override
+	public boolean isAxiomGCI() {
+		return isAxiomGCI;
 	}
 
 	@Override

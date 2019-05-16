@@ -11,6 +11,8 @@ public interface Relationship extends Component {
 	 */
 	String getAxiomId();
 
+	boolean isAxiomGCI();
+
 	String getSourceId();
 
 	int getRelationshipGroup();

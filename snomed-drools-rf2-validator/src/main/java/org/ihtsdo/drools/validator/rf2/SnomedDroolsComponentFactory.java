@@ -51,7 +51,7 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 	@Override
 	public void newRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
 		if (!characteristicTypeId.equals(INFERRED_RELATIONSHIP)) {
-			repository.addRelationship(new DroolsRelationship(null, id, isActive(active), moduleId, sourceId, destinationId, Integer.parseInt(relationshipGroup), typeId, characteristicTypeId, published(effectiveTime), published(effectiveTime)));
+			repository.addRelationship(new DroolsRelationship(null, false, id, isActive(active), moduleId, sourceId, destinationId, Integer.parseInt(relationshipGroup), typeId, characteristicTypeId, published(effectiveTime), published(effectiveTime)));
 		}
 	}
 
@@ -68,10 +68,10 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 				if (axiom != null) {
 					if (axiom.getLeftHandSideNamedConcept() != null && axiom.getRightHandSideRelationships() != null) {
 						// Regular axiom
-						addRelationships(id, axiom.getLeftHandSideNamedConcept(), axiom.getRightHandSideRelationships(), moduleId, effectiveTime);
+						addRelationships(id, false, axiom.getLeftHandSideNamedConcept(), axiom.getRightHandSideRelationships(), moduleId, effectiveTime);
 					} else if (axiom.getRightHandSideNamedConcept() != null && axiom.getLeftHandSideRelationships() != null) {
 						// GCI OntologyAxiom
-						addRelationships(id, axiom.getRightHandSideNamedConcept(), axiom.getLeftHandSideRelationships(), moduleId, effectiveTime);
+						addRelationships(id, true, axiom.getRightHandSideNamedConcept(), axiom.getLeftHandSideRelationships(), moduleId, effectiveTime);
 					}
 				} else {
 					// Can't be converted to relationships
@@ -95,7 +95,7 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 		return axiomParsingError;
 	}
 
-	private void addRelationships(String axiomId, Long namedConcept, Map<Integer, List<Relationship>> groups, String moduleId, String effectiveTime) {
+	private void addRelationships(String axiomId, boolean isGCI, Long namedConcept, Map<Integer, List<Relationship>> groups, String moduleId, String effectiveTime) {
 		groups.forEach((group, relationships) -> relationships.forEach(relationship -> {
 
 			long typeId = relationship.getTypeId();
@@ -104,9 +104,9 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 			// Build a composite identifier for this 'relationship' (which is actually a fragment of an axiom expression) because it doesn't have its own component identifier.
 			String compositeIdentifier = axiomId + "/Group_" + group + "/Type_" + typeId + "/Destination_" + destinationId;
 
-			DroolsRelationship relationship1 = new DroolsRelationship(axiomId, compositeIdentifier, true, moduleId, namedConcept.toString(),
-					destinationId + "", group,
-					typeId + "", ConceptConstants.STATED_RELATIONSHIP, published(effectiveTime), published(effectiveTime));
+			DroolsRelationship relationship1 = new DroolsRelationship(axiomId, isGCI, compositeIdentifier, true, moduleId,
+                    namedConcept.toString(), destinationId + "",
+                    group, typeId + "", ConceptConstants.STATED_RELATIONSHIP, published(effectiveTime), published(effectiveTime));
 			logger.info("Add axiom relationship {}", relationship);
 			repository.addRelationship(
 					relationship1);

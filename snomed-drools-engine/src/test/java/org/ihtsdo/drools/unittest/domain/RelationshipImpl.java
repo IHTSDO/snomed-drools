@@ -25,6 +25,11 @@ public class RelationshipImpl implements Relationship {
 	}
 
 	@Override
+	public boolean isAxiomGCI() {
+		return false;
+	}
+
+	@Override
 	public String getId() {
 		return id;
 	}
