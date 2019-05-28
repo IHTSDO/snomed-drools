@@ -64,19 +64,25 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 			// Fields: id	effectiveTime	active	moduleId	refsetId	referencedComponentId	owlExpression
 			String owlExpression = otherValues[0];
 			try {
-				AxiomRepresentation axiom = axiomConverter.convertAxiomToRelationships(parseLong(referencedComponentId), owlExpression);
+				//AxiomRepresentation axiom = axiomConverter.convertAxiomToRelationships(parseLong(referencedComponentId), owlExpression);
+				AxiomRepresentation axiom = axiomConverter.convertAxiomToRelationships(owlExpression);
 				if (axiom != null) {
 					if (axiom.getLeftHandSideNamedConcept() != null && axiom.getRightHandSideRelationships() != null) {
 						// Regular axiom
 						addRelationships(id, false, axiom.getLeftHandSideNamedConcept(), axiom.getRightHandSideRelationships(), moduleId, effectiveTime);
+						// compare referencedComponentID and named concept in OWL expression
+						validateComponentIdAndNamedConcept(id, activeBool, moduleId, parseLong(referencedComponentId), axiom.getLeftHandSideNamedConcept());
 					} else if (axiom.getRightHandSideNamedConcept() != null && axiom.getLeftHandSideRelationships() != null) {
 						// GCI OntologyAxiom
 						addRelationships(id, true, axiom.getRightHandSideNamedConcept(), axiom.getLeftHandSideRelationships(), moduleId, effectiveTime);
+						// compare referencedComponentID and named concept in OWL expression
+						validateComponentIdAndNamedConcept(id, activeBool, moduleId, parseLong(referencedComponentId), axiom.getRightHandSideNamedConcept());
 					}
 				} else {
 					// Can't be converted to relationships
 					Set<String> namedConceptIds = axiomConverter.getIdsOfConceptsNamedInAxiom(owlExpression).stream().map(Object::toString).collect(Collectors.toSet());
 					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, activeBool, moduleId, referencedComponentId, owlExpression, namedConceptIds, published(effectiveTime), published(effectiveTime)));
+
 				}
 			} catch (ConversionException | OWLParserException e) {
 				logger.warn("OntologyAxiom conversion failed for refset member " + id, e);
@@ -119,5 +125,12 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 
 	private boolean published(String effectiveTime) {
 		return !currentEffectiveTime.equals(effectiveTime);
+	}
+
+	private void validateComponentIdAndNamedConcept(String axiomId, boolean active, String moduleId, Long referencedComponentId, Long namedConceptId) {
+		if(!referencedComponentId.equals(namedConceptId)) {
+			repository.addComponentLoadingError(referencedComponentId, new DroolsComponent(axiomId, active, moduleId, false, false),
+					"ReferencedComponentId " + referencedComponentId + " does not match named concept " + namedConceptId + " in Axiom " + axiomId);
+		}
 	}
 }

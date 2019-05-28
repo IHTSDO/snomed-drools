@@ -39,7 +39,7 @@ public class IntegrationTest {
 
         invalidContentsReport.forEach(invalidContent -> System.out.println(invalidContent));
 
-        assertEquals(5, invalidContentsReport.size());
+        assertEquals(7, invalidContentsReport.size());
 
         int index = 0;
         assertEquals(Severity.WARNING, invalidContentsReport.get(index).getSeverity());
@@ -51,6 +51,18 @@ public class IntegrationTest {
         assertEquals("Concepts must not have relationships to inactive concepts.", invalidContentsReport.get(index).getMessage());
         assertEquals("1b6427e7-23de-476f-8f25-423306f180ac/Group_0/Type_100104001/Destination_100107001", invalidContentsReport.get(index).getComponentId());
         assertEquals("100105001", invalidContentsReport.get(index).getConceptId());
+
+        index++;
+        assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
+        assertEquals("ReferencedComponentId 404684003 does not match named concept 100105001 in Axiom 990f6779-1475-41ff-aacd-4b1924d4ab9f", invalidContentsReport.get(index).getMessage());
+        assertEquals("990f6779-1475-41ff-aacd-4b1924d4ab9f", invalidContentsReport.get(index).getComponentId());
+        assertEquals("404684003", invalidContentsReport.get(index).getConceptId());
+
+        index++;
+        assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
+        assertEquals("ReferencedComponentId 404684003 does not match named concept 100105001 in Axiom abf66bf1-708c-4ae2-b969-1e98eec7d250", invalidContentsReport.get(index).getMessage());
+        assertEquals("abf66bf1-708c-4ae2-b969-1e98eec7d250", invalidContentsReport.get(index).getComponentId());
+        assertEquals("404684003", invalidContentsReport.get(index).getConceptId());
 
         index++;
         assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());

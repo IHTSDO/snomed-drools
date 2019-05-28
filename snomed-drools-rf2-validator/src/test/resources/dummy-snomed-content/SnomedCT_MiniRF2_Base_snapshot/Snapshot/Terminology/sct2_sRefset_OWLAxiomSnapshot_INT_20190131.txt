@@ -1,5 +1,11 @@
 id	effectiveTime	active	moduleId	refsetId	referencedComponentId	owlExpression
 
+# This axiom has unmatched referencedComponentId and named concept
+990f6779-1475-41ff-aacd-4b1924d4ab9f	20190131	1	900000000000207008	733073007	404684003	EquivalentClasses(:100105001 ObjectIntersectionOf(:100102001 ObjectSomeValuesFrom(:100104001 :100108001)))
+
+# This GCI axiom has unmatched referencedComponentId and named concept
+abf66bf1-708c-4ae2-b969-1e98eec7d250	20190131	1	900000000000207008	733073007	404684003	SubClassOf(ObjectIntersectionOf(:100102001 ObjectSomeValuesFrom(:609096000 ObjectSomeValuesFrom(:100104001 :100108001))) :100105001)
+
 # This axiom references a concept which does not exist as the source concept
 53b64d8e-ec40-49e5-bc07-decf7113c7f8	20190131	1	900000000000207008	733073007	123	EquivalentClasses(:123 ObjectIntersectionOf(:100102001 ObjectSomeValuesFrom(:100104001 :100108001)))
 
