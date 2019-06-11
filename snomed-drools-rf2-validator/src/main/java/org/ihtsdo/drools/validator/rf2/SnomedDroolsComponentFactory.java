@@ -113,9 +113,8 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 			DroolsRelationship relationship1 = new DroolsRelationship(axiomId, isGCI, compositeIdentifier, true, moduleId,
                     namedConcept.toString(), destinationId + "",
                     group, typeId + "", ConceptConstants.STATED_RELATIONSHIP, published(effectiveTime), published(effectiveTime));
-			logger.info("Add axiom relationship {}", relationship);
-			repository.addRelationship(
-					relationship1);
+			logger.info("Add axiom relationship {}", relationship1);
+			repository.addRelationship(relationship1);
 		}));
 	}
 

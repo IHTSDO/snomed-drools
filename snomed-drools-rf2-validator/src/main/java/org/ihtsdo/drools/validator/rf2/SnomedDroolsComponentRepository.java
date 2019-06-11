@@ -55,9 +55,11 @@ public class SnomedDroolsComponentRepository {
 		DroolsDescription description = descriptionMap.get(descriptionId);
 		if (description == null) {
 			// TODO: This should be a warning and part of the validation report.
-			logger.warn("Language reference set member " + memberId + " references Description " + descriptionId + " which can not be found.");
+			String message = "Language reference set member " + memberId + " references Description " + descriptionId + " which can not be found.";
+			logger.warn(message);
+		} else {
+			description.getAcceptabilityMap().put(refsetId, acceptabilityId);
 		}
-		description.getAcceptabilityMap().put(refsetId, acceptabilityId);
 	}
 
 	public void addRelationship(DroolsRelationship relationship) {
@@ -69,9 +71,12 @@ public class SnomedDroolsComponentRepository {
 				DroolsConcept destinationConcept = conceptMap.get(destinationId);
 				if (destinationConcept == null) {
 					// TODO: This should be a warning and part of the validation report.
-					logger.warn("Relationship " + relationship.getId() + " has destination Concept " + relationship.getDestinationId() + " which can not be found.");
+					String message = "Relationship " + relationship.getId() + " has destination Concept " + relationship.getDestinationId() + " which can not be found.";
+					logger.warn(message);
+					addComponentLoadingWarning(parseLong(concept.getId()), relationship, message);
+				} else {
+					destinationConcept.getActiveInboundStatedRelationships().add(relationship);
 				}
-				destinationConcept.getActiveInboundStatedRelationships().add(relationship);
 			}
 		});
 	}
@@ -104,6 +109,10 @@ public class SnomedDroolsComponentRepository {
 
 	public synchronized void addComponentLoadingError(long conceptId, Component component, String message) {
 		componentLoadingErrors.add(new InvalidContent(conceptId + "", component, message, Severity.ERROR));
+	}
+
+	public synchronized void addComponentLoadingWarning(long conceptId, Component component, String message) {
+		componentLoadingErrors.add(new InvalidContent(conceptId + "", component, message, Severity.WARNING));
 	}
 
 	public DroolsConcept getConcept(String conceptId) {
