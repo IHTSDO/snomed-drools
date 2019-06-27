@@ -40,9 +40,9 @@ public class DroolsRF2Validator {
 	private final Logger logger = LoggerFactory.getLogger(DroolsRF2Validator.class);
 
 	public static void main(String[] args) {
-		if (args.length != 4 && args.length != 5) {
+		if (args.length != 4 && args.length != 5 && args.length != 6) {
 			// NOTE - Keep in sync with README.md file.
-			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <rf2SnapshotDirectory> <currentEffectiveTime> <includedModules(optional)>");
+			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <rf2SnapshotDirectory> <currentEffectiveTime> <includedModules(optional)> <previousRf2Directory(optional)>");
 			System.exit(1);
 		}
 
@@ -70,6 +70,11 @@ public class DroolsRF2Validator {
 			System.exit(1);
 		}
 
+		String prevRf2Release = null;
+		if(args.length > 5) {
+			prevRf2Release = args[5];
+		}
+
 		File report = new File("validation-report-" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + ".txt");
 		try {
 			// Load test resources from public S3 location
@@ -79,7 +84,7 @@ public class DroolsRF2Validator {
 
 			HashSet<String> ruleSetNamesToRun = Sets.newHashSet(commaSeparatedAssertionGroups.split(","));
 			HashSet<String> snomedSnapshotDirectories = Sets.newHashSet(snapshotDirectories.split(","));
-			List<InvalidContent> invalidContents = rf2Validator.validateSnapshots(snomedSnapshotDirectories, deltaDirectory, ruleSetNamesToRun, currentEffectiveTime, includedModuleSets);
+			List<InvalidContent> invalidContents = rf2Validator.validateSnapshots(snomedSnapshotDirectories, deltaDirectory, prevRf2Release, ruleSetNamesToRun, currentEffectiveTime, includedModuleSets);
 			report.createNewFile();
 			try (BufferedWriter reportWriter = new BufferedWriter(new FileWriter(report))) {
 				reportWriter.write("conceptId\tcomponentId\tmessage\tseverity\tignorePublishedCheck");
@@ -122,7 +127,7 @@ public class DroolsRF2Validator {
 		testResourceProvider = ruleExecutor.newTestResourceProvider(testResourcesResourceManager);
 	}
 
-	public List<InvalidContent> validateSnapshotStreams(Set<InputStream> snomedRf2EditionZips, InputStream snomedRf2DeltaZip, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {
+	public List<InvalidContent> validateSnapshotStreams(Set<InputStream> snomedRf2EditionZips, InputStream snomedRf2DeltaZip, InputStream prevRf2ReleaseZip, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {
 		Set<String> directoryPaths = new HashSet<>();
 		// Unzip RF2 archive for reuse
 		for (InputStream snomedRf2EditionZip : snomedRf2EditionZips) {
@@ -132,13 +137,16 @@ public class DroolsRF2Validator {
 		String deltaDirectory = null;
 		if(snomedRf2DeltaZip != null) {
 			deltaDirectory = new ReleaseImporter().unzipRelease(snomedRf2DeltaZip, ReleaseImporter.ImportType.DELTA).getAbsolutePath();
-
 		}
-		return validateSnapshots(directoryPaths, deltaDirectory, ruleSetNamesToRun, currentEffectiveTime, includedModules);
+		String prevReleaseDirectory = null;
+		if(prevRf2ReleaseZip != null) {
+			prevReleaseDirectory = new ReleaseImporter().unzipRelease(prevRf2ReleaseZip, ReleaseImporter.ImportType.SNAPSHOT).getAbsolutePath();
+		}
+		return validateSnapshots(directoryPaths, deltaDirectory, prevReleaseDirectory, ruleSetNamesToRun, currentEffectiveTime, includedModules);
 	}
 
 
-	public List<InvalidContent> validateSnapshots(Set<String> snomedRf2EditionDir, String snomedRf2DeltaZip, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {
+	public List<InvalidContent> validateSnapshots(Set<String> snomedRf2EditionDir, String snomedRf2DeltaZip, String prevReleaseDir, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {
 		long start = new Date().getTime();
 		Assert.isTrue(ruleSetNamesToRun != null && !ruleSetNamesToRun.isEmpty(), "The name of at least one rule set must be specified.");
 
@@ -175,8 +183,15 @@ public class DroolsRF2Validator {
 				.withIncludedReferenceSetFilenamePattern(".*_cRefset_Language.*")
 				.withIncludedReferenceSetFilenamePattern(".*_OWL.*");
 
+		PreviousReleaseComponentFactory previousReleaseComponentFactory = null;
+		if(prevReleaseDir != null) {
+			previousReleaseComponentFactory = new PreviousReleaseComponentFactory();
+			Set<String> prevRelease = new HashSet<>();
+			prevRelease.add(prevReleaseDir);
+			importer.loadEffectiveSnapshotReleaseFiles(prevRelease, snapshotLoadingProfile, previousReleaseComponentFactory);
+		}
 
-		SnomedDroolsComponentFactory componentFactory = new SnomedDroolsComponentFactory(repository, currentEffectiveTime);
+		SnomedDroolsComponentFactory componentFactory = new SnomedDroolsComponentFactory(repository, currentEffectiveTime, previousReleaseComponentFactory);
 		importer.loadEffectiveSnapshotReleaseFiles(snomedRf2EditionDir, snapshotLoadingProfile, componentFactory);
 		if (componentFactory.isAxiomParsingError()) {
 			throw new ReleaseImportException("Failed to parse one or more OWL Axioms. Check logs for details.");

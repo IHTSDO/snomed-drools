@@ -3,7 +3,6 @@ package org.ihtsdo.drools.validator.rf2;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.response.Severity;
 import org.ihtsdo.otf.snomedboot.ReleaseImportException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.snomed.otf.snomedboot.testutil.ZipUtil;
@@ -33,7 +32,7 @@ public class IntegrationTest {
         List<InvalidContent> invalidContentsReport = droolsRF2Validator.validateSnapshotStreams(
                 Collections.singleton(new FileInputStream(snomedRF2Zip)),
                 null,
-                Collections.singleton("unit-test"),
+                null, Collections.singleton("unit-test"),
                 "20190131",
                 null);
 

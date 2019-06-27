@@ -28,30 +28,35 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 	private final SnomedDroolsComponentRepository repository;
 	private final AxiomRelationshipConversionService axiomConverter;
 	private final String currentEffectiveTime;
+	private final PreviousReleaseComponentFactory previousReleaseComponentFactory;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private boolean axiomParsingError = false;
 
-	SnomedDroolsComponentFactory(SnomedDroolsComponentRepository repository, String currentEffectiveTime) {
+	SnomedDroolsComponentFactory(SnomedDroolsComponentRepository repository, String currentEffectiveTime, PreviousReleaseComponentFactory previousReleaseComponentFactory) {
 		this.repository = repository;
 		axiomConverter = new AxiomRelationshipConversionService(repository.getUngroupedAttributes());
 		this.currentEffectiveTime = currentEffectiveTime;
+		this.previousReleaseComponentFactory = previousReleaseComponentFactory;
 	}
 
 	@Override
 	public void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
-		repository.addConcept(new DroolsConcept(conceptId, isActive(active), moduleId, definitionStatusId, published(effectiveTime), published(effectiveTime)));
+		repository.addConcept(new DroolsConcept(conceptId, isActive(active), moduleId, definitionStatusId,
+				published(effectiveTime), previousReleaseComponentFactory != null ? previousReleaseComponentFactory.getReleasedConcepts().contains(conceptId) : published(effectiveTime)));
 	}
 
 	@Override
 	public void newDescriptionState(String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
-		repository.addDescription(new DroolsDescription(id, isActive(active), moduleId, conceptId, languageCode, typeId, term, caseSignificanceId, TEXT_DEFINITION.equals(typeId), published(effectiveTime), published(effectiveTime)));
+		repository.addDescription(new DroolsDescription(id, isActive(active), moduleId, conceptId, languageCode, typeId, term, caseSignificanceId, TEXT_DEFINITION.equals(typeId),
+				published(effectiveTime), previousReleaseComponentFactory != null ? previousReleaseComponentFactory.getReleasedDescriptions().contains(id) : published(effectiveTime)));
 	}
 
 	@Override
 	public void newRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
 		if (!characteristicTypeId.equals(INFERRED_RELATIONSHIP)) {
-			repository.addRelationship(new DroolsRelationship(null, false, id, isActive(active), moduleId, sourceId, destinationId, Integer.parseInt(relationshipGroup), typeId, characteristicTypeId, published(effectiveTime), published(effectiveTime)));
+			repository.addRelationship(new DroolsRelationship(null, false, id, isActive(active), moduleId, sourceId, destinationId, Integer.parseInt(relationshipGroup), typeId, characteristicTypeId,
+					published(effectiveTime), previousReleaseComponentFactory != null ? previousReleaseComponentFactory.getReleasedRelationships().contains(id) : published(effectiveTime)));
 		}
 	}
 

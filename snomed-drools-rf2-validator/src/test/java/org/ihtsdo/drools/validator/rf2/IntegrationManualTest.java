@@ -22,18 +22,25 @@ public class IntegrationManualTest {
     
     public static void main(String[] args) throws IOException, ReleaseImportException {
         String releaseFilePath = "/path/to/release1,/path/to/release2";
+        String prevReleasePath = null;
         String deltaDirectoryPath = "path/to/delta";
         String directoryOfRuleSetsPath = "path/to/rules";
         HashSet<String> ruleSetNamesToRun = Sets.newHashSet("common-authoring,int-authoring".split(","));
         String includedModules = "";
-        Set<String> includedModulesSet = Sets.newHashSet(includedModules.split(","));
+        Set<String> includedModulesSet = includedModules.isEmpty() ? new HashSet<>() : Sets.newHashSet(includedModules.split(","));
         Set<InputStream> inputStreams = new HashSet<>();
         HashSet<String> releasesFiles = Sets.newHashSet(releaseFilePath.split(","));
         for (String releasesFile : releasesFiles) {
             inputStreams.add(new FileInputStream(releasesFile));
         }
-        InputStream deltaInputStream = new FileInputStream(deltaDirectoryPath);
-        List<InvalidContent> invalidContents = new DroolsRF2Validator(directoryOfRuleSetsPath).validateSnapshotStreams(inputStreams, deltaInputStream, ruleSetNamesToRun, "", includedModulesSet);
+        InputStream deltaInputStream = null; //new FileInputStream(deltaDirectoryPath);
+
+        InputStream prevReleaseStream = null;
+        if(prevReleasePath != null) {
+            prevReleaseStream = new FileInputStream(prevReleasePath);
+        }
+
+        List<InvalidContent> invalidContents = new DroolsRF2Validator(directoryOfRuleSetsPath).validateSnapshotStreams(inputStreams, prevReleaseStream, prevReleaseStream, ruleSetNamesToRun, "20200131", includedModulesSet);
 
         // Some extra output when running this main method in development -
         int outputSize = invalidContents.size() > 50 ? 50 : invalidContents.size();
