@@ -217,17 +217,28 @@ public class DroolsRF2Validator {
 		logger.info("Running tests");
 		List<InvalidContent> invalidContents = ruleExecutor.execute(ruleSetNamesToRun, concepts, conceptService, descriptionService, relationshipService, true, false);
 		invalidContents.addAll(componentLoadingErrors);
-		//Free resources after getting validation results
-		repository.cleanup();
-		descriptionService.getDroolsDescriptionIndex().cleanup();
-		logger.info("Tests complete. Total run time {} seconds", (new Date().getTime() - start) / 1000);
 
 		//Filter only invalid components that are in the specified modules list, if modules list is not specified, return all invalid components
 		if(includedModules != null && !includedModules.isEmpty()) {
 			logger.info("Filtering invalid contents for included module ids: {}", String.join(",", includedModules));
 			invalidContents = invalidContents.stream().filter(content -> includedModules.contains(content.getComponent().getModuleId())).collect(Collectors.toList());
 		}
+
+		// Add concept FSN to invalid contents
+		for (InvalidContent invalidContent : invalidContents) {
+			if(invalidContent.getConceptId() != null && !invalidContent.getConceptId().isEmpty()) {
+				Set<String> fsnSet = descriptionService.getFSNs(Sets.newHashSet(invalidContent.getConceptId()));
+				if(!fsnSet.isEmpty()) {
+					invalidContent.setConceptFsn(fsnSet.iterator().next());
+				}
+			}
+		}
+
+		//Free resources after getting validation results
+		repository.cleanup();
+		descriptionService.getDroolsDescriptionIndex().cleanup();
 		logger.info("invalidContent count {}", invalidContents.size());
+		logger.info("Tests complete. Total run time {} seconds", (new Date().getTime() - start) / 1000);
 		return invalidContents;
 	}
 
