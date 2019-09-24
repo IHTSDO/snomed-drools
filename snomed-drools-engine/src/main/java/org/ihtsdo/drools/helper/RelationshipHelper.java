@@ -33,7 +33,7 @@ public class RelationshipHelper {
 			if (relationship.isActive()
 					&& !Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())
 					&& Constants.IS_A.equals(relationship.getTypeId())
-					&& relationship.isAxiomGCI()) {
+					&& !relationship.isAxiomGCI()) {
 				activeParentConceptIds.add(relationship.getDestinationId());
 			}
 		}
