@@ -35,7 +35,7 @@ public class ConceptHelper {
     public static boolean isAxiomEquivalent(Concept concept) {
         Map<String, List<Relationship>> axiomMap = new HashMap<>();
         concept.getRelationships().forEach(relationship -> {
-            if (!relationship.isAxiomGCI() && relationship.isActive() && !Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())
+            if (!relationship.isAxiomGCI() && relationship.isActive() && !Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId()))
             {
                 if (axiomMap.containsKey(relationship.getAxiomId())) {
                     axiomMap.get(relationship.getAxiomId()).add(relationship);
