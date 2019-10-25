@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import org.ihtsdo.drools.domain.Concept;
+import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Relationship;
 
 public class ConceptHelper {
@@ -34,7 +35,8 @@ public class ConceptHelper {
     public static boolean isAxiomEquivalent(Concept concept) {
         Map<String, List<Relationship>> axiomMap = new HashMap<>();
         concept.getRelationships().forEach(relationship -> {
-            if (!relationship.isAxiomGCI()) {
+            if (!relationship.isAxiomGCI() && relationship.isActive() && !Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())
+            {
                 if (axiomMap.containsKey(relationship.getAxiomId())) {
                     axiomMap.get(relationship.getAxiomId()).add(relationship);
                 } else {
