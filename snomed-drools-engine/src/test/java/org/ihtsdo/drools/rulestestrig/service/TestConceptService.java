@@ -24,7 +24,12 @@ public class TestConceptService implements ConceptService {
 		Concept concept = concepts.get(conceptId);
 		return concept != null && concept.isActive();
 	}
-	
+
+	@Override
+	public Concept findById(String conceptId) {
+		return concepts.get(conceptId);
+	}
+
 	@Override
 	public Set<String> getAllTopLevelHierarchies(){
 		Set<String> allTopLevelHierarchies = new HashSet<>();

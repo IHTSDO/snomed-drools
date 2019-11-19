@@ -27,6 +27,11 @@ public class DroolsConceptService implements ConceptService {
 	}
 
 	@Override
+	public Concept findById(String conceptId) {
+		return repository.getConcept(conceptId);
+	}
+
+	@Override
 	public Set<String> getAllTopLevelHierarchies() {
 		DroolsConcept rootConcept = repository.getConcept(Constants.ROOT_CONCEPT);
 		Set<String> resultSet = new HashSet<>();
