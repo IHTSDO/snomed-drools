@@ -5,6 +5,7 @@ import org.ihtsdo.drools.domain.*;
 public class InvalidContent {
 
 	private String conceptId;
+	private String conceptFsn;
 	private Component component;
 	private String message;
 	private Severity severity;
@@ -93,6 +94,14 @@ public class InvalidContent {
 
 	public void setComponent(Component component) {
 		this.component = component;
+	}
+
+	public String getConceptFsn() {
+		return conceptFsn;
+	}
+
+	public void setConceptFsn(String conceptFsn) {
+		this.conceptFsn = conceptFsn;
 	}
 
 	@Override

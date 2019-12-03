@@ -10,8 +10,10 @@ import org.ihtsdo.drools.service.DescriptionService;
 import org.ihtsdo.drools.service.TestResourceProvider;
 import org.ihtsdo.drools.validator.rf2.DroolsDescriptionIndex;
 import org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentRepository;
+import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -36,11 +38,18 @@ public class DroolsDescriptionService implements DescriptionService {
 	public Set<String> getFSNs(Set<String> conceptIds, String... languageRefsetIds) {
 		Set<String> fsns = new HashSet<>();
 		for (String conceptId : conceptIds) {
-			Collection<DroolsDescription> descriptions = repository.getConcept(conceptId).getDescriptions();
-			for (DroolsDescription description : descriptions) {
-				if (description.isActive() && description.getTypeId().equals(FULLY_SPECIFIED_NAME)) {
-					for (String languageRefsetId : languageRefsetIds) {
-						if (PREFERRED_ACCEPTABILITY.equals(description.getAcceptabilityMap().get(languageRefsetId))) {
+			DroolsConcept concept = repository.getConcept(conceptId);
+			if(concept != null) {
+				Collection<DroolsDescription> descriptions = concept.getDescriptions();
+				for (DroolsDescription description : descriptions) {
+					if (description.isActive() && description.getTypeId().equals(FULLY_SPECIFIED_NAME)) {
+						if(languageRefsetIds != null && languageRefsetIds.length > 0) {
+							for (String languageRefsetId : languageRefsetIds) {
+								if (PREFERRED_ACCEPTABILITY.equals(description.getAcceptabilityMap().get(languageRefsetId))) {
+									fsns.add(description.getTerm());
+								}
+							}
+						} else {
 							fsns.add(description.getTerm());
 						}
 					}
