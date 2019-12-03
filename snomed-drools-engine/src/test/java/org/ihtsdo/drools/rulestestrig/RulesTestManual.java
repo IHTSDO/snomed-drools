@@ -5,7 +5,6 @@ import org.ihtsdo.drools.RuleExecutorFactory;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.OntologyAxiom;
-import org.ihtsdo.drools.exception.RuleExecutorException;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.rulestestrig.domain.*;
 import org.ihtsdo.drools.rulestestrig.service.TestConceptService;
@@ -15,7 +14,6 @@ import org.ihtsdo.drools.service.TestResourceProvider;
 import org.ihtsdo.otf.resourcemanager.ManualResourceConfiguration;
 import org.ihtsdo.otf.resourcemanager.ResourceConfiguration;
 import org.ihtsdo.otf.resourcemanager.ResourceManager;
-import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +24,6 @@ import org.junit.runners.Parameterized.Parameters;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RunWith(Parameterized.class)
 public class RulesTestManual {

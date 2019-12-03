@@ -82,7 +82,8 @@ public class TestConceptService implements ConceptService {
 		}
 		final Set<String> parents = new HashSet<>();
 		for (Relationship relationship : concept.getRelationships()) {
-			if (relationship.isActive() 
+			if (relationship.isActive()
+				&& !relationship.isAxiomGCI()
 				&& Constants.IS_A.equals(relationship.getTypeId()) 
 				&& Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
 				parents.add(relationship.getDestinationId());

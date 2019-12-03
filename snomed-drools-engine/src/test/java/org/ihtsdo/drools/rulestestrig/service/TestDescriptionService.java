@@ -126,6 +126,7 @@ public class TestDescriptionService implements DescriptionService {
 		for (Relationship relationship : concept.getRelationships()) {
 			if (Constants.IS_A.equals(relationship.getTypeId()) 
 				&& relationship.isActive() 
+				&& !relationship.isAxiomGCI()
 				&& Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
 				Concept parent = concepts.get(relationship.getDestinationId());
 				for (Description description : parent.getDescriptions()) {

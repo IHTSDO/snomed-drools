@@ -127,6 +127,7 @@ public class DroolsDescriptionService implements DescriptionService {
 		for (Relationship relationship : concept.getRelationships()) {
 			if (relationship.isActive()
 					&& Constants.IS_A.equals(relationship.getTypeId())
+					&& !relationship.isAxiomGCI()
 					&& Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
 				Concept parent = repository.getConcept(relationship.getDestinationId());
 				for (Description description : parent.getDescriptions()) {

@@ -51,7 +51,9 @@ public class DroolsConceptService implements ConceptService {
 		DroolsConcept droolsConcept = repository.getConcept(concept.getId());
 		Set<String> statedParents = new HashSet<>();
 		for (DroolsRelationship relationship : droolsConcept.getRelationships()) {
-			if(relationship.isActive() && Constants.IS_A.equals(relationship.getTypeId())
+			if(relationship.isActive() 
+					&& !relationship.isAxiomGCI() 
+					&& Constants.IS_A.equals(relationship.getTypeId())
 					&& Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
 				statedParents.add(relationship.getDestinationId());
 			}
