@@ -147,6 +147,14 @@ public class DroolsRF2Validator {
 
 
 	public List<InvalidContent> validateSnapshots(Set<String> snomedRf2EditionDir, String snomedRf2DeltaZip, String prevReleaseDir, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {
+		return getInvalidContents(snomedRf2EditionDir, snomedRf2DeltaZip, prevReleaseDir, ruleSetNamesToRun, currentEffectiveTime, includedModules, null);
+	}
+
+	public List<InvalidContent> validateSnapshots(Set<String> snomedRf2EditionDir, String snomedRf2DeltaZip, String prevReleaseDir, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules, Boolean activeConceptsOnly) throws ReleaseImportException {
+		return getInvalidContents(snomedRf2EditionDir, snomedRf2DeltaZip, prevReleaseDir, ruleSetNamesToRun, currentEffectiveTime, includedModules, activeConceptsOnly);
+	}
+
+	private List <InvalidContent> getInvalidContents(Set <String> snomedRf2EditionDir, String snomedRf2DeltaZip, String prevReleaseDir, Set <String> ruleSetNamesToRun, String currentEffectiveTime, Set <String> includedModules, Boolean activeConceptsOnly) throws ReleaseImportException {
 		long start = new Date().getTime();
 		Assert.isTrue(ruleSetNamesToRun != null && !ruleSetNamesToRun.isEmpty(), "The name of at least one rule set must be specified.");
 
@@ -222,6 +230,11 @@ public class DroolsRF2Validator {
 		if(includedModules != null && !includedModules.isEmpty()) {
 			logger.info("Filtering invalid contents for included module ids: {}", String.join(",", includedModules));
 			invalidContents = invalidContents.stream().filter(content -> includedModules.contains(content.getComponent().getModuleId())).collect(Collectors.toList());
+		}
+
+		// Filter only active concepts
+		if (activeConceptsOnly != null && activeConceptsOnly) {
+			invalidContents = invalidContents.stream().filter(c -> Boolean.compare(activeConceptsOnly.booleanValue(), conceptService.isActive(c.getConceptId())) == 0).collect(Collectors.toList());
 		}
 
 		// Add concept FSN to invalid contents
