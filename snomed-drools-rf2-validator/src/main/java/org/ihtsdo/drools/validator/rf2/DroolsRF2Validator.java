@@ -233,8 +233,8 @@ public class DroolsRF2Validator {
 		}
 
 		// Filter only active concepts
-		if (activeConceptsOnly != null && activeConceptsOnly) {
-			invalidContents = invalidContents.stream().filter(c -> Boolean.compare(activeConceptsOnly.booleanValue(), conceptService.isActive(c.getConceptId())) == 0).collect(Collectors.toList());
+		if (Boolean.TRUE.equals(activeConceptsOnly)) {
+			invalidContents = invalidContents.stream().filter(c -> conceptService.isActive(c.getConceptId())).collect(Collectors.toList());
 		}
 
 		// Add concept FSN to invalid contents
