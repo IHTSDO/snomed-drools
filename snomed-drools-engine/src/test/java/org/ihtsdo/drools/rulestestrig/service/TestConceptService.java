@@ -100,5 +100,10 @@ public class TestConceptService implements ConceptService {
 		}
 		return ancestorIds;
 	}
-	
+
+	@Override
+	public Set <String> findConceptsHavingMultipleTopHierarchies(String... topHierarchies) {
+		return Collections.EMPTY_SET;
+	}
+
 }

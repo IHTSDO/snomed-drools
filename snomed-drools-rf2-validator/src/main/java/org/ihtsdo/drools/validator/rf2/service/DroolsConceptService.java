@@ -91,4 +91,9 @@ public class DroolsConceptService implements ConceptService {
 		}
 		return resultSet;
 	}
+
+	@Override
+	public Set <String> findConceptsHavingMultipleTopHierarchies(String... strings) {
+		return Collections.EMPTY_SET;
+	}
 }
