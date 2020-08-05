@@ -13,5 +13,4 @@ public interface ConceptService {
 	Set<String> findStatedAncestorsOfConcept(Concept concept);
 	Set<String> findTopLevelHierarchiesOfConcept(Concept concept);
 	Set<String> findStatedAncestorsOfConcepts(List<String> conceptIds);
-	Set<String> findConceptsHavingMultipleTopHierarchies(String... topHierarchies);
 }
