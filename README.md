@@ -21,10 +21,10 @@ The same SNOMED Drools Rules apply to axiom fragments as to relationships.
 ## Content Access Implementations
 The following implementations use the SNOMED Drools Engine and implement the interfaces above to give the engine access to SNOMED CT content:
 
-* [SNOMED Drools RF2 Validator](https://github.com/IHTSDO/snomed-drools/tree/master/snomed-drools-rf2-validator)
 * [Snowstorm Terminology Server](https://github.com/IHTSDO/snowstorm) (in production)
-* SNOMED Release Validation Framework (in production)
-* [Snow Owl Terminology Server](https://github.com/IHTSDO/snow-owl) (may be out of date)
+* [SNOMED Drools RF2 Validator](https://github.com/IHTSDO/snomed-drools/tree/master/snomed-drools-rf2-validator)
+  * [SNOMED Release Validation Framework](https://github.com/IHTSDO/release-validation-framework) uses the RF2 Validator (in production)
+* [Snow Owl Terminology Server](https://github.com/IHTSDO/snow-owl) (now retired)
 
 ## The Assertion Rules
 The rules for this engine are maintained separately in the [SNOMED Drools Rules project](https://github.com/IHTSDO/snomed-drools-rules).
