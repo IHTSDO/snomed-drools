@@ -2,6 +2,7 @@ package org.ihtsdo.drools.rulestestrig.domain;
 
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Relationship;
+import org.snomed.otf.owltoolkit.domain.Relationship.ConcreteValue;
 
 public class TestRelationship implements Relationship, TestComponent {
 
@@ -17,6 +18,7 @@ public class TestRelationship implements Relationship, TestComponent {
 	private String typeId;
 	private String destinationId;
 	private String characteristicTypeId;
+	private ConcreteValue concreteValue;
 
 	public TestRelationship() {
 		active = true;
@@ -87,6 +89,11 @@ public class TestRelationship implements Relationship, TestComponent {
 		return characteristicTypeId;
 	}
 
+	@Override
+	public ConcreteValue getConcreteValue() {
+		return concreteValue;
+	}
+
 	public void setId(String id) {
 		this.id = id;
 	}
@@ -129,6 +136,10 @@ public class TestRelationship implements Relationship, TestComponent {
 
 	public void setCharacteristicTypeId(String characteristicTypeId) {
 		this.characteristicTypeId = characteristicTypeId;
+	}
+
+	public void setConcreteValue(ConcreteValue value) {
+		this.concreteValue = value;
 	}
 
 	@Override
