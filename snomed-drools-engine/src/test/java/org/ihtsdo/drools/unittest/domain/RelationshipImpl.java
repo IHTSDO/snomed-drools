@@ -1,7 +1,6 @@
 package org.ihtsdo.drools.unittest.domain;
 
 import org.ihtsdo.drools.domain.Relationship;
-import org.snomed.otf.owltoolkit.domain.Relationship.ConcreteValue;
 
 public class RelationshipImpl implements Relationship {
 
@@ -13,7 +12,7 @@ public class RelationshipImpl implements Relationship {
 	private String typeId;
 	private String characteristicTypeId;
 	private boolean released;
-	private ConcreteValue concreteValue;
+	private String concreteValue;
 
 	public RelationshipImpl(String id, String typeId) {
 		this.id = id;
@@ -86,7 +85,7 @@ public class RelationshipImpl implements Relationship {
 	}
 
 	@Override
-	public ConcreteValue getConcreteValue() {
+	public String getConcreteValue() {
 		return concreteValue;
 	}
 
@@ -114,7 +113,7 @@ public class RelationshipImpl implements Relationship {
 		this.released = released;
 	}
 
-	public void setConcreteValue(ConcreteValue value) {
+	public void setConcreteValue(String value) {
 		this.concreteValue = value;
 	}
 

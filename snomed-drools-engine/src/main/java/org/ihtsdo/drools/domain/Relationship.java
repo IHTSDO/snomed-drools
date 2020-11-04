@@ -1,5 +1,4 @@
 package org.ihtsdo.drools.domain;
-import org.snomed.otf.owltoolkit.domain.Relationship.ConcreteValue;
 
 /**
  * Represents a stated relationship, OWL Axiom fragment or inferred relationship
@@ -24,5 +23,5 @@ public interface Relationship extends Component {
 
 	String getCharacteristicTypeId();
 
-	ConcreteValue getConcreteValue();
+	String getConcreteValue();
 }

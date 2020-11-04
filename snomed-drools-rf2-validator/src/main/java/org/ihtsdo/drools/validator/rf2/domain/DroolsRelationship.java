@@ -1,7 +1,6 @@
 package org.ihtsdo.drools.validator.rf2.domain;
 
 import org.ihtsdo.drools.domain.Relationship;
-import org.snomed.otf.owltoolkit.domain.Relationship.ConcreteValue;
 
 public class DroolsRelationship extends DroolsComponent implements Relationship {
 
@@ -12,9 +11,9 @@ public class DroolsRelationship extends DroolsComponent implements Relationship 
 	private final int group;
 	private final String typeId;
 	private final String characteristicTypeId;
-	private ConcreteValue concreteValue;
+	private String concreteValue;
 
-	public DroolsRelationship(String axiomId, boolean isAxiomGCI, String id, boolean active, String moduleId, String sourceId, String destinationId, int group, String typeId, String characteristicTypeId, boolean published, boolean released, ConcreteValue concreteValue) {
+	public DroolsRelationship(String axiomId, boolean isAxiomGCI, String id, boolean active, String moduleId, String sourceId, String destinationId, int group, String typeId, String characteristicTypeId, boolean published, boolean released, String concreteValue) {
 		super(id, active, moduleId, published, released);
 		this.axiomId = axiomId;
 		this.isAxiomGCI = isAxiomGCI;
@@ -62,7 +61,7 @@ public class DroolsRelationship extends DroolsComponent implements Relationship 
 	}
 
 	@Override
-	public ConcreteValue getConcreteValue() {
+	public String getConcreteValue() {
 		return concreteValue;
 	}
 
