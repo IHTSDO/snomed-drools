@@ -31,10 +31,7 @@
 		<dependency>
 			<groupId>org.drools</groupId>
 			<artifactId>drools-compiler</artifactId>
-			<version>6.3.0.Final_fixed</version>
-			<!-- 6.3.0.Final_fixed is a modifed version of the drools-compiler 6.3.0.Final bundle
-			the '.*' has been removed from the package import section
-			of the OSGi manifest because Snow Owl's Virgo OSGi container cannot parse it -->
+			<version>6.3.0.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>jboss</groupId>
