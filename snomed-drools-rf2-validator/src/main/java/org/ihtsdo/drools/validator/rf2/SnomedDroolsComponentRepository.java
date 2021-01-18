@@ -67,15 +67,17 @@ public class SnomedDroolsComponentRepository {
 		conceptOptional.ifPresent(concept -> {
 			concept.getRelationships().add(relationship);
 			if (relationship.isActive() && relationship.getCharacteristicTypeId().equals(STATED_RELATIONSHIP_CHARACTERISTIC_TYPE_ID)) {
-				long destinationId = parseLong(relationship.getDestinationId());
-				DroolsConcept destinationConcept = conceptMap.get(destinationId);
-				if (destinationConcept == null) {
-					// TODO: This should be a warning and part of the validation report.
-					String message = "Relationship " + relationship.getId() + " has destination Concept " + relationship.getDestinationId() + " which can not be found.";
-					logger.warn(message);
-					addComponentLoadingWarning(parseLong(concept.getId()), relationship, message);
-				} else {
-					destinationConcept.getActiveInboundStatedRelationships().add(relationship);
+				if (relationship.getDestinationId() != null) {
+					long destinationId = parseLong(relationship.getDestinationId());
+					DroolsConcept destinationConcept = conceptMap.get(destinationId);
+					if (destinationConcept == null) {
+						// TODO: This should be a warning and part of the validation report.
+						String message = "Relationship " + relationship.getId() + " has destination Concept " + relationship.getDestinationId() + " which can not be found.";
+						logger.warn(message);
+						addComponentLoadingWarning(parseLong(concept.getId()), relationship, message);
+					} else {
+						destinationConcept.getActiveInboundStatedRelationships().add(relationship);
+					}
 				}
 			}
 		});

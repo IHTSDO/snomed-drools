@@ -57,7 +57,8 @@ public class ConceptHelper {
                         for (Relationship relationship2 : relationships2) {
                             //can not use 'equal' to compare 2 relationship objects as they always have different axiomId
                             if (relationship1.getTypeId().equals(relationship2.getTypeId())
-                                    && relationship1.getDestinationId().equals(relationship2.getDestinationId())
+                                    && ((relationship1.getDestinationId() != null && relationship2.getDestinationId() != null && relationship1.getDestinationId().equals(relationship2.getDestinationId()))
+                                        || (relationship1.getConcreteValue() != null && relationship2.getConcreteValue() != null && relationship1.getConcreteValue().equals(relationship2.getConcreteValue())))
                                     && relationship1.getRelationshipGroup() == relationship2.getRelationshipGroup()) {
                                 count++;
                             }

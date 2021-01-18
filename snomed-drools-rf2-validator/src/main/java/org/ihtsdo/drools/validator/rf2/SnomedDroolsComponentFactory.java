@@ -111,13 +111,14 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 
 			long typeId = relationship.getTypeId();
 			long destinationId = relationship.getDestinationId();
+			Relationship.ConcreteValue concreteValue = relationship.getValue();
 
 			// Build a composite identifier for this 'relationship' (which is actually a fragment of an axiom expression) because it doesn't have its own component identifier.
-			String compositeIdentifier = axiomId + "/Group_" + group + "/Type_" + typeId + "/Destination_" + destinationId;
+			String compositeIdentifier = axiomId + "/Group_" + group + "/Type_" + typeId + "/Destination_" + (destinationId != 0L ? destinationId : "") + "/ConcreteValue_" + (concreteValue != null ? concreteValue.asString() : "");
 
 			DroolsRelationship relationship1 = new DroolsRelationship(axiomId, isGCI, compositeIdentifier, true, moduleId,
-                    namedConcept.toString(), !relationship.isConcrete() ? destinationId + "" : null,
-                    group, typeId + "", ConceptConstants.STATED_RELATIONSHIP, published(effectiveTime), published(effectiveTime), relationship.isConcrete() ? relationship.getValue().asString() : null);
+					namedConcept.toString(), destinationId != -1 ? destinationId + "" : null,
+					group, typeId + "", ConceptConstants.STATED_RELATIONSHIP, published(effectiveTime), published(effectiveTime), concreteValue != null ? concreteValue.asString() : null);
 			logger.info("Add axiom relationship {}", relationship1);
 			repository.addRelationship(relationship1);
 		}));
