@@ -48,7 +48,7 @@ public class IntegrationTest {
         index++;
         assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
         assertEquals("Concepts must not have relationships to inactive concepts.", invalidContentsReport.get(index).getMessage());
-        assertEquals("1b6427e7-23de-476f-8f25-423306f180ac/Group_0/Type_100104001/Destination_100107001", invalidContentsReport.get(index).getComponentId());
+        assertEquals("1b6427e7-23de-476f-8f25-423306f180ac/Group_0/Type_100104001/Destination_100107001/ConcreteValue_", invalidContentsReport.get(index).getComponentId());
         assertEquals("100105001", invalidContentsReport.get(index).getConceptId());
 
         index++;
@@ -65,14 +65,14 @@ public class IntegrationTest {
 
         index++;
         assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
-        assertEquals("Relationship 53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_116680003/Destination_100102001 references conceptId 123 which does not exist", invalidContentsReport.get(index).getMessage());
-        assertEquals("53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_116680003/Destination_100102001", invalidContentsReport.get(index).getComponentId());
+        assertEquals("Relationship 53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_116680003/Destination_100102001/ConcreteValue_ references conceptId 123 which does not exist", invalidContentsReport.get(index).getMessage());
+        assertEquals("53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_116680003/Destination_100102001/ConcreteValue_", invalidContentsReport.get(index).getComponentId());
         assertEquals("123", invalidContentsReport.get(index).getConceptId());
 
         index++;
         assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
-        assertEquals("Relationship 53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_100104001/Destination_100108001 references conceptId 123 which does not exist", invalidContentsReport.get(index).getMessage());
-        assertEquals("53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_100104001/Destination_100108001", invalidContentsReport.get(index).getComponentId());
+        assertEquals("Relationship 53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_100104001/Destination_100108001/ConcreteValue_ references conceptId 123 which does not exist", invalidContentsReport.get(index).getMessage());
+        assertEquals("53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_100104001/Destination_100108001/ConcreteValue_", invalidContentsReport.get(index).getComponentId());
         assertEquals("123", invalidContentsReport.get(index).getConceptId());
 
         index++;
