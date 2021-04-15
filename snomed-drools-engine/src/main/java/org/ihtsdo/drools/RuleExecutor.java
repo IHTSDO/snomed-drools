@@ -144,7 +144,7 @@ public class RuleExecutor {
 						components.clear();
 						((StatelessKnowledgeSessionImpl) statelessKieSession).newWorkingMemory();
 					} catch (Exception e) {
-						exceptionContents.add(new InvalidContent(concept.getId(),concept, "Exception raised during rule execution: " + e.getMessage(), Severity.ERROR));
+						exceptionContents.add(new InvalidContent(concept.getId(),concept, "An error occurred while running concept validation. Technical detail: " + e.getMessage(), Severity.ERROR));
 					}
 					return null;
 				});
