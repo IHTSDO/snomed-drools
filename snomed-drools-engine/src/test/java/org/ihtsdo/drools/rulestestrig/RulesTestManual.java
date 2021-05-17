@@ -32,26 +32,27 @@ public class RulesTestManual {
 	private static final String ASSERT_CONCEPTS_PASS = "assertConceptsPass";
 	private static final String ASSERT_CONCEPTS_FAIL = "assertConceptsFail";
 	
-	private RuleExecutor ruleExecutor;
-	private Map<String, Concept> concepts;
+	private final RuleExecutor ruleExecutor;
+	private final Map<String, Concept> concepts;
 	private Map<String, List<TestConcept<TestDescription, TestRelationship>>> testConcepts;
-	
+	private Map<String, String> ruleIdToMessageMap = new HashMap<>();
+
 	private TestConceptService conceptService;
 	private TestDescriptionService descriptionService;
 	private TestRelationshipService relationshipService;
 
 	@Parameters(name = "{0}")
-	public static Iterable<? extends Object> data() {
+	public static Iterable<?> data() {
 		final String rulesPath = "../../snomed-drools-rules"; // relative path to snomed-drools-rules, either check out to here or use symlink
 		final File rulesDirectory = new File(rulesPath);
 		Assert.assertTrue(rulesDirectory.isDirectory());
 
 		final List<File> ruleDirectories = new ArrayList<>();
-		for (File productGroupDirectory : rulesDirectory.listFiles(TestUtil.DIRECTORY_FILTER)) {
-			for (File ruleGroupDirectory : productGroupDirectory.listFiles(TestUtil.DIRECTORY_FILTER)) {
-				for (File ruleDirectory : ruleGroupDirectory.listFiles(TestUtil.DIRECTORY_FILTER)) {
+		for (File productGroupDirectory : Objects.requireNonNull(rulesDirectory.listFiles(TestUtil.DIRECTORY_FILTER))) {
+			for (File ruleGroupDirectory : Objects.requireNonNull(productGroupDirectory.listFiles(TestUtil.DIRECTORY_FILTER))) {
+				for (File ruleDirectory : Objects.requireNonNull(ruleGroupDirectory.listFiles(TestUtil.DIRECTORY_FILTER))) {
 					final File[] ruleFiles = ruleDirectory.listFiles(TestUtil.RULE_FILE_FILTER);
-					if (ruleFiles.length > 0) {
+					if (ruleFiles != null && ruleFiles.length > 0) {
 						ruleDirectories.add(ruleDirectory);
 					}
 				}
@@ -153,14 +154,28 @@ public class RulesTestManual {
 				if (!uniqueComponentAssertionSet.add(pair)) {
 					Assert.fail("Component failures should not be reported multiple times. Duplicate component/message found: " + pair);
 				}
+
+				// Attempt to prevent multiple assertions using the same rule id.. this does not guarantee uniqueness because not 100% test coverage.
+				final String existingMessage = ruleIdToMessageMap.get(content.getRuleId());
+				final String newMessage = firstPart(content.getMessage());
+				if (existingMessage != null && !existingMessage.equals(newMessage)) {
+					Assert.fail("Assertion id " + content.getRuleId() + " has been used with multiple failure messages: '" + existingMessage +
+							"' AND '" + newMessage + "'");
+				} else {
+					ruleIdToMessageMap.put(content.getRuleId(), newMessage);
+				}
 			}
 
 			if (expectPass) {
-				Assert.assertEquals("A concept from the " + ASSERT_CONCEPTS_PASS + " set actually failed! " + invalidContent.toString(), 0, invalidContent.size());
+				Assert.assertEquals("A concept from the " + ASSERT_CONCEPTS_PASS + " set actually failed! " + invalidContent, 0, invalidContent.size());
 			} else {
 				Assert.assertNotEquals("A concept from the " + ASSERT_CONCEPTS_FAIL + " set actually passed! " + concept.toString(), 0, invalidContent.size());
 			}
 		}
+	}
+
+	private String firstPart(String message) {
+		return message.substring(0, Math.min(message.length(), 20));
 	}
 
 }
