@@ -4,11 +4,12 @@ import org.ihtsdo.drools.response.InvalidContent
 global java.util.List invalidContent
 
 rule "Dummy Term acceptability test"
-    dialect "mvel"
-    when
-        d : Description(acceptabilityMap.size() == 1)
-    then
-        InvalidContent invalid = new InvalidContent(d, "Term should have acceptability entries in one dialect.");
-        invalid.ignorePublishedCheck();
-        invalidContent.add(invalid);
+	dialect "mvel"
+	when
+		d : Description(acceptabilityMap.size() == 1)
+	then
+		InvalidContent invalid = new InvalidContent("29699b62-d288-4deb-b403-6f24e186a10c",
+				d, "Term should have acceptability entries in one dialect.");
+		invalid.ignorePublishedCheck();
+		invalidContent.add(invalid);
 end

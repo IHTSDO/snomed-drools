@@ -17,5 +17,6 @@ rule "Active concept should have only one semantic tag"
 						&& term matches (".*\\("+ tag +"\\)\\s+\\("+ tag +"\\)")
 						)
 	then
-		invalidContent.add(new InvalidContent(d, "Active FSN should have only one semantic tag.", Severity.WARNING));
+		invalidContent.add(new InvalidContent("8ba8678f-20df-4107-9784-4de8e7e0e797",
+				d, "Active FSN should have only one semantic tag.", Severity.WARNING));
 end

@@ -10,9 +10,9 @@ rule "Active Concepts should not have two relationships with the same type, targ
 	when
 		c : Concept(active)
 		r1 : Relationship(sourceId == c.id)
-		r2 : Relationship(sourceId == c.id && r1.id != id && r1.axiomId == axiomId && typeId == r1.typeId && destinationId == r1.destinationId && relationshipGroup == r1.relationshipGroup
-							&& (!r1.released || (r1.active && r2.active)))
+		r2 : Relationship(sourceId == c.id && r1.id != id && r1.axiomId == axiomId && typeId == r1.typeId && destinationId == r1.destinationId &&
+						relationshipGroup == r1.relationshipGroup && (!r1.released || (r1.active && r2.active)))
 	then
-		invalidContent.add(new InvalidContent(r1, "An active concept must not have two relationships with the same type, target and group. The duplicate can be an inactive relationship that should be reactivated, or an unreleased new relationship that should be deleted. Please review the following relationship: " + r2.id + "."));
-
+		invalidContent.add(new InvalidContent("175010fe-2a7f-419a-8c83-736ee801bdbf",
+				r1, "An active concept must not have two relationships with the same type, target and group. The duplicate can be an inactive relationship that should be reactivated, or an unreleased new relationship that should be deleted. Please review the following relationship: " + r2.id + "."));
 end

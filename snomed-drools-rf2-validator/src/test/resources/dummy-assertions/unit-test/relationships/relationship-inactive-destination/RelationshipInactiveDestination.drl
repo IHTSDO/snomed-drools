@@ -10,5 +10,6 @@ rule "Active relationship must not have inactive destination"
 	when
 		r : Relationship(active && !conceptService.isActive(destinationId))
 	then
-		invalidContent.add(new InvalidContent(r, "Concepts must not have relationships to inactive concepts."));
+		invalidContent.add(new InvalidContent("399c0b37-ec7b-4659-9321-4a14c70eaa28",
+				r, "Concepts must not have relationships to inactive concepts."));
 end

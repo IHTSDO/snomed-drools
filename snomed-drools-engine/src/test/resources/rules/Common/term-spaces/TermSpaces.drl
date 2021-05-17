@@ -4,9 +4,10 @@ import org.ihtsdo.drools.response.InvalidContent
 global java.util.List invalidContent
 
 rule "Double spaces"
-    dialect "mvel"
-    when
-        d : Description(term matches ".*  .*" || term matches " .*" || term matches ".* ")
-    then
-        invalidContent.add(new InvalidContent(d, "Term should not contain double spaces."));
+	dialect "mvel"
+	when
+		d : Description(term matches ".*  .*" || term matches " .*" || term matches ".* ")
+	then
+		invalidContent.add(new InvalidContent("d04c89b7-962c-4dbc-ac5e-0033e808e913",
+				d, "Term should not contain double spaces."));
 end
