@@ -110,11 +110,11 @@ public class SnomedDroolsComponentRepository {
 	}
 
 	public synchronized void addComponentLoadingError(long conceptId, Component component, String message) {
-		componentLoadingErrors.add(new InvalidContent(conceptId + "", component, message, Severity.ERROR));
+		componentLoadingErrors.add(new InvalidContent("component-loading-error", conceptId + "", component, message, Severity.ERROR));
 	}
 
 	public synchronized void addComponentLoadingWarning(long conceptId, Component component, String message) {
-		componentLoadingErrors.add(new InvalidContent(conceptId + "", component, message, Severity.WARNING));
+		componentLoadingErrors.add(new InvalidContent("component-loading-warning", conceptId + "", component, message, Severity.WARNING));
 	}
 
 	public DroolsConcept getConcept(String conceptId) {
