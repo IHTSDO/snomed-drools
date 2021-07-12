@@ -15,105 +15,103 @@ import org.ihtsdo.otf.resourcemanager.ResourceConfiguration;
 import org.ihtsdo.otf.resourcemanager.ResourceManager;
 import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.ReleaseImporter;
-import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.aws.core.io.s3.SimpleStorageResourceLoader;
 import org.springframework.util.Assert;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static java.lang.Long.parseLong;
-import static org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentFactory.MRCM_ATTRIBUTE_DOMAIN_INTERNATIONAL_REFSET;
+import java.util.stream.Stream;
 
 public class DroolsRF2Validator {
 
 	public static final ManualResourceConfiguration BLANK_RESOURCES_CONFIGURATION =
 			new ManualResourceConfiguration(true, false, new ResourceConfiguration.Local("classpath:blank-resource-files"), null);
 	private static final String TAB = "\t";
+	public static final String SCTIDS_REGEX = "[0-9,]+";
+
+	public static final LoadingProfile LOADING_PROFILE = LoadingProfile.complete
+			.withoutAllRefsets()
+			.withIncludedReferenceSetFilenamePattern(".*_cRefset_Language.*")
+			.withIncludedReferenceSetFilenamePattern(".*_OWL.*");
+
 	private final RuleExecutor ruleExecutor;
 	private final TestResourceProvider testResourceProvider;
 	private final Logger logger = LoggerFactory.getLogger(DroolsRF2Validator.class);
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		if (args.length != 4 && args.length != 5 && args.length != 6) {
 			// NOTE - Keep in sync with README.md file.
-			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <rf2SnapshotDirectory> <currentEffectiveTime> <includedModules(optional)> <previousRf2Directory(optional)>");
+			System.out.println("Usage: java -jar snomed-drools-rf2*.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> " +
+					"<extractedRF2FilesDirectories> <currentEffectiveTime> <includedModules(optional)> <previousRf2Directory(optional)>");
 			System.exit(1);
 		}
 
+		// Resolve mandatory arguments
 		String directoryOfRuleSetsPath = args[0];
-
 		String commaSeparatedAssertionGroups = args[1];
-		String verticalBarSeparatedSnapshotAndDeltaDirectories = args[2];
-		String deltaDirectory = null;
-		String[] snapshotsAndDelta = verticalBarSeparatedSnapshotAndDeltaDirectories.split("\\|");
-		if(snapshotsAndDelta.length == 2) {
-			deltaDirectory = snapshotsAndDelta[1];
-		}
-		String snapshotDirectories = snapshotsAndDelta[0];
+		Set<String> assertionGroups = Sets.newHashSet(commaSeparatedAssertionGroups.split(","));
+		Set<String> extractedRF2FilesDirectories = Sets.newHashSet(args[2].split(","));
 		String currentEffectiveTime = args[3];
-		Set<String> includedModuleSets = null;
-		if (args.length > 4) {
-			String includedModules = args[4];
-			if(includedModules != null && !includedModules.isEmpty()) {
-				includedModuleSets = Sets.newHashSet(includedModules.split(","));
-			}
-		}
-
 		if (!currentEffectiveTime.matches("\\d{8}")) {
 			System.out.println("Expecting <currentEffectiveTime> using format yyyymmdd");
 			System.exit(1);
 		}
 
-		String prevRf2Release = null;
-		if(args.length > 5) {
-			prevRf2Release = args[5];
-		}
-
-		File report = new File("validation-report-" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + ".txt");
-		try {
-			// Load test resources from public S3 location
-			ResourceManager testResourcesResourceManager = getTestResourceManager();
-
-			DroolsRF2Validator rf2Validator = new DroolsRF2Validator(directoryOfRuleSetsPath, testResourcesResourceManager);
-
-			HashSet<String> ruleSetNamesToRun = Sets.newHashSet(commaSeparatedAssertionGroups.split(","));
-			HashSet<String> snomedSnapshotDirectories = Sets.newHashSet(snapshotDirectories.split(","));
-			List<InvalidContent> invalidContents = rf2Validator.validateSnapshots(snomedSnapshotDirectories, deltaDirectory, prevRf2Release, ruleSetNamesToRun, currentEffectiveTime, includedModuleSets);
-			report.createNewFile();
-			try (BufferedWriter reportWriter = new BufferedWriter(new FileWriter(report))) {
-				reportWriter.write("conceptId\tcomponentId\tmessage\tseverity\tignorePublishedCheck");
-				reportWriter.newLine();
-
-				for (InvalidContent invalidContent : invalidContents) {
-					reportWriter.write(invalidContent.getConceptId());
-					reportWriter.write(TAB);
-					reportWriter.write(invalidContent.getComponentId());
-					reportWriter.write(TAB);
-					reportWriter.write(invalidContent.getMessage());
-					reportWriter.write(TAB);
-					reportWriter.write(invalidContent.getSeverity().toString());
-					reportWriter.write(TAB);
-					reportWriter.write(invalidContent.isIgnorePublishedCheck() + "");
-					reportWriter.newLine();
+		// Resolve optional arguments
+		Set<String> includedModuleSets = null;
+		Set<String> previousReleaseDirectories = null;
+		if (args.length > 4) {
+			String arg4 = args[4];
+			if (arg4.matches(SCTIDS_REGEX)) {
+				includedModuleSets = toModules(arg4);
+			} else if (isDirectories(arg4)) {
+				previousReleaseDirectories = Sets.newHashSet(arg4.split(","));
+			}
+			if (args.length > 5) {
+				String arg5 = args[4];
+				if (arg5.matches(SCTIDS_REGEX)) {
+					includedModuleSets = toModules(arg5);
+				} else if (isDirectories(arg5)) {
+					previousReleaseDirectories = Sets.newHashSet(arg5.split(","));
 				}
 			}
-		} catch (ReleaseImportException | IOException e) {
-			e.printStackTrace();
 		}
+
+		new DroolsRF2Validator(directoryOfRuleSetsPath, true)
+				.validate(assertionGroups, extractedRF2FilesDirectories, currentEffectiveTime, includedModuleSets, previousReleaseDirectories);
+	}
+
+	private static boolean isDirectories(String arg) {
+		if (arg != null && !arg.isEmpty()) {
+			final String[] dirs = arg.split(",");
+			for (String dir : dirs) {
+				if (!new File(dir).isDirectory()) {
+					System.err.printf("Path '%s' is not a directory.%n", dir);
+					return false;
+				}
+			}
+			return dirs.length > 0;
+		}
+		return false;
 	}
 
 	/**
 	 * Creates a validator with assertions loaded from disk but without any test resource files.
 	 * @param directoryOfAssertionGroups Directory of assertion groups to load.
+	 * @param loadTestResources If static resource files should be loaded, used by some tests.
 	 */
-	public DroolsRF2Validator(String directoryOfAssertionGroups) {
-		this(directoryOfAssertionGroups, new ResourceManager(BLANK_RESOURCES_CONFIGURATION, null));
+	public DroolsRF2Validator(String directoryOfAssertionGroups, boolean loadTestResources) throws IOException {
+		this(directoryOfAssertionGroups, getTestResourceManager(loadTestResources));
 	}
 
 	/**
@@ -127,94 +125,72 @@ public class DroolsRF2Validator {
 		testResourceProvider = ruleExecutor.newTestResourceProvider(testResourcesResourceManager);
 	}
 
-	public List<InvalidContent> validateSnapshotStreams(Set<InputStream> snomedRf2EditionZips, InputStream snomedRf2DeltaZip, InputStream prevRf2ReleaseZip, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {
-		Set<String> directoryPaths = new HashSet<>();
-		// Unzip RF2 archive for reuse
-		for (InputStream snomedRf2EditionZip : snomedRf2EditionZips) {
-			String snapshotDirectoryPath = new ReleaseImporter().unzipRelease(snomedRf2EditionZip, ReleaseImporter.ImportType.SNAPSHOT).getAbsolutePath();
-			directoryPaths.add(snapshotDirectoryPath);
+	private void validate(Set<String> assertionGroups, Set<String> extractedRF2FilesDirectories,
+			String currentEffectiveTime, Set<String> includedModuleSets, Set<String> previousReleaseDirectories) {
+
+		File report = new File("validation-report-" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + ".txt");
+		try {
+			// Load test resources from public S3 location
+
+			// Run assertions
+			List<InvalidContent> invalidContents = validateRF2Files(extractedRF2FilesDirectories, previousReleaseDirectories, assertionGroups, currentEffectiveTime,
+					includedModuleSets, false);
+
+			// Write report
+			report.createNewFile();
+			try (BufferedWriter reportWriter = new BufferedWriter(new FileWriter(report))) {
+				reportWriter.write("conceptId\tcomponentId\tmessage\tseverity\tignorePublishedCheck");
+				reportWriter.newLine();
+
+				for (InvalidContent invalidContent : invalidContents) {
+					reportWriter.write(invalidContent.getConceptId());
+					reportWriter.write(TAB);
+					reportWriter.write(invalidContent.getComponentId());
+					reportWriter.write(TAB);
+					reportWriter.write(invalidContent.getMessage().replace("\n", " "));
+					reportWriter.write(TAB);
+					reportWriter.write(invalidContent.getSeverity().toString());
+					reportWriter.write(TAB);
+					reportWriter.write(invalidContent.isIgnorePublishedCheck() + "");
+					reportWriter.newLine();
+				}
+			}
+		} catch (ReleaseImportException | IOException e) {
+			e.printStackTrace();
 		}
-		String deltaDirectory = null;
-		if(snomedRf2DeltaZip != null) {
-			deltaDirectory = new ReleaseImporter().unzipRelease(snomedRf2DeltaZip, ReleaseImporter.ImportType.DELTA).getAbsolutePath();
-		}
-		String prevReleaseDirectory = null;
-		if(prevRf2ReleaseZip != null) {
-			prevReleaseDirectory = new ReleaseImporter().unzipRelease(prevRf2ReleaseZip, ReleaseImporter.ImportType.SNAPSHOT).getAbsolutePath();
-		}
-		return validateSnapshots(directoryPaths, deltaDirectory, prevReleaseDirectory, ruleSetNamesToRun, currentEffectiveTime, includedModules);
 	}
 
-
-	public List<InvalidContent> validateSnapshots(Set<String> snomedRf2EditionDir, String snomedRf2DeltaZip, String prevReleaseDir, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules) throws ReleaseImportException {
-		return getInvalidContents(snomedRf2EditionDir, snomedRf2DeltaZip, prevReleaseDir, ruleSetNamesToRun, currentEffectiveTime, includedModules, null);
+	private static Set<String> toModules(String arg) {
+		return Arrays.stream(arg.split(",")).map(String::trim).collect(Collectors.toSet());
 	}
 
-	public List<InvalidContent> validateSnapshots(Set<String> snomedRf2EditionDir, String snomedRf2DeltaZip, String prevReleaseDir, Set<String> ruleSetNamesToRun, String currentEffectiveTime, Set<String> includedModules, Boolean activeConceptsOnly) throws ReleaseImportException {
-		return getInvalidContents(snomedRf2EditionDir, snomedRf2DeltaZip, prevReleaseDir, ruleSetNamesToRun, currentEffectiveTime, includedModules, activeConceptsOnly);
-	}
+	/**
+	 *
+	 * @param extractedRF2FilesDirectories	Paths to directories containing all extracted RF2 files. This can be the snapshot files of a single or multiple code systems and
+	 *                                         can also include delta files for the new release.
+	 * @param previousReleaseDirectories	Path to directories containing extracted RF2 files from the previous release. These are used to determine the released status of
+	 *                                         components, that is used in some assertions.
+	 * @param ruleSetNamesToRun				The assertion groups to run the rules of.
+	 * @param currentEffectiveTime			The current effectiveTime of the latest published files, used to determine the published flag on components.
+	 * @param includedModules				Optional filter to validate components only in specific modules.
+	 * @param activeConceptsOnly            Optional filter to return invalid content only for active concepts (ignore inactive concepts).
+	 * @return								A collections of invalid content according to the rules within the assertion groups selected.
+	 * @throws ReleaseImportException		Exception thrown when application fails to load the RF2 files to be validated.
+	 */
+	public List<InvalidContent> validateRF2Files(Set<String> extractedRF2FilesDirectories, Set<String> previousReleaseDirectories, Set <String> ruleSetNamesToRun,
+			String currentEffectiveTime,
+			Set<String> includedModules, boolean activeConceptsOnly) throws ReleaseImportException {
 
-	private List <InvalidContent> getInvalidContents(Set <String> snomedRf2EditionDir, String snomedRf2DeltaZip, String prevReleaseDir, Set <String> ruleSetNamesToRun, String currentEffectiveTime, Set <String> includedModules, Boolean activeConceptsOnly) throws ReleaseImportException {
 		long start = new Date().getTime();
 		Assert.isTrue(ruleSetNamesToRun != null && !ruleSetNamesToRun.isEmpty(), "The name of at least one rule set must be specified.");
 
-		logger.info("Loading components from RF2");
-
-		ReleaseImporter importer = new ReleaseImporter();
-
-		// Load ungrouped attribute set from MRCM file
-		Set<Long> ungroupedAttributes = new HashSet<>();
-		LoadingProfile justMRCM = new LoadingProfile()
-				.withIncludedReferenceSetFilenamePattern(".*_MRCMAttributeDomain.*");
-		importer.loadEffectiveSnapshotReleaseFiles(snomedRf2EditionDir, justMRCM, new ImpotentComponentFactory() {
-			@Override
-			public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
-				if ("1".equals(active) && refsetId.equals(MRCM_ATTRIBUTE_DOMAIN_INTERNATIONAL_REFSET)) {
-					// id	effectiveTime	active	moduleId	refsetId	referencedComponentId	domainId	grouped	attributeCardinality	attributeInGroupCardinality	ruleStrengthId	contentTypeId
-					// 																otherValues .. 	0			1		2						3							4				5
-
-					// Ungrouped attribute
-					if ("0".equals(otherValues[1])) {
-						ungroupedAttributes.add(parseLong(referencedComponentId));
-					}
-				}
-			}
-		});
-
-
-		// Load all other components
-		SnomedDroolsComponentRepository repository = new SnomedDroolsComponentRepository();
-		repository.getUngroupedAttributes().addAll(ungroupedAttributes);
-
-		LoadingProfile snapshotLoadingProfile = LoadingProfile.complete
-				.withoutAllRefsets()
-				.withIncludedReferenceSetFilenamePattern(".*_cRefset_Language.*")
-				.withIncludedReferenceSetFilenamePattern(".*_OWL.*");
-
 		PreviousReleaseComponentFactory previousReleaseComponentFactory = null;
-		if(prevReleaseDir != null) {
-			previousReleaseComponentFactory = new PreviousReleaseComponentFactory();
-			Set<String> prevRelease = new HashSet<>();
-			prevRelease.add(prevReleaseDir);
-			importer.loadEffectiveSnapshotReleaseFiles(prevRelease, snapshotLoadingProfile, previousReleaseComponentFactory);
+		if (previousReleaseDirectories != null) {
+			previousReleaseComponentFactory = loadPreviousReleaseComponentIds(previousReleaseDirectories);
 		}
 
-		SnomedDroolsComponentFactory componentFactory = new SnomedDroolsComponentFactory(repository, currentEffectiveTime, previousReleaseComponentFactory);
-		importer.loadEffectiveSnapshotReleaseFiles(snomedRf2EditionDir, snapshotLoadingProfile, componentFactory);
-		if (componentFactory.isAxiomParsingError()) {
-			throw new ReleaseImportException("Failed to parse one or more OWL Axioms. Check logs for details.");
-		}
-
-		List<InvalidContent> componentLoadingErrors = repository.getComponentLoadingErrors();
-
-		if(snomedRf2DeltaZip != null) {
-			logger.info("Start loading delta file...");
-			LoadingProfile deltaLoadingProfile = snapshotLoadingProfile.withInactiveRelationships()
-					.withInactiveRefsetMembers()
-					.withFullDescriptionObjects();
-			importer.loadDeltaReleaseFiles(snomedRf2DeltaZip, deltaLoadingProfile, componentFactory);
-			logger.info("Completed loading delta file");
-		}
+		logger.info("Loading components from RF2");
+		SnomedDroolsComponentRepository repository = loadComponentsFromRF2(extractedRF2FilesDirectories, currentEffectiveTime, previousReleaseComponentFactory);
 		logger.info("Components loaded");
 
 		DroolsConceptService conceptService = new DroolsConceptService(repository);
@@ -224,7 +200,7 @@ public class DroolsRF2Validator {
 		Collection<DroolsConcept> concepts = repository.getConcepts();
 		logger.info("Running tests");
 		List<InvalidContent> invalidContents = ruleExecutor.execute(ruleSetNamesToRun, concepts, conceptService, descriptionService, relationshipService, true, false);
-		invalidContents.addAll(componentLoadingErrors);
+		invalidContents.addAll(repository.getComponentLoadingErrors());
 
 		//Filter only invalid components that are in the specified modules list, if modules list is not specified, return all invalid components
 		if(includedModules != null && !includedModules.isEmpty()) {
@@ -233,7 +209,7 @@ public class DroolsRF2Validator {
 		}
 
 		// Filter only active concepts
-		if (Boolean.TRUE.equals(activeConceptsOnly)) {
+		if (activeConceptsOnly) {
 			invalidContents = invalidContents.stream().filter(c -> conceptService.isActive(c.getConceptId())).collect(Collectors.toList());
 		}
 
@@ -255,20 +231,67 @@ public class DroolsRF2Validator {
 		return invalidContents;
 	}
 
+	private PreviousReleaseComponentFactory loadPreviousReleaseComponentIds(Set<String> previousReleaseDirectories) throws ReleaseImportException {
+		ReleaseImporter importer = new ReleaseImporter();
+		final PreviousReleaseComponentFactory componentFactory = new PreviousReleaseComponentFactory();
+		importer.loadEffectiveSnapshotReleaseFiles(previousReleaseDirectories, LOADING_PROFILE, componentFactory);
+		return componentFactory;
+	}
+
+	private SnomedDroolsComponentRepository loadComponentsFromRF2(Set<String> extractedRF2FilesDirectories, String currentEffectiveTime,
+			PreviousReleaseComponentFactory previousReleaseComponentIds) throws ReleaseImportException {
+
+		ReleaseImporter importer = new ReleaseImporter();
+
+		boolean loadDelta = anyDeltaFilesPresent(extractedRF2FilesDirectories);
+		if (loadDelta) {
+			logger.info("Delta files detected, validating combination of snapshot and delta.");
+		} else {
+			logger.info("No delta files detected, validating snapshot.");
+		}
+
+		SnomedDroolsComponentRepository repository = new SnomedDroolsComponentRepository();
+		SnomedDroolsComponentFactory componentFactory = new SnomedDroolsComponentFactory(repository, currentEffectiveTime, previousReleaseComponentIds);
+		if (loadDelta) {
+			importer.loadEffectiveSnapshotAndDeltaReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory);
+		} else {
+			importer.loadEffectiveSnapshotReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory);
+		}
+
+		return repository;
+	}
+
+	private boolean anyDeltaFilesPresent(Set<String> extractedRF2FilesDirectories) throws ReleaseImportException {
+		boolean loadDelta = false;
+		for (String extractedRF2FilesDirectory : extractedRF2FilesDirectories) {
+			try (final Stream<Path> pathStream = Files.find(new File(extractedRF2FilesDirectory).toPath(), 50,
+					(path, basicFileAttributes) -> path.toFile().getName().matches("x?(sct|rel)2_Concept_[^_]*Delta_.*.txt"))) {
+				loadDelta = pathStream.findFirst().isPresent();
+			} catch (IOException e) {
+				throw new ReleaseImportException("Error while searching input files.", e);
+			}
+		}
+		return loadDelta;
+	}
+
 	public RuleExecutor getRuleExecutor() {
 		return ruleExecutor;
 	}
 
-	private static ResourceManager getTestResourceManager() throws IOException {
-		Properties properties = new Properties();
-		// Load bucket and path for test resources
-		properties.load(DroolsRF2Validator.class.getResourceAsStream("/aws.properties"));
+	private static ResourceManager getTestResourceManager(boolean loadTestResources) throws IOException {
+		if (loadTestResources) {
+			Properties properties = new Properties();
+			// Load bucket and path for test resources
+			properties.load(DroolsRF2Validator.class.getResourceAsStream("/aws.properties"));
 
-		ManualResourceConfiguration testResourcesConfiguration = new ManualResourceConfiguration(true, true, null,
-				new ResourceConfiguration.Cloud(properties.getProperty("test-resources.cloud.bucket"), properties.getProperty("test-resources.cloud.path")));
+			ManualResourceConfiguration testResourcesConfiguration = new ManualResourceConfiguration(true, true, null,
+					new ResourceConfiguration.Cloud(properties.getProperty("test-resources.cloud.bucket"), properties.getProperty("test-resources.cloud.path")));
 
-		// This uses anonymous access
-		return new ResourceManager(testResourcesConfiguration, new SimpleStorageResourceLoader(AmazonS3ClientBuilder.standard().withRegion("us-east-1").build()));
+			// This uses anonymous access
+			return new ResourceManager(testResourcesConfiguration, new SimpleStorageResourceLoader(AmazonS3ClientBuilder.standard().withRegion("us-east-1").build()));
+		} else {
+			return new ResourceManager(BLANK_RESOURCES_CONFIGURATION, null);
+		}
 	}
 
 }

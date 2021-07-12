@@ -21,17 +21,14 @@ public class SnomedDroolsComponentRepository {
 
 	private final Map<Long, DroolsConcept> conceptMap;
 	private final Map<Long, DroolsDescription> descriptionMap;
-	private final Set<Long> ungroupedAttributes;
 	private final Set<DroolsOntologyAxiom> ontologyAxioms;
 	private final List<InvalidContent> componentLoadingErrors;
 
-
-	private Logger logger = LoggerFactory.getLogger(getClass());
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public SnomedDroolsComponentRepository() {
 		conceptMap = new Long2ObjectOpenHashMap<>();
 		descriptionMap = new Long2ObjectOpenHashMap<>();
-		ungroupedAttributes = new HashSet<>();
 		ontologyAxioms = new HashSet<>();
 		componentLoadingErrors = new ArrayList<>();
 	}
@@ -50,7 +47,7 @@ public class SnomedDroolsComponentRepository {
 		});
 	}
 
-	public void addLanguageReferenceSetMember(String memberId, String referencedComponentId, String refsetId, String acceptabilityId) {
+	public synchronized void addLanguageReferenceSetMember(String memberId, String referencedComponentId, String refsetId, String acceptabilityId) {
 		long descriptionId = parseLong(referencedComponentId);
 		DroolsDescription description = descriptionMap.get(descriptionId);
 		if (description == null) {
@@ -133,10 +130,6 @@ public class SnomedDroolsComponentRepository {
 		return descriptionMap.get(parseLong(descriptionId));
 	}
 
-	public Set<Long> getUngroupedAttributes() {
-		return ungroupedAttributes;
-	}
-
 	public Set<DroolsOntologyAxiom> getOntologyAxioms() {
 		return ontologyAxioms;
 	}
@@ -148,7 +141,6 @@ public class SnomedDroolsComponentRepository {
 	public void cleanup() {
 		conceptMap.clear();
 		descriptionMap.clear();
-		ungroupedAttributes.clear();
 		ontologyAxioms.clear();
 	}
 }

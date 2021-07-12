@@ -8,7 +8,7 @@ global ConceptService conceptService
 rule "Active relationship must not have inactive destination"
 	dialect "mvel"
 	when
-		r : Relationship(active && !conceptService.isActive(destinationId))
+		r : Relationship(active && destinationId != null && !conceptService.isActive(destinationId))
 	then
 		invalidContent.add(new InvalidContent("399c0b37-ec7b-4659-9321-4a14c70eaa28",
 				r, "Concepts must not have relationships to inactive concepts."));

@@ -1,60 +1,59 @@
 package org.ihtsdo.drools.validator.rf2;
 
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
+
+import static java.lang.Long.parseLong;
 
 public class PreviousReleaseComponentFactory extends ImpotentComponentFactory {
 
-    private Set<String> releasedConcepts = new TreeSet<>();
-    private Set<String> releasedDescriptions = new TreeSet<>();
-    private Set<String> releasedRelationships = new TreeSet<>();
-    private Set<String> releaseRefsetMembers = new TreeSet<>();
-    private static final String INFERRED_RELATIONSHIP = "900000000000011006";
+    private final Set<Long> releasedConceptIds = Collections.synchronizedSet(new LongOpenHashSet());
+    private final Set<Long> releasedDescriptionIds = Collections.synchronizedSet(new LongOpenHashSet());
+    private final Set<Long> releasedRelationshipIds = Collections.synchronizedSet(new LongOpenHashSet());
+    private final Set<String> releaseRefsetMemberIds = Collections.synchronizedSet(new HashSet<>());
 
     @Override
     public void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
-        releasedConcepts.add(conceptId);
+        releasedConceptIds.add(parseLong(conceptId));
     }
 
     @Override
     public void newDescriptionState(String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
-        releasedDescriptions.add(id);
+        releasedDescriptionIds.add(parseLong(id));
     }
 
     @Override
     public void newRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
-        if (!characteristicTypeId.equals(INFERRED_RELATIONSHIP)) {
-            releasedRelationships.add(id);
-        }
+		releasedRelationshipIds.add(parseLong(id));
     }
+
+	@Override
+	public void newConcreteRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String value, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
+		releasedRelationshipIds.add(parseLong(id));
+	}
 
     @Override
     public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
-        releaseRefsetMembers.add(refsetId + "_" + id);
+        releaseRefsetMemberIds.add(id);
     }
 
-    public Set<String> getReleasedConcepts() {
-        return releasedConcepts;
-    }
+	public Set<Long> getReleasedConceptIds() {
+		return releasedConceptIds;
+	}
 
-    public Set<String> getReleasedDescriptions() {
-        return releasedDescriptions;
-    }
+	public Set<Long> getReleasedDescriptionIds() {
+		return releasedDescriptionIds;
+	}
 
-    public Set<String> getReleasedRelationships() {
-        return releasedRelationships;
-    }
+	public Set<Long> getReleasedRelationshipIds() {
+		return releasedRelationshipIds;
+	}
 
-    public Set<String> getReleaseRefsetMembers() {
-        return releaseRefsetMembers;
-    }
-
-    public void cleanup() {
-        releasedConcepts.clear();
-        releasedDescriptions.clear();
-        releasedRelationships.clear();
-        releaseRefsetMembers.clear();
-    }
+	public Set<String> getReleaseRefsetMemberIds() {
+		return releaseRefsetMemberIds;
+	}
 }
