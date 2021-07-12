@@ -234,7 +234,7 @@ public class DroolsRF2Validator {
 	private PreviousReleaseComponentFactory loadPreviousReleaseComponentIds(Set<String> previousReleaseDirectories) throws ReleaseImportException {
 		ReleaseImporter importer = new ReleaseImporter();
 		final PreviousReleaseComponentFactory componentFactory = new PreviousReleaseComponentFactory();
-		importer.loadEffectiveSnapshotReleaseFiles(previousReleaseDirectories, LOADING_PROFILE, componentFactory);
+		importer.loadEffectiveSnapshotReleaseFiles(previousReleaseDirectories, LOADING_PROFILE, componentFactory, true);
 		return componentFactory;
 	}
 
@@ -253,9 +253,9 @@ public class DroolsRF2Validator {
 		SnomedDroolsComponentRepository repository = new SnomedDroolsComponentRepository();
 		SnomedDroolsComponentFactory componentFactory = new SnomedDroolsComponentFactory(repository, currentEffectiveTime, previousReleaseComponentIds);
 		if (loadDelta) {
-			importer.loadEffectiveSnapshotAndDeltaReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory);
+			importer.loadEffectiveSnapshotAndDeltaReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, false);
 		} else {
-			importer.loadEffectiveSnapshotReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory);
+			importer.loadEffectiveSnapshotReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, false);
 		}
 
 		return repository;
