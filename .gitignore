@@ -3,3 +3,5 @@ target
 *.iml
 
 rules
+snomed-drools-rules
+validation-report-*.txt
