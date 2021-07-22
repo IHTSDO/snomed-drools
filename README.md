@@ -1,5 +1,5 @@
 # SNOMED Drools Engine
-A SNOMED CT Concept Validation Engine using Drools (Business Rules Engine).
+A SNOMED CT Concept Validation Engine using [Drools (Business Rules Engine)](http://drools.org).
 
 This library is used in the SNOMED International Authoring Platform to validate the parts of a concept which have changed during authoring.
 
