@@ -262,16 +262,17 @@ public class DroolsRF2Validator {
 	}
 
 	private boolean anyDeltaFilesPresent(Set<String> extractedRF2FilesDirectories) throws ReleaseImportException {
-		boolean loadDelta = false;
 		for (String extractedRF2FilesDirectory : extractedRF2FilesDirectories) {
 			try (final Stream<Path> pathStream = Files.find(new File(extractedRF2FilesDirectory).toPath(), 50,
 					(path, basicFileAttributes) -> path.toFile().getName().matches("x?(sct|rel)2_Concept_[^_]*Delta_.*.txt"))) {
-				loadDelta = pathStream.findFirst().isPresent();
+				if (pathStream.findFirst().isPresent()) {
+					return true;
+				}
 			} catch (IOException e) {
 				throw new ReleaseImportException("Error while searching input files.", e);
 			}
 		}
-		return loadDelta;
+		return false;
 	}
 
 	public RuleExecutor getRuleExecutor() {
