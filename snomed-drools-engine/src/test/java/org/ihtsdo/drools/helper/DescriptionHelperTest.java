@@ -10,9 +10,9 @@ import java.util.Set;
 public class DescriptionHelperTest {
 
 	@Test
-	public void testIsSemanticTagEquivalentToAnother() throws Exception {
-		Assert.assertFalse(DescriptionHelper.isSemanticTagEquivalentToAnother("Clinical finding (finding)", newSet("SNOMED CT Concept (SNOMED RT+CTV3)")));
-		Assert.assertTrue(DescriptionHelper.isSemanticTagEquivalentToAnother("Bleeding (finding)", newSet("Clinical finding (finding)")));
+	public void testSemanticTagCompatibleWithinHierarchy() throws Exception {
+		Assert.assertFalse(DescriptionHelper.isSemanticTagCompatibleWithinHierarchy("Clinical finding (finding)", newSet("product")));
+		Assert.assertTrue(DescriptionHelper.isSemanticTagCompatibleWithinHierarchy("Disease (disorder)", newSet("finding")));
 	}
 
 	private Set<String> newSet(String... string) {

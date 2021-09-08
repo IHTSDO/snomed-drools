@@ -3,6 +3,7 @@ package org.ihtsdo.drools.helper;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -14,6 +15,34 @@ public class DescriptionHelper {
 	public static final Pattern TAG_PATTERN = Pattern.compile("^.*\\((.*)\\)$");
 	public static final Pattern FULL_TAG_PATTERN = Pattern.compile("^.*(\\s\\([^\\)]+\\))$");
 	public static final Pattern FIRST_WORD_PATTERN = Pattern.compile("([^\\s]*).*$");
+
+    private static final Map<String, List<String>> semanticTagMap = new HashMap<>();
+
+    static {
+        semanticTagMap.put("organism", Arrays.asList("organism"));
+        semanticTagMap.put("qualifier value", Arrays.asList("intended site", "qualifier value", "release characteristic", "supplier",
+                "dose form", "state of matter", "basic dose form", "product name", "disposition",
+                "unit of presentation", "role", "administration method", "transformation"));
+        semanticTagMap.put("observable entity", Arrays.asList("observable entity"));
+        semanticTagMap.put("special concept", Arrays.asList("navigational concept"));
+        semanticTagMap.put("environment / location", Arrays.asList("environment", "geographic location"));
+        semanticTagMap.put("record artifact", Arrays.asList("record artifact"));
+        semanticTagMap.put("metadata", Arrays.asList("foundation metadata concept", "link assertion", "namespace concept",
+                "linkage concept", "attribute", "OWL metadata concept", "core metadata concept"));
+        semanticTagMap.put("finding", Arrays.asList("finding", "disorder"));
+        semanticTagMap.put("event", Arrays.asList("event"));
+        semanticTagMap.put("body structure", Arrays.asList("morphologic abnormality", "cell structure", "body structure", "cell"));
+        semanticTagMap.put("procedure", Arrays.asList("procedure", "regime/therapy"));
+        semanticTagMap.put("specimen", Arrays.asList("specimen"));
+        semanticTagMap.put("physical force", Arrays.asList("physical force"));
+        semanticTagMap.put("situation", Arrays.asList("situation"));
+        semanticTagMap.put("staging scale", Arrays.asList("staging scale", "tumor staging", "assessment scale"));
+        semanticTagMap.put("physical object", Arrays.asList("physical object", "product"));
+        semanticTagMap.put("social concept", Arrays.asList("social concept", "occupation", "racial group", "person",
+				"religion/philosophy", "life style", "ethnic group"));
+        semanticTagMap.put("substance", Arrays.asList("substance"));
+        semanticTagMap.put("product", Arrays.asList("physical object", "medicinal product", "clinical drug", "medicinal product form", "product"));
+    }
 
 	private DescriptionHelper () {}
 	
@@ -117,10 +146,6 @@ public class DescriptionHelper {
 		return false;
 	}
 
-	public static boolean isSemanticTagEquivalentToAnother(String testTerm, Set<String> otherTerms) {
-		return isSemanticTagEquivalentToAnother(testTerm, otherTerms, null);
-	}
-
 	public static boolean isAllParentSemanticTagMatchWithTerm(String testTerm, List<String> otherTerms) {
 		String tag = getTag(testTerm);		
 		if (tag != null) {
@@ -135,23 +160,13 @@ public class DescriptionHelper {
 		return true;
 	}
 	
-	public static boolean isSemanticTagEquivalentToAnother(String testTerm, Set<String> otherTerms,
-														   String[][] acceptablePairs) {
+	public static boolean isSemanticTagCompatibleWithinHierarchy(String testTerm, Set<String> topLevelSemanticTags) {
 		String tag = getTag(testTerm);
 		if (tag != null) {
-			for (String otherTerm : otherTerms) {
-				String parentTag = getTag(otherTerm);
-				if (tag.equals(parentTag)) {
+			for (String topLevelSemanticTag : topLevelSemanticTags) {
+				List<String> compatibleSemanticTags = semanticTagMap.get(topLevelSemanticTag);
+				if (!CollectionUtils.isEmpty(compatibleSemanticTags) && compatibleSemanticTags.contains(tag)) {
 					return true;
-				}
-				if (acceptablePairs != null) {
-					for (String[] acceptablePair : acceptablePairs) {
-						if (acceptablePair.length == 2
-								&& (acceptablePair[0].equals("*") || tag.equals(acceptablePair[0]))
-								&& acceptablePair[1].equals(parentTag)) {
-							return true;
-						}
-					}
 				}
 			}
 		}
