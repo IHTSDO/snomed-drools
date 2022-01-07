@@ -29,7 +29,7 @@ public class DescriptionHelper {
         semanticTagMap.put("record artifact", Arrays.asList("record artifact"));
         semanticTagMap.put("metadata", Arrays.asList("foundation metadata concept", "link assertion", "namespace concept",
                 "linkage concept", "attribute", "OWL metadata concept", "core metadata concept"));
-        semanticTagMap.put("finding", Arrays.asList("finding", "disorder"));
+        semanticTagMap.put("finding", Arrays.asList("finding", "disorder", "pattern"));
         semanticTagMap.put("event", Arrays.asList("event"));
         semanticTagMap.put("body structure", Arrays.asList("morphologic abnormality", "cell structure", "body structure", "cell"));
         semanticTagMap.put("procedure", Arrays.asList("procedure", "regime/therapy"));
@@ -42,6 +42,8 @@ public class DescriptionHelper {
 				"religion/philosophy", "life style", "ethnic group"));
         semanticTagMap.put("substance", Arrays.asList("substance"));
         semanticTagMap.put("product", Arrays.asList("physical object", "medicinal product", "clinical drug", "medicinal product form", "product"));
+		semanticTagMap.put("theoretical entity", Arrays.asList("theoretical entity"));
+
     }
 
 	private DescriptionHelper () {}
