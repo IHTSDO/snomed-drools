@@ -131,8 +131,18 @@ public class DroolsDescriptionService implements DescriptionService {
 					&& Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
 				Concept parent = repository.getConcept(relationship.getDestinationId());
 				for (Description description : parent.getDescriptions()) {
+					boolean matchedAcceptability = false;
 					if (description.isActive() && Constants.FSN.equals(description.getTypeId())) {
-						if(!termSematicTag.equals(DescriptionHelper.getTag(description.getTerm()))) {
+						if(languageRefsetIds != null && languageRefsetIds.length > 0) {
+							for (String languageRefsetId : languageRefsetIds) {
+								if (PREFERRED_ACCEPTABILITY.equals(description.getAcceptabilityMap().get(languageRefsetId))) {
+									matchedAcceptability = true;
+									break;
+								}
+							}
+						}
+
+						if((languageRefsetIds == null || matchedAcceptability) && !termSematicTag.equals(DescriptionHelper.getTag(description.getTerm()))) {
 							conceptIds.add(relationship.getDestinationId());
 						}
 					}
