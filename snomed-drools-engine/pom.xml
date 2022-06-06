@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.ihtsdo.drools</groupId>
 		<artifactId>snomed-drools</artifactId>
-		<version>3.1.2-SNAPSHOT</version>
+		<version>3.1.2</version>
 	</parent>
 
 	<artifactId>snomed-drools-engine</artifactId>
