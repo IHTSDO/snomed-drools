@@ -39,8 +39,14 @@ public class TestUtil {
 						jsonReader.beginObject();
 						while (jsonReader.hasNext()) {
 							String name = jsonReader.nextName();
-							if (name.equals("active")) {
+							if (name.equals("id")) {
+								ontologyAxiom.setId(jsonReader.nextString());
+							} else if (name.equals("active")) {
 								ontologyAxiom.setActive(jsonReader.nextBoolean());
+							} else if (name.equals("primitive")) {
+								ontologyAxiom.setPrimitive(jsonReader.nextBoolean());
+							} else if (name.equals("referencedComponentId")) {
+								ontologyAxiom.setReferencedComponentId(jsonReader.nextString());
 							} else if (name.equals("owlExpressionNamedConcepts")) {
 								jsonReader.beginArray();
 								HashSet<String> concept = new HashSet<>();
