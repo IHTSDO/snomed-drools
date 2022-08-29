@@ -36,7 +36,7 @@ public class IntegrationTest {
 
         invalidContentsReport.forEach(System.out::println);
 
-        assertEquals(7, invalidContentsReport.size());
+        assertEquals(8, invalidContentsReport.size());
 
         int index = 0;
         assertEquals(Severity.WARNING, invalidContentsReport.get(index).getSeverity());
@@ -71,6 +71,12 @@ public class IntegrationTest {
         assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
         assertEquals("Relationship 53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_100104001/Destination_100108001 references conceptId 123 which does not exist", invalidContentsReport.get(index).getMessage());
         assertEquals("53b64d8e-ec40-49e5-bc07-decf7113c7f8/Group_0/Type_100104001/Destination_100108001", invalidContentsReport.get(index).getComponentId());
+        assertEquals("123", invalidContentsReport.get(index).getConceptId());
+
+        index++;
+        assertEquals(Severity.ERROR, invalidContentsReport.get(index).getSeverity());
+        assertEquals("Axiom Refset 53b64d8e-ec40-49e5-bc07-decf7113c7f8 references conceptId 123 which does not exist", invalidContentsReport.get(index).getMessage());
+        assertEquals("53b64d8e-ec40-49e5-bc07-decf7113c7f8", invalidContentsReport.get(index).getComponentId());
         assertEquals("123", invalidContentsReport.get(index).getConceptId());
 
         index++;

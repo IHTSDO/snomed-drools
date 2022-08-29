@@ -81,10 +81,11 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 						// compare referencedComponentID and named concept in OWL expression
 						validateComponentIdAndNamedConcept(id, activeBool, moduleId, parseLong(referencedComponentId), axiom.getRightHandSideNamedConcept());
 					}
+					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, activeBool, moduleId, referencedComponentId, owlExpression, null, published, released, axiom.isPrimitive()));
 				} else {
 					// Can't be converted to relationships
 					Set<String> namedConceptIds = axiomConverter.getIdsOfConceptsNamedInAxiom(owlExpression).stream().map(Object::toString).collect(Collectors.toSet());
-					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, activeBool, moduleId, referencedComponentId, owlExpression, namedConceptIds, published, released));
+					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, activeBool, moduleId, referencedComponentId, owlExpression, namedConceptIds, published, released, axiom.isPrimitive()));
 				}
 			} catch (ConversionException | OWLParserException e) {
 				logger.warn("OntologyAxiom conversion failed for refset member " + id, e);

@@ -9,6 +9,8 @@ import java.util.Collection;
  */
 public interface OntologyAxiom extends Component {
 
+	boolean isPrimitive();
+
 	String getReferencedComponentId();
 
 	String getOwlExpression();

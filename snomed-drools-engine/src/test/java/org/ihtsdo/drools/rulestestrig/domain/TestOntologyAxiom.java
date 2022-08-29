@@ -11,6 +11,7 @@ public class TestOntologyAxiom implements OntologyAxiom, TestComponent {
 	private boolean published;
 	private boolean released;
 	private String moduleId;
+	private boolean primitive;
 	private String referencedComponentId;
 	private String owlExpression;
 	private Collection<String> owlExpressionNamedConcepts;
@@ -31,6 +32,15 @@ public class TestOntologyAxiom implements OntologyAxiom, TestComponent {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public void setPrimitive(boolean primitive) {
+		this.primitive = primitive;
+	}
+
+	@Override
+	public boolean isPrimitive() {
+		return primitive;
 	}
 
 	@Override
