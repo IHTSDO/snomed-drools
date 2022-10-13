@@ -67,19 +67,11 @@ public class DroolsConceptService implements ConceptService {
 
 	@Override
 	public Set<String> findTopLevelHierarchiesOfConcept(Concept concept) {
-		DroolsConcept droolsConcept = repository.getConcept(concept.getId());
-		Set<String> resultSet = new HashSet<>();
-		for (DroolsRelationship relationship : droolsConcept.getRelationships()) {
-			if(relationship.isActive() && Constants.IS_A.equals(relationship.getTypeId())
-					&& Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
-				if(Constants.ROOT_CONCEPT.equals(relationship.getDestinationId())) {
-					resultSet.add(relationship.getSourceId());
-				} else {
-					resultSet.addAll(findTopLevelHierarchiesOfConcept(repository.getConcept(relationship.getDestinationId())));
-				}
-			}
-		}
-		return resultSet;
+		Set<String> statedAncestors = findStatedAncestorsOfConcept(concept);
+		Set<String> topLevelHierarchies = getAllTopLevelHierarchies();
+		statedAncestors.retainAll(topLevelHierarchies);
+
+		return statedAncestors;
 	}
 
 
