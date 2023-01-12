@@ -22,6 +22,7 @@ import org.kie.api.runtime.StatelessKieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.aws.core.io.s3.SimpleStorageResourceLoader;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -114,6 +115,30 @@ public class RuleExecutor {
 
 		final List<List<InvalidContent>> sessionInvalidContent = new ArrayList<>();
 		final List<InvalidContent> exceptionContents = new ArrayList<>();
+		final Map<String, IntegrityIssueReport> integrityIssueReportMap = new HashMap<>();
+		for (Concept concept : concepts) {
+			IntegrityIssueReport report = findAllComponentsWithBadIntegrity(concept, conceptService);
+			if (!report.isEmpty()) {
+				integrityIssueReportMap.put(concept.getId(), report);
+			}
+		}
+		if (!integrityIssueReportMap.isEmpty()) {
+			StringBuilder builder = new StringBuilder();
+			for (String key : integrityIssueReportMap.keySet()) {
+				IntegrityIssueReport report = integrityIssueReportMap.get(key);
+				builder.append("Unable to find ");
+				if (report.isRelationshipTypeNotFound() && report.isRelationshipTargetNotFound()) {
+					builder.append("the relationship type ").append(report.getRelationshipWithNotFoundType()).append(" and relationship target ").append(report.getRelationshipWithNotFoundDestination());
+				} else if (report.isRelationshipTypeNotFound()) {
+					builder.append("the relationship type ").append(report.getRelationshipWithNotFoundType());
+				} else if (report.isRelationshipTargetNotFound()) {
+					builder.append("the relationship target ").append(report.getRelationshipWithNotFoundDestination());
+				}
+				builder.append(" for source concept ").append(key).append(". ");
+
+			}
+			throw new RuleExecutorException("Structural integrity issues. Details: " + builder.toString().trim());
+		}
 		for (String ruleSetName : ruleSetNames) {
 			final KieContainer kieContainer = assertionGroupContainers.get(ruleSetName);
 			if (kieContainer == null) {
@@ -187,6 +212,26 @@ public class RuleExecutor {
 		}
 
 		return invalidContent;
+	}
+
+	private IntegrityIssueReport findAllComponentsWithBadIntegrity(Concept concept, ConceptService conceptService) {
+		final List<String> relationshipWithNotFoundType = new ArrayList();
+		final List<String> relationshipWithNotFoundDestination = new ArrayList();
+		if (concept.isActive()) {
+			for (Relationship relationship : concept.getRelationships()) {
+				Concept typeConcept = conceptService.findById(relationship.getTypeId());
+				if (typeConcept == null) {
+					relationshipWithNotFoundType.add(relationship.getTypeId());
+				}
+				if (StringUtils.isEmpty(relationship.getConcreteValue())) {
+					Concept destinationConcept = conceptService.findById(relationship.getDestinationId());
+					if (destinationConcept == null) {
+						relationshipWithNotFoundDestination.add(relationship.getDestinationId());
+					}
+				}
+			}
+		}
+		return new IntegrityIssueReport(relationshipWithNotFoundType, relationshipWithNotFoundDestination);
 	}
 
 	private List<InvalidContent> removeDuplicates(List<InvalidContent> invalidContent) {
@@ -272,4 +317,44 @@ public class RuleExecutor {
 		return assertionGroupRuleCounts.getOrDefault(assertionGroupName, 0);
 	}
 
+	private class IntegrityIssueReport {
+
+		private List<String> relationshipWithNotFoundType;
+
+		private List<String> relationshipWithNotFoundDestination;
+
+		IntegrityIssueReport(List<String> relationshipWithNotFoundType, List<String> relationshipWithNotFoundDestination) {
+			this.relationshipWithNotFoundType = relationshipWithNotFoundType;
+			this.relationshipWithNotFoundDestination = relationshipWithNotFoundDestination;
+		}
+
+		public boolean isEmpty() {
+			return (relationshipWithNotFoundType == null || relationshipWithNotFoundType.isEmpty()) &&
+					(relationshipWithNotFoundDestination == null || relationshipWithNotFoundDestination.isEmpty());
+		}
+
+		public boolean isRelationshipTypeNotFound() {
+			return relationshipWithNotFoundType != null && !relationshipWithNotFoundType.isEmpty();
+		}
+
+		public boolean isRelationshipTargetNotFound() {
+			return relationshipWithNotFoundDestination != null && !relationshipWithNotFoundDestination.isEmpty();
+		}
+
+		public List<String> getRelationshipWithNotFoundType() {
+			return relationshipWithNotFoundType;
+		}
+
+		public void setRelationshipWithNotFoundType(List<String> relationshipWithNotFoundType) {
+			this.relationshipWithNotFoundType = relationshipWithNotFoundType;
+		}
+
+		public List<String> getRelationshipWithNotFoundDestination() {
+			return relationshipWithNotFoundDestination;
+		}
+
+		public void setRelationshipWithNotFoundDestination(List<String> relationshipWithNotFoundDestination) {
+			this.relationshipWithNotFoundDestination = relationshipWithNotFoundDestination;
+		}
+	}
 }
