@@ -2,50 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<parent>
+		<groupId>org.snomed</groupId>
+		<artifactId>snomed-parent-bom</artifactId>
+		<version>1.0.4-SNAPSHOT</version>
+	</parent>
+
 	<groupId>org.ihtsdo.drools</groupId>
 	<artifactId>snomed-drools</artifactId>
 	<version>3.4.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>1.8</java.version>
-		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<maven.compiler.source>${java.version}</maven.compiler.source>
-		<slf4j.version>1.7.5</slf4j.version>
-	</properties>
-
 	<modules>
 		<module>snomed-drools-engine</module>
 		<module>snomed-drools-rf2-validator</module>
 	</modules>
-
-	<repositories>
-		<repository>
-			<id>ihtsdo-releases</id>
-			<releases><enabled>true</enabled></releases>
-			<snapshots><enabled>false</enabled></snapshots>
-			<url>https://nexus3.ihtsdotools.org/repository/maven-releases/</url>
-		</repository>
-		<repository>
-			<id>ihtsdo-snapshots</id>
-			<releases><enabled>false</enabled></releases>
-			<snapshots><enabled>true</enabled></snapshots>
-			<url>https://nexus3.ihtsdotools.org/repository/maven-snapshots/</url>
-		</repository>
-	</repositories>
-
-	<distributionManagement>
-		<repository>
-			<id>ihtsdo-public-nexus</id>
-			<name>IHTSDO Public Nexus Releases</name>
-			<url>https://nexus3.ihtsdotools.org/repository/maven-releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>ihtsdo-public-nexus</id>
-			<name>IHTSDO Public Nexus Snapshots</name>
-			<url>https://nexus3.ihtsdotools.org/repository/maven-snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 </project>

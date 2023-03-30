@@ -18,7 +18,7 @@ import org.ihtsdo.otf.snomedboot.ReleaseImporter;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.aws.core.io.s3.SimpleStorageResourceLoader;
+import org.snomed.otf.script.dao.SimpleStorageResourceLoader;
 import org.springframework.util.Assert;
 
 import java.io.BufferedWriter;

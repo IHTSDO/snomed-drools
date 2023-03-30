@@ -21,7 +21,7 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.StatelessKieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.aws.core.io.s3.SimpleStorageResourceLoader;
+import org.snomed.otf.script.dao.SimpleStorageResourceLoader;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
@@ -29,7 +29,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class RuleExecutor {
@@ -167,7 +166,8 @@ public class RuleExecutor {
 						StatelessKieSession statelessKieSession = sessions.get(sessionIndex);
 						statelessKieSession.execute(components);
 						components.clear();
-						((StatelessKnowledgeSessionImpl) statelessKieSession).newWorkingMemory();
+						// Clear memory use
+						((StatelessKnowledgeSessionImpl) statelessKieSession).getKnowledgeBase().newKieSession();
 					} catch (Exception e) {
 						exceptionContents.add(new InvalidContent(concept.getId(),concept, "An error occurred while running concept validation. Technical detail: " + e.getMessage(), Severity.ERROR));
 					}
