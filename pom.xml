@@ -18,4 +18,23 @@
 		<module>snomed-drools-rf2-validator</module>
 	</modules>
 
+	<repositories>
+		<repository>
+			<id>ihtsdo-releases</id>
+			<name>ihtsdo-releases</name>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<url>https://nexus3.ihtsdotools.org/repository/maven-releases/</url>
+		</repository>
+		<repository>
+			<id>ihtsdo-snapshots</id>
+			<name>ihtsdo-snapshots</name>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<url>https://nexus3.ihtsdotools.org/repository/maven-snapshots/</url>
+		</repository>
+	</repositories>
+
 </project>
