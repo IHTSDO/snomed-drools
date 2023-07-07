@@ -4,7 +4,6 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import org.drools.core.impl.StatelessKnowledgeSessionImpl;
 import org.ihtsdo.drools.domain.*;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
 import org.ihtsdo.drools.exception.RuleExecutorException;
@@ -167,7 +166,7 @@ public class RuleExecutor {
 						statelessKieSession.execute(components);
 						components.clear();
 						// Clear memory use
-						((StatelessKnowledgeSessionImpl) statelessKieSession).getKnowledgeBase().newKieSession();
+						statelessKieSession.getKieBase().newKieSession();
 					} catch (Exception e) {
 						exceptionContents.add(new InvalidContent(concept.getId(),concept, "An error occurred while running concept validation. Technical detail: " + e.getMessage(), Severity.ERROR));
 					}
