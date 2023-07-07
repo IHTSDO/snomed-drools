@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.snomed</groupId>
 		<artifactId>snomed-parent-bom</artifactId>
-		 <version>1.0.12-SNAPSHOT</version>
+		 <version>1.0.12</version>
 	</parent>
 
 	<groupId>org.ihtsdo.drools</groupId>
 	<artifactId>snomed-drools</artifactId>
-	<version>3.3.2-SNAPSHOT</version>
+	<version>3.3.2</version>
 	<packaging>pom</packaging>
 
 	<modules>
