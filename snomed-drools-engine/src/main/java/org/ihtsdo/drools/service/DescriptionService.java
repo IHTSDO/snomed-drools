@@ -21,6 +21,6 @@ public interface DescriptionService {
 	
 	Set<String> findParentsNotContainingSemanticTag(Concept concept, String termSematicTag, String... languageRefsetIds);
 
-	boolean isRecognisedSemanticTag(String termSemanticTag);
+	boolean isRecognisedSemanticTag(String termSemanticTag, String language);
 
 }

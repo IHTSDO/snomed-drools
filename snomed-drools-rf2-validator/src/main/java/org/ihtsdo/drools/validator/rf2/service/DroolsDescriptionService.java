@@ -153,8 +153,8 @@ public class DroolsDescriptionService implements DescriptionService {
 	}
 
 	@Override
-	public boolean isRecognisedSemanticTag(String termSemanticTag) {
-		return testResourceProvider.getSemanticTags().contains(termSemanticTag);
+	public boolean isRecognisedSemanticTag(String termSemanticTag, String language) {
+		return testResourceProvider.getSemanticTagsByLanguage(Collections.singleton(language)).contains(termSemanticTag);
 	}
 
 	public DroolsDescriptionIndex getDroolsDescriptionIndex() {

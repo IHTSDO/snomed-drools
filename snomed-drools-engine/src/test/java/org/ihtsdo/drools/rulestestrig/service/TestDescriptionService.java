@@ -8,6 +8,7 @@ import org.ihtsdo.drools.helper.DescriptionHelper;
 import org.ihtsdo.drools.service.DescriptionService;
 import org.ihtsdo.drools.service.TestResourceProvider;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -143,7 +144,7 @@ public class TestDescriptionService implements DescriptionService {
 	}
 
 	@Override
-	public boolean isRecognisedSemanticTag(String termSemanticTag) {
-		return testResourceProvider.getSemanticTags().contains(termSemanticTag);
+	public boolean isRecognisedSemanticTag(String termSemanticTag, String language) {
+		return testResourceProvider.getSemanticTagsByLanguage(Collections.singleton(language)).contains(termSemanticTag);
 	}
 }

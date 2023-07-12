@@ -18,25 +18,25 @@ import java.util.Set;
  */
 public class TestResourceProvider {
 
-	private static final String SEMANTIC_TAG_FILENAME = "semantic-tags.txt";
+	private static final String SEMANTIC_TAG_FILENAME_PREFIX = "semantic-tags";
 	private static final String CASE_SIGNIFICANT_WORDS_FILENAME = "cs_words.txt";
 	private static final String US_TO_GB_TERMS_MAP_FILENAME = "us-to-gb-terms-map.txt";
 
 	private final ResourceManager resourceManager;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private final Set<String> semanticTags;
+	private final Map<String, Set<String>> semanticTagsMap;
 	private final Set<String> caseSignificantWords;
 	private final Map<String, String> usToGbTermMap;
 
 	public TestResourceProvider(ResourceManager resourceManager) throws IOException {
 		this.resourceManager = resourceManager;
-		semanticTags = loadSemanticTags();
+		semanticTagsMap = loadSemanticTagsMap();
 		caseSignificantWords = loadCaseSignificantWords();
 		usToGbTermMap = doGetUsToGbTermMap();
 	}
 
 	public boolean isAnyResourcesLoaded() {
-		return (semanticTags != null && !semanticTags.isEmpty())
+		return (semanticTagsMap != null && !semanticTagsMap.isEmpty())
 				|| (caseSignificantWords != null && !caseSignificantWords.isEmpty())
 				|| (usToGbTermMap != null && !usToGbTermMap.isEmpty());
 	}
@@ -46,7 +46,23 @@ public class TestResourceProvider {
 	 * @return Set of semantic tags.
 	 */
 	public Set<String> getSemanticTags() {
-		return semanticTags;
+		Set<String> allTags = new HashSet<>();
+		semanticTagsMap.values().forEach(value -> allTags.addAll(value));
+		return  allTags;
+	}
+
+	/**
+	 * Returns cached semantic tags list by languages.
+	 * @return Set of semantic tags.
+	 */
+	public Set<String> getSemanticTagsByLanguage(Set<String> language) {
+		Set<String> semanticTags = new HashSet<>();
+		semanticTagsMap.entrySet().forEach(entry -> {
+			if (language.contains(entry.getKey())) {
+				semanticTags.addAll(entry.getValue());
+			}
+		});
+		return  semanticTags;
 	}
 
 	/**
@@ -65,16 +81,27 @@ public class TestResourceProvider {
 		return usToGbTermMap;
 	}
 
-	private Set<String> loadSemanticTags() throws IOException {
-		Set<String> terms = new HashSet<>();
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceManager.readResourceStream(SEMANTIC_TAG_FILENAME)))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				terms.add(line.trim());
+	private Map<String, Set<String>> loadSemanticTagsMap() throws IOException {
+		Map<String, Set<String>> tagsMap = new HashMap<>();
+		Set<String> allTags = new HashSet<>();
+		Set<String> filenames = resourceManager.listFilenames(SEMANTIC_TAG_FILENAME_PREFIX);
+		for (String filename : filenames) {
+			String language = filename.equalsIgnoreCase("semantic-tags.txt") ? "en" : filename.substring(filename.indexOf("_") + 1, filename.indexOf("."));
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceManager.readResourceStream(filename)))) {
+				String line;
+				Set<String> tags = new HashSet<>();
+				while ((line = reader.readLine()) != null) {
+					tags.add(line.trim());
+				}
+				if (!tags.isEmpty()) {
+					tagsMap.put(language, tags);
+				}
+				allTags.addAll(tags);
 			}
 		}
-		logger.info("{} semantic tags loaded", terms.size());
-		return terms;
+
+		logger.info("{} semantic tags loaded", allTags.size());
+		return tagsMap;
 	}
 
 	private Set<String> loadCaseSignificantWords() throws IOException {
