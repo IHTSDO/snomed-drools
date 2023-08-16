@@ -82,6 +82,35 @@
 
 	<build>
 		<plugins>
+			<!-- Add the Add-Opens to the manifest file to allow snomed-owl-toolkit to work with java 17. Remove this when the owl-api is updatedversion 5-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>default-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<archive>
+								<manifestEntries>
+									<Add-Opens>java.base/java.lang</Add-Opens>
+								</manifestEntries>
+							</archive>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+				</configuration>
+			</plugin>
 			<!-- Create Executable Application Archive -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

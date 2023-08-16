@@ -156,7 +156,7 @@ public class DroolsRF2Validator {
 				}
 			}
 		} catch (ReleaseImportException | IOException e) {
-			e.printStackTrace();
+			logger.error("Failed to validate.", e);
 		}
 	}
 

@@ -99,7 +99,7 @@ public class SnomedDroolsComponentRepository {
 			} else {
 				errorMessageBuilder.append("Component ");
 			}
-			errorMessageBuilder.append(component.getId() + " references conceptId " + conceptId + " which does not exist");
+			errorMessageBuilder.append(component.getId()).append(" references conceptId ").append(conceptId).append(" which does not exist");
 			addComponentLoadingError(conceptId, component, errorMessageBuilder.toString());
 			return Optional.empty();
 		}

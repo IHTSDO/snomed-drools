@@ -4,6 +4,7 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.ihtsdo.drools.domain.*;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
 import org.ihtsdo.drools.exception.RuleExecutorException;
@@ -21,7 +22,6 @@ import org.kie.api.runtime.StatelessKieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snomed.otf.script.dao.SimpleStorageResourceLoader;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -214,8 +214,8 @@ public class RuleExecutor {
 	}
 
 	private IntegrityIssueReport findAllComponentsWithBadIntegrity(Concept concept, ConceptService conceptService) {
-		final List<String> relationshipWithNotFoundType = new ArrayList();
-		final List<String> relationshipWithNotFoundDestination = new ArrayList();
+		final List<String> relationshipWithNotFoundType = new ArrayList<>();
+		final List<String> relationshipWithNotFoundDestination = new ArrayList<>();
 		if (concept.isActive()) {
 			for (Relationship relationship : concept.getRelationships()) {
 				Concept typeConcept = conceptService.findById(relationship.getTypeId());
@@ -316,7 +316,7 @@ public class RuleExecutor {
 		return assertionGroupRuleCounts.getOrDefault(assertionGroupName, 0);
 	}
 
-	private class IntegrityIssueReport {
+	private static class IntegrityIssueReport {
 
 		private List<String> relationshipWithNotFoundType;
 

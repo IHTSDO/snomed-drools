@@ -1,12 +1,8 @@
 package org.ihtsdo.drools.validator.rf2;
 
 import com.google.gson.Gson;
-import org.ihtsdo.otf.snomedboot.ReleaseImportException;
-import org.ihtsdo.otf.snomedboot.ReleaseImporter;
-import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.traversal.TreeWalker;
 
 import java.io.*;
 import java.net.URL;

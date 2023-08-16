@@ -1,6 +1,9 @@
 package org.ihtsdo.drools.rulestestrig;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
+import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -14,17 +17,15 @@ import org.ihtsdo.drools.rulestestrig.domain.TestOntologyAxiom;
 import org.ihtsdo.drools.rulestestrig.domain.TestRelationship;
 
 import java.io.*;
-import java.lang.reflect.Array;
-import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 public class TestUtil {
 
-	public static final Charset UTF8 = Charset.forName("UTF-8");
+	public static final Charset UTF8 = StandardCharsets.UTF_8;
 	private static Gson gson;
 
 	static {
@@ -39,23 +40,22 @@ public class TestUtil {
 						jsonReader.beginObject();
 						while (jsonReader.hasNext()) {
 							String name = jsonReader.nextName();
-							if (name.equals("id")) {
-								ontologyAxiom.setId(jsonReader.nextString());
-							} else if (name.equals("active")) {
-								ontologyAxiom.setActive(jsonReader.nextBoolean());
-							} else if (name.equals("primitive")) {
-								ontologyAxiom.setPrimitive(jsonReader.nextBoolean());
-							} else if (name.equals("referencedComponentId")) {
-								ontologyAxiom.setReferencedComponentId(jsonReader.nextString());
-							} else if (name.equals("owlExpressionNamedConcepts")) {
-								jsonReader.beginArray();
-								HashSet<String> concept = new HashSet<>();
-								ontologyAxiom.setOwlExpressionNamedConcepts(concept);
-								while (jsonReader.hasNext()) {
-									concept.add(jsonReader.nextString());
-								}
-								jsonReader.endArray();
-							}
+                            switch (name) {
+                                case "id" -> ontologyAxiom.setId(jsonReader.nextString());
+                                case "active" -> ontologyAxiom.setActive(jsonReader.nextBoolean());
+                                case "primitive" -> ontologyAxiom.setPrimitive(jsonReader.nextBoolean());
+                                case "referencedComponentId" ->
+                                        ontologyAxiom.setReferencedComponentId(jsonReader.nextString());
+                                case "owlExpressionNamedConcepts" -> {
+                                    jsonReader.beginArray();
+                                    HashSet<String> concept = new HashSet<>();
+                                    ontologyAxiom.setOwlExpressionNamedConcepts(concept);
+                                    while (jsonReader.hasNext()) {
+                                        concept.add(jsonReader.nextString());
+                                    }
+                                    jsonReader.endArray();
+                                }
+                            }
 						}
 						jsonReader.endObject();
 						return ontologyAxiom;
@@ -73,18 +73,8 @@ public class TestUtil {
 		return gson.fromJson(new FileReader(jsonFile), new TypeToken<Map<String, List<TestConcept<TestDescription, TestRelationship>>>>() {}.getType());
 	}
 
-	public static final FileFilter DIRECTORY_FILTER = new FileFilter() {
-		@Override
-		public boolean accept(File file) {
-			return file.isDirectory() && !file.isHidden();
-		}
-	};
+	public static final FileFilter DIRECTORY_FILTER = file -> file.isDirectory() && !file.isHidden();
 
-	public static final FilenameFilter RULE_FILE_FILTER = new FilenameFilter() {
-		@Override
-		public boolean accept(File file, String name) {
-			return new File(file, name).isFile() && name.endsWith(".drl");
-		}
-	};
+	public static final FilenameFilter RULE_FILE_FILTER = (file, name) -> new File(file, name).isFile() && name.endsWith(".drl");
 
 }

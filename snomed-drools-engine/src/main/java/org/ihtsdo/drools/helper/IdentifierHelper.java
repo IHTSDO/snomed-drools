@@ -1,9 +1,9 @@
 package org.ihtsdo.drools.helper;
 
+import org.apache.commons.lang3.StringUtils;
 import org.ihtsdo.drools.domain.ComponentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import java.util.regex.Pattern;
 
@@ -39,14 +39,9 @@ public class IdentifierHelper {
         try {
             if (VerhoeffCheck.validateLastChecksumDigit(sctid) && componentType != null) {
                 switch (componentType) {
-                    case Concept:
-                        isValid = isConceptId(sctid);
-                        break;
-                    case Description:
-                        isValid = isDescriptionId(sctid);
-                        break;
-                    case Relationship:
-                        isValid = isRelationshipId(sctid);
+                    case Concept -> isValid = isConceptId(sctid);
+                    case Description -> isValid = isDescriptionId(sctid);
+                    case Relationship -> isValid = isRelationshipId(sctid);
                 }
             }
         } catch (Exception e) {

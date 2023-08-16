@@ -47,7 +47,7 @@ public class TestResourceProvider {
 	 */
 	public Set<String> getSemanticTags() {
 		Set<String> allTags = new HashSet<>();
-		semanticTagsMap.values().forEach(value -> allTags.addAll(value));
+		semanticTagsMap.values().forEach(allTags::addAll);
 		return  allTags;
 	}
 
@@ -57,11 +57,11 @@ public class TestResourceProvider {
 	 */
 	public Set<String> getSemanticTagsByLanguage(Set<String> language) {
 		Set<String> semanticTags = new HashSet<>();
-		semanticTagsMap.entrySet().forEach(entry -> {
-			if (language.contains(entry.getKey())) {
-				semanticTags.addAll(entry.getValue());
-			}
-		});
+		semanticTagsMap.forEach((key, value) -> {
+            if (language.contains(key)) {
+                semanticTags.addAll(value);
+            }
+        });
 		return  semanticTags;
 	}
 

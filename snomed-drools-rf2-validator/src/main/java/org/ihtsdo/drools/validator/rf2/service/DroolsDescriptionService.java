@@ -13,7 +13,6 @@ import org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentRepository;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;

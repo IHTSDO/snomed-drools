@@ -1,10 +1,7 @@
 package org.ihtsdo.drools.helper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
+
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Relationship;
@@ -12,18 +9,18 @@ import org.ihtsdo.drools.domain.Relationship;
 public class ConceptHelper {
 	
 	public static boolean containsAnyConcept(List<String> conceptIdList, String... restrictConcepts){
-		List<String> restrictList = new ArrayList<String>(Arrays.asList(restrictConcepts));		
-		return conceptIdList.size() > 1 && conceptIdList.size() == restrictList.size() && conceptIdList.containsAll(restrictList);
+		List<String> restrictList = new ArrayList<>(List.of(restrictConcepts));
+		return conceptIdList.size() > 1 && conceptIdList.size() == restrictList.size() && new HashSet<>(conceptIdList).containsAll(restrictList);
 	}
 	
 	public static boolean isMoreThanOneTopLevelHierarchy(List<String> conceptIdList, String... restrictConcepts){
-		List<String> restrictList = new ArrayList<String>(Arrays.asList(restrictConcepts));
+		List<String> restrictList = new ArrayList<>(List.of(restrictConcepts));
 		
 		if (conceptIdList.size() > 1) {
 			if (conceptIdList.size() > restrictList.size()) {
 				return true;
 			} else if (conceptIdList.size() == restrictList.size()) {
-				return !conceptIdList.containsAll(restrictList);
+				return !new HashSet<>(conceptIdList).containsAll(restrictList);
 			} else {
 				return false;
 			}
@@ -51,7 +48,7 @@ public class ConceptHelper {
             for (String key2 : axiomMap.keySet()) {
                 List<Relationship> relationships1 = axiomMap.get(key1);
                 List<Relationship> relationships2 = axiomMap.get(key2);
-                if (key1 != key2 && relationships1.size() == relationships2.size()) {
+                if (!Objects.equals(key1, key2) && relationships1.size() == relationships2.size()) {
                     int count = 0;
                     for (Relationship relationship1 : relationships1) {
                         for (Relationship relationship2 : relationships2) {

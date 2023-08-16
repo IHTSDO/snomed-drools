@@ -1,7 +1,6 @@
 package org.ihtsdo.drools.domain;
 
 import java.util.Collection;
-import java.util.Set;
 
 public interface Concept extends Component {
 

@@ -19,7 +19,6 @@ import org.ihtsdo.otf.resourcemanager.ResourceManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.ihtsdo.drools.rulestestrig.domain.Constants;
 
 import java.util.*;
 

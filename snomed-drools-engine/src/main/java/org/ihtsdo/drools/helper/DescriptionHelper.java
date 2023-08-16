@@ -19,30 +19,30 @@ public class DescriptionHelper {
     private static final Map<String, List<String>> semanticTagMap = new HashMap<>();
 
     static {
-        semanticTagMap.put("organism", Arrays.asList("organism"));
-        semanticTagMap.put("qualifier value", Arrays.asList("intended site", "qualifier value", "release characteristic", "supplier",
+        semanticTagMap.put("organism", List.of("organism"));
+        semanticTagMap.put("qualifier value", List.of("intended site", "qualifier value", "release characteristic", "supplier",
                 "dose form", "state of matter", "basic dose form", "product name", "disposition",
                 "unit of presentation", "role", "administration method", "transformation"));
-        semanticTagMap.put("observable entity", Arrays.asList("observable entity"));
-        semanticTagMap.put("special concept", Arrays.asList("navigational concept"));
-        semanticTagMap.put("environment / location", Arrays.asList("environment", "geographic location"));
-        semanticTagMap.put("record artifact", Arrays.asList("record artifact"));
-        semanticTagMap.put("metadata", Arrays.asList("foundation metadata concept", "link assertion", "namespace concept",
+        semanticTagMap.put("observable entity", List.of("observable entity"));
+        semanticTagMap.put("special concept", List.of("navigational concept"));
+        semanticTagMap.put("environment / location", List.of("environment", "geographic location"));
+        semanticTagMap.put("record artifact", List.of("record artifact"));
+        semanticTagMap.put("metadata", List.of("foundation metadata concept", "link assertion", "namespace concept",
                 "linkage concept", "attribute", "OWL metadata concept", "core metadata concept"));
-        semanticTagMap.put("finding", Arrays.asList("finding", "disorder", "pattern"));
-        semanticTagMap.put("event", Arrays.asList("event"));
-        semanticTagMap.put("body structure", Arrays.asList("morphologic abnormality", "cell structure", "body structure", "cell"));
-        semanticTagMap.put("procedure", Arrays.asList("procedure", "regime/therapy"));
-        semanticTagMap.put("specimen", Arrays.asList("specimen"));
-        semanticTagMap.put("physical force", Arrays.asList("physical force"));
-        semanticTagMap.put("situation", Arrays.asList("situation"));
-        semanticTagMap.put("staging scale", Arrays.asList("staging scale", "tumor staging", "assessment scale"));
-        semanticTagMap.put("physical object", Arrays.asList("physical object", "product"));
-        semanticTagMap.put("social concept", Arrays.asList("social concept", "occupation", "racial group", "person",
+        semanticTagMap.put("finding", List.of("finding", "disorder", "pattern"));
+        semanticTagMap.put("event", List.of("event"));
+        semanticTagMap.put("body structure", List.of("morphologic abnormality", "cell structure", "body structure", "cell"));
+        semanticTagMap.put("procedure", List.of("procedure", "regime/therapy"));
+        semanticTagMap.put("specimen", List.of("specimen"));
+        semanticTagMap.put("physical force", List.of("physical force"));
+        semanticTagMap.put("situation", List.of("situation"));
+        semanticTagMap.put("staging scale", List.of("staging scale", "tumor staging", "assessment scale"));
+        semanticTagMap.put("physical object", List.of("physical object", "product"));
+        semanticTagMap.put("social concept", List.of("social concept", "occupation", "racial group", "person",
 				"religion/philosophy", "life style", "ethnic group"));
-        semanticTagMap.put("substance", Arrays.asList("substance"));
-        semanticTagMap.put("product", Arrays.asList("physical object", "medicinal product", "clinical drug", "medicinal product form", "product"));
-		semanticTagMap.put("theoretical entity", Arrays.asList("theoretical entity"));
+        semanticTagMap.put("substance", List.of("substance"));
+        semanticTagMap.put("product", List.of("physical object", "medicinal product", "clinical drug", "medicinal product form", "product"));
+		semanticTagMap.put("theoretical entity", List.of("theoretical entity"));
 
     }
 
@@ -62,7 +62,7 @@ public class DescriptionHelper {
 	}
 
 	public static boolean isMoreThanOneAcceptabilityPerDialect(Concept concept, boolean active, String typeId, String acceptability) {
-		List<String> dialects = new ArrayList<String>();
+		List<String> dialects = new ArrayList<>();
 		dialects.add(Constants.US_EN_LANG_REFSET);
 		dialects.add(Constants.GB_EN_LANG_REFSET);
 		
@@ -109,7 +109,7 @@ public class DescriptionHelper {
 	 *         false otherwise
 	 */
 	public static boolean hasAcceptabilityMap(Description description) {
-		return description.getAcceptabilityMap() != null && description.getAcceptabilityMap().size() > 0;
+		return description.getAcceptabilityMap() != null && !description.getAcceptabilityMap().isEmpty();
 	}
 
 	/**
@@ -221,10 +221,10 @@ public class DescriptionHelper {
 
 			// if first words are equal and case significance not equal, return
 			// false - exclude text definitions
-			if (fw1 != null && fw2 != null && fw1.toLowerCase().equals(fw2.toLowerCase())
-					&& !Constants.TEXT_DEFINITION.equals(d.getTypeId())
-					&& !Constants.TEXT_DEFINITION.equals(description.getTypeId()) && d.getCaseSignificanceId() != null
-					&& !d.getCaseSignificanceId().equals(description.getCaseSignificanceId())) {
+			if (fw1 != null && fw1.equalsIgnoreCase(fw2)
+                    && !Constants.TEXT_DEFINITION.equals(d.getTypeId())
+                    && !Constants.TEXT_DEFINITION.equals(description.getTypeId()) && d.getCaseSignificanceId() != null
+                    && !d.getCaseSignificanceId().equals(description.getCaseSignificanceId())) {
 				return false;
 			}
 		}
