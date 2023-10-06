@@ -15,8 +15,8 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class DroolsDescriptionIndex {
     private void loadRepository(SnomedDroolsComponentRepository repository) {
         //Only load repository at first time
         if (index == null) {
-            index = new RAMDirectory();
+            index = new ByteBuffersDirectory();
             StandardAnalyzer analyzer = new StandardAnalyzer();
             Collection<DroolsDescription> descriptions = repository.getDescriptions();
             IndexWriterConfig config = new IndexWriterConfig(analyzer);

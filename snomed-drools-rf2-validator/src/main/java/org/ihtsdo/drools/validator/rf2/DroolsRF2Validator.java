@@ -1,6 +1,5 @@
 package org.ihtsdo.drools.validator.rf2;
 
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.google.common.collect.Sets;
 import org.ihtsdo.drools.RuleExecutor;
 import org.ihtsdo.drools.RuleExecutorFactory;
@@ -20,6 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snomed.otf.script.dao.SimpleStorageResourceLoader;
 import org.springframework.util.Assert;
+import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -288,8 +290,11 @@ public class DroolsRF2Validator {
 			ManualResourceConfiguration testResourcesConfiguration = new ManualResourceConfiguration(true, true, null,
 					new ResourceConfiguration.Cloud(properties.getProperty("test-resources.cloud.bucket"), properties.getProperty("test-resources.cloud.path")));
 
-			// This uses anonymous access
-			return new ResourceManager(testResourcesConfiguration, new SimpleStorageResourceLoader(AmazonS3ClientBuilder.standard().withRegion("us-east-1").build()));
+			S3Client s3Client = S3Client.builder()
+					.region(Region.US_EAST_1)
+					.credentialsProvider(ProfileCredentialsProvider.create())
+					.build();
+			return new ResourceManager(testResourcesConfiguration, new SimpleStorageResourceLoader(s3Client));
 		} else {
 			return new ResourceManager(BLANK_RESOURCES_CONFIGURATION, null);
 		}

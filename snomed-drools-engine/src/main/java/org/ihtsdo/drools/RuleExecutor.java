@@ -1,9 +1,10 @@
 package org.ihtsdo.drools;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
+import software.amazon.awssdk.services.s3.S3Client;
+
 import org.apache.commons.lang3.StringUtils;
 import org.ihtsdo.drools.domain.*;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
@@ -63,12 +64,12 @@ public class RuleExecutor {
 
 	public TestResourceProvider newTestResourceProvider(String awsKey, String awsSecretKey, String bucket, String path) throws RuleExecutorException {
 		try {
-			AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
-					.withRegion("us-east-1")
-					.withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(awsKey, awsSecretKey)))
+			S3Client s3Client = S3Client.builder()
+					.region(Region.US_EAST_1)
+					.credentialsProvider(ProfileCredentialsProvider.create())
 					.build();
 			ManualResourceConfiguration resourceConfiguration = new ManualResourceConfiguration(true, true, null, new ResourceConfiguration.Cloud(bucket, path));
-			ResourceManager resourceManager = new ResourceManager(resourceConfiguration, new SimpleStorageResourceLoader(amazonS3));
+			ResourceManager resourceManager = new ResourceManager(resourceConfiguration, new SimpleStorageResourceLoader(s3Client));
 			TestResourceProvider testResourceProvider = new TestResourceProvider(resourceManager);
 			testResourcesEmpty = !testResourceProvider.isAnyResourcesLoaded();
 			return testResourceProvider;
