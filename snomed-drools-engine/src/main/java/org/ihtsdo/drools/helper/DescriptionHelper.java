@@ -16,36 +16,6 @@ public class DescriptionHelper {
 	public static final Pattern FULL_TAG_PATTERN = Pattern.compile("^.*(\\s\\([^\\)]+\\))$");
 	public static final Pattern FIRST_WORD_PATTERN = Pattern.compile("([^\\s]*).*$");
 
-    private static final Map<String, List<String>> semanticTagMap = new HashMap<>();
-
-    static {
-        semanticTagMap.put("organism", List.of("organism"));
-        semanticTagMap.put("qualifier value", List.of("intended site", "qualifier value", "release characteristic", "supplier",
-                "dose form", "state of matter", "basic dose form", "product name", "disposition",
-                "unit of presentation", "role", "administration method", "transformation"));
-        semanticTagMap.put("observable entity", List.of("observable entity"));
-        semanticTagMap.put("special concept", List.of("navigational concept"));
-        semanticTagMap.put("environment / location", List.of("environment", "geographic location"));
-        semanticTagMap.put("record artifact", List.of("record artifact"));
-        semanticTagMap.put("metadata", List.of("foundation metadata concept", "link assertion", "namespace concept",
-                "linkage concept", "attribute", "OWL metadata concept", "core metadata concept"));
-        semanticTagMap.put("finding", List.of("finding", "disorder", "pattern"));
-        semanticTagMap.put("event", List.of("event"));
-        semanticTagMap.put("body structure", List.of("morphologic abnormality", "cell structure", "body structure", "cell"));
-        semanticTagMap.put("procedure", List.of("procedure", "regime/therapy"));
-        semanticTagMap.put("specimen", List.of("specimen"));
-        semanticTagMap.put("physical force", List.of("physical force"));
-        semanticTagMap.put("situation", List.of("situation"));
-        semanticTagMap.put("staging scale", List.of("staging scale", "tumor staging", "assessment scale"));
-        semanticTagMap.put("physical object", List.of("physical object", "product"));
-        semanticTagMap.put("social concept", List.of("social concept", "occupation", "racial group", "person",
-				"religion/philosophy", "life style", "ethnic group"));
-        semanticTagMap.put("substance", List.of("substance"));
-        semanticTagMap.put("product", List.of("physical object", "medicinal product", "clinical drug", "medicinal product form", "product"));
-		semanticTagMap.put("theoretical entity", List.of("theoretical entity"));
-
-    }
-
 	private DescriptionHelper () {}
 	
 	public static Collection<Description> filterByActiveTypeAndDialectPreferred(Concept concept, boolean active,
@@ -162,20 +132,6 @@ public class DescriptionHelper {
 		return true;
 	}
 	
-	public static boolean isSemanticTagCompatibleWithinHierarchy(String testTerm, Set<String> topLevelSemanticTags) {
-		String tag = getTag(testTerm);
-		if (tag != null) {
-			for (String topLevelSemanticTag : topLevelSemanticTags) {
-				List<String> compatibleSemanticTags = semanticTagMap.get(topLevelSemanticTag);
-				if (!CollectionUtils.isEmpty(compatibleSemanticTags) && compatibleSemanticTags.contains(tag)) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
 	/**
 	 * Boolean check for case significance match between preferred term and one
 	 * or more fsns
