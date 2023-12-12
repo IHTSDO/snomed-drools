@@ -2,9 +2,7 @@ package org.ihtsdo.drools.validator.rf2.domain;
 
 import org.ihtsdo.drools.domain.Concept;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class DroolsConcept extends DroolsComponent implements Concept {
 
@@ -13,6 +11,7 @@ public class DroolsConcept extends DroolsComponent implements Concept {
 	private final Set<DroolsRelationship> relationships;
 	private final Set<DroolsRelationship> activeInboundStatedRelationships;
 	private final Set<DroolsOntologyAxiom> ontologyAxioms;
+	private Map<String, Set<String>> associationTargets;
 
 	public DroolsConcept(String id, boolean active, String moduleId, String definitionStatusId, boolean published, boolean released) {
 		super(id, active, moduleId, published, released);
@@ -21,6 +20,7 @@ public class DroolsConcept extends DroolsComponent implements Concept {
 		relationships = new HashSet<>();
 		activeInboundStatedRelationships = new HashSet<>();
 		ontologyAxioms = new HashSet<>();
+		associationTargets = new HashMap<>();
 	}
 
 	@Override
@@ -45,5 +45,10 @@ public class DroolsConcept extends DroolsComponent implements Concept {
 
 	public Set<DroolsRelationship> getActiveInboundStatedRelationships() {
 		return activeInboundStatedRelationships;
+	}
+
+	@Override
+	public Map <String, Set<String>> getAssociationTargets() {
+		return associationTargets;
 	}
 }

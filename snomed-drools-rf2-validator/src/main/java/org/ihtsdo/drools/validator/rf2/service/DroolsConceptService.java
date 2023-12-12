@@ -27,6 +27,16 @@ public class DroolsConceptService implements ConceptService {
 	}
 
 	@Override
+	public boolean isInactiveConceptSameAs(String inactiveConceptId, String conceptId) {
+		DroolsConcept inactiveConcept = repository.getConcept(inactiveConceptId);
+		String sameAsAssociationText = Constants.historicalAssociationNames.get(Constants.REFSET_SAME_AS_ASSOCIATION);
+		return inactiveConcept != null
+				&& !inactiveConcept.getAssociationTargets().isEmpty()
+				&& inactiveConcept.getAssociationTargets().containsKey(sameAsAssociationText)
+				&& inactiveConcept.getAssociationTargets().get(sameAsAssociationText).contains(conceptId);
+	}
+
+	@Override
 	public Concept findById(String conceptId) {
 		return repository.getConcept(conceptId);
 	}

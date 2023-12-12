@@ -1,5 +1,6 @@
 package org.ihtsdo.drools.validator.rf2;
 
+import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.validator.rf2.domain.*;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
@@ -97,6 +98,9 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 			// Language reference set
 			String acceptabilityId = otherValues[0];
 			repository.addLanguageReferenceSetMember(id, referencedComponentId, refsetId, acceptabilityId);
+		} else if (activeBool && (Constants.historicalAssociationNames.keySet().contains(refsetId))) {
+			String targetComponentId = otherValues[0];
+			repository.addAssociationTargetMember(id, refsetId, referencedComponentId, targetComponentId);
 		}
 	}
 

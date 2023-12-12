@@ -44,6 +44,7 @@ public class DroolsRF2Validator {
 	public static final LoadingProfile LOADING_PROFILE = LoadingProfile.complete
 			.withoutAllRefsets()
 			.withIncludedReferenceSetFilenamePattern(".*_cRefset_Language.*")
+			.withIncludedReferenceSetFilenamePattern(".*_cRefset_Association.*")
 			.withIncludedReferenceSetFilenamePattern(".*_OWL.*");
 
 	private final RuleExecutor ruleExecutor;
