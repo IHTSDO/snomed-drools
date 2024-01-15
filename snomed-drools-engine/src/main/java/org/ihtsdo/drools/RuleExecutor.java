@@ -1,5 +1,6 @@
 package org.ihtsdo.drools;
 
+import org.springframework.util.CollectionUtils;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
@@ -87,6 +88,7 @@ public class RuleExecutor {
 	 * Passing services in with every invocation of this method allows the implementation to capture content context. For example
 	 * services relevant to the content branch being worked on.
 	 * @param ruleSetNames The rule sets to use during validation.
+	 * @param excludedRules List of UUIDs to be excluded from the validation
 	 * @param concepts The concepts to be validated.
 	 * @param conceptService An implementation of the ConceptService class for use in validation rules.
 	 * @param descriptionService An implementation of the DescriptionService class for use in validation rules.
@@ -99,6 +101,7 @@ public class RuleExecutor {
 	 */
 	public List<InvalidContent> execute(
 			Set<String> ruleSetNames,
+			Set<String> excludedRules,
 			Collection<? extends Concept> concepts,
 			ConceptService conceptService,
 			DescriptionService descriptionService,
@@ -194,7 +197,9 @@ public class RuleExecutor {
 		List<InvalidContent> invalidContent = sessionInvalidContent.stream().flatMap(Collection::stream).filter(Objects::nonNull).collect(Collectors.toList());
 		invalidContent.addAll(exceptionContents);
 		invalidContent = removeDuplicates(invalidContent);
-
+		if (!CollectionUtils.isEmpty(excludedRules)) {
+			invalidContent = excludeFailuresFromResults(invalidContent, excludedRules);
+		}
 		if (!includePublishedComponents) {
 			Set<InvalidContent> publishedInvalidContent = new HashSet<>();
 			for (InvalidContent invalidContentItem : invalidContent) {
@@ -245,6 +250,16 @@ public class RuleExecutor {
 			}
 		}
 		return uniqueInvalidContent;
+	}
+
+	private List<InvalidContent> excludeFailuresFromResults(List<InvalidContent> invalidContent, Set<String> excludedRules) {
+		List<InvalidContent> newInvalidContent = new ArrayList<>();
+		for (InvalidContent content : invalidContent) {
+			if (!excludedRules.contains(content.getRuleId())) {
+				newInvalidContent.add(content);
+			}
+		}
+		return newInvalidContent;
 	}
 
 	private void assertComponentIdsPresent(Concept concept) {

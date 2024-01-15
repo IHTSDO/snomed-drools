@@ -54,7 +54,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		final List<InvalidContent> invalidContent = ruleExecutor.execute(RULE_SET_NAMES, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
+		final List<InvalidContent> invalidContent = ruleExecutor.execute(RULE_SET_NAMES, null, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
 
 		Assert.assertEquals(1, invalidContent.size());
 		final InvalidContent invalidContent1 = invalidContent.get(0);
@@ -70,7 +70,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		final List<InvalidContent> invalidContent = ruleExecutor.execute(RULE_SET_NAMES, Collections.singleton(concept), conceptService, descriptionService, relationshipService, false, false);
+		final List<InvalidContent> invalidContent = ruleExecutor.execute(RULE_SET_NAMES, null, Collections.singleton(concept), conceptService, descriptionService, relationshipService, false, false);
 
 		Assert.assertEquals(0, invalidContent.size());
 	}
@@ -80,7 +80,7 @@ public class RuleExecutorTest {
 		final Concept concept = new ConceptImpl("1")
 				.addDescription(new DescriptionImpl("2", "a").published().addToAcceptability("900000000000508004", "PREFERRED"));
 
-		final List<InvalidContent> invalidContent = ruleExecutor.execute(RULE_SET_NAMES, Collections.singleton(concept), conceptService, descriptionService, relationshipService, false, false);
+		final List<InvalidContent> invalidContent = ruleExecutor.execute(RULE_SET_NAMES, null, Collections.singleton(concept), conceptService, descriptionService, relationshipService, false, false);
 
 		Assert.assertEquals(1, invalidContent.size());
 		final InvalidContent invalidContent1 = invalidContent.get(0);
@@ -96,7 +96,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		ruleExecutor.execute(RULE_SET_NAMES, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
+		ruleExecutor.execute(RULE_SET_NAMES, null, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
 	}
 
 	@Test(expected = BadRequestRuleExecutorException.class)
@@ -106,7 +106,7 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl("r2", "4"));
 
-		ruleExecutor.execute(RULE_SET_NAMES, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
+		ruleExecutor.execute(RULE_SET_NAMES, null, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
 	}
 
 	@Test(expected = BadRequestRuleExecutorException.class)
@@ -116,6 +116,26 @@ public class RuleExecutorTest {
 				.addRelationship(new RelationshipImpl("r1", "3"))
 				.addRelationship(new RelationshipImpl(null, "4"));
 
-		ruleExecutor.execute(RULE_SET_NAMES, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
+		ruleExecutor.execute(RULE_SET_NAMES, null, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
+	}
+
+	@Test
+	public void testExecuteWithExcludedRules() {
+		final Concept concept = new ConceptImpl("1")
+				.addDescription(new DescriptionImpl("2", "a  "))
+				.addRelationship(new RelationshipImpl("r1", "3"))
+				.addRelationship(new RelationshipImpl("r2", "4"));
+
+		List<InvalidContent> invalidContents = ruleExecutor.execute(RULE_SET_NAMES, null, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
+
+		Assert.assertEquals(1, invalidContents.size());
+		final InvalidContent invalidContent = invalidContents.get(0);
+		Assert.assertEquals(concept.getId(), invalidContent.getConceptId());
+		Assert.assertEquals("Term should not contain double spaces.", invalidContent.getMessage());
+		Assert.assertEquals("2", invalidContent.getComponentId());
+
+		Set<String> excludedRules = Collections.singleton("d04c89b7-962c-4dbc-ac5e-0033e808e913");
+		invalidContents = ruleExecutor.execute(RULE_SET_NAMES, excludedRules, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
+		Assert.assertEquals(0, invalidContents.size());
 	}
 }

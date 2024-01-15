@@ -145,6 +145,7 @@ public class RulesTestManual {
 			ruleSetNames.add("OneRule");
 			final List<InvalidContent> invalidContent = ruleExecutor.execute(
 					ruleSetNames,
+					null,
 					Collections.singleton(concept),
 					conceptService, descriptionService, relationshipService, false, false);
 

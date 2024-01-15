@@ -23,7 +23,7 @@ public class IntegrationManualTest {
         Set<String> includedModulesSet = Sets.newHashSet();
 
 		List<InvalidContent> invalidContents = new DroolsRF2Validator(directoryOfRuleSetsPath, false)
-				.validateRF2Files(Collections.singleton(copyRF2RemovingComments(releaseFilePath)), null, ruleSetNamesToRun, currentEffectiveTime, includedModulesSet, false);
+				.validateRF2Files(Collections.singleton(copyRF2RemovingComments(releaseFilePath)), null, ruleSetNamesToRun, null, currentEffectiveTime, includedModulesSet, false);
 
         // Some extra output when running this main method in development -
         int outputSize = Math.min(invalidContents.size(), 50);
