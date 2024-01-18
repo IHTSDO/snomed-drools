@@ -23,4 +23,6 @@ public interface DescriptionService {
 
 	boolean isRecognisedSemanticTag(String termSemanticTag, String language);
 
+	boolean isSemanticTagCompatibleWithinHierarchy(String term, Set<String> topLevelSemanticTags);
+
 }

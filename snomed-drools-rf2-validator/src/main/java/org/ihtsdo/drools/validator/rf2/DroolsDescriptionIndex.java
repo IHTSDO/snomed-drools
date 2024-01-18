@@ -76,7 +76,7 @@ public class DroolsDescriptionIndex {
             TopDocs docs = indexSearcher.search(builder.build(), preView == 0 ? 1 : preView);
             ScoreDoc[] hits = docs.scoreDocs;
             for (ScoreDoc hit : hits) {
-                Document document = indexSearcher.doc(hit.doc);
+                Document document = indexSearcher.storedFields().document(hit.doc);
                 results.add(document.get(FIELD_ID));
             }
 

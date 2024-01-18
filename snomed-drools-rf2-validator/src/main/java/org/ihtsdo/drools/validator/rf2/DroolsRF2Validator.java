@@ -44,6 +44,7 @@ public class DroolsRF2Validator {
 	public static final LoadingProfile LOADING_PROFILE = LoadingProfile.complete
 			.withoutAllRefsets()
 			.withIncludedReferenceSetFilenamePattern(".*_cRefset_Language.*")
+			.withIncludedReferenceSetFilenamePattern(".*_cRefset_Association.*")
 			.withIncludedReferenceSetFilenamePattern(".*_OWL.*");
 
 	private final RuleExecutor ruleExecutor;
@@ -90,7 +91,7 @@ public class DroolsRF2Validator {
 		}
 
 		new DroolsRF2Validator(directoryOfRuleSetsPath, true)
-				.validate(assertionGroups, extractedRF2FilesDirectories, currentEffectiveTime, includedModuleSets, previousReleaseDirectories);
+				.validate(assertionGroups, null, extractedRF2FilesDirectories, currentEffectiveTime, includedModuleSets, previousReleaseDirectories);
 	}
 
 	private static boolean isDirectories(String arg) {
@@ -127,7 +128,7 @@ public class DroolsRF2Validator {
 		testResourceProvider = ruleExecutor.newTestResourceProvider(testResourcesResourceManager);
 	}
 
-	private void validate(Set<String> assertionGroups, Set<String> extractedRF2FilesDirectories,
+	private void validate(Set<String> assertionGroups, Set<String> excludedRules, Set<String> extractedRF2FilesDirectories,
 			String currentEffectiveTime, Set<String> includedModuleSets, Set<String> previousReleaseDirectories) {
 
 		File report = new File("validation-report-" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + ".txt");
@@ -135,7 +136,7 @@ public class DroolsRF2Validator {
 			// Load test resources from public S3 location
 
 			// Run assertions
-			List<InvalidContent> invalidContents = validateRF2Files(extractedRF2FilesDirectories, previousReleaseDirectories, assertionGroups, currentEffectiveTime,
+			List<InvalidContent> invalidContents = validateRF2Files(extractedRF2FilesDirectories, previousReleaseDirectories, assertionGroups, excludedRules, currentEffectiveTime,
 					includedModuleSets, false);
 
 			// Write report
@@ -173,6 +174,7 @@ public class DroolsRF2Validator {
 	 * @param previousReleaseDirectories	Path to directories containing extracted RF2 files from the previous release. These are used to determine the released status of
 	 *                                         components, that is used in some assertions.
 	 * @param ruleSetNamesToRun				The assertion groups to run the rules of.
+	 * @param excludedRules 				List of UUIDs to be excluded from the validation
 	 * @param currentEffectiveTime			The current effectiveTime of the latest published files, used to determine the published flag on components.
 	 * @param includedModules				Optional filter to validate components only in specific modules.
 	 * @param activeConceptsOnly            Optional filter to return invalid content only for active concepts (ignore inactive concepts).
@@ -180,7 +182,7 @@ public class DroolsRF2Validator {
 	 * @throws ReleaseImportException		Exception thrown when application fails to load the RF2 files to be validated.
 	 */
 	public List<InvalidContent> validateRF2Files(Set<String> extractedRF2FilesDirectories, Set<String> previousReleaseDirectories, Set <String> ruleSetNamesToRun,
-			String currentEffectiveTime,
+												 Set<String> excludedRules, String currentEffectiveTime,
 			Set<String> includedModules, boolean activeConceptsOnly) throws ReleaseImportException {
 
 		long start = new Date().getTime();
@@ -201,7 +203,7 @@ public class DroolsRF2Validator {
 
 		Collection<DroolsConcept> concepts = repository.getConcepts();
 		logger.info("Running tests");
-		List<InvalidContent> invalidContents = ruleExecutor.execute(ruleSetNamesToRun, concepts, conceptService, descriptionService, relationshipService, true, false);
+		List<InvalidContent> invalidContents = ruleExecutor.execute(ruleSetNamesToRun, excludedRules, concepts, conceptService, descriptionService, relationshipService, true, false);
 		invalidContents.addAll(repository.getComponentLoadingErrors());
 
 		//Filter only invalid components that are in the specified modules list, if modules list is not specified, return all invalid components

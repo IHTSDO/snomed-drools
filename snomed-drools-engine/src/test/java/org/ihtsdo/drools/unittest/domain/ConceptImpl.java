@@ -7,6 +7,8 @@ import org.ihtsdo.drools.domain.Relationship;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class ConceptImpl implements Concept {
 
@@ -96,6 +98,11 @@ public class ConceptImpl implements Concept {
 	@Override
 	public Collection<? extends OntologyAxiom> getOntologyAxioms() {
 		return ontologyAxioms;
+	}
+
+	@Override
+	public Map <String, Set<String>> getAssociationTargets() {
+		return null;
 	}
 
 	@Override

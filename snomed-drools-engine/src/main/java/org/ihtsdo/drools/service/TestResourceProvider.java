@@ -7,10 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Provides test resources from disk or S3 depending on ResourceManager configuration.
@@ -19,20 +16,51 @@ import java.util.Set;
 public class TestResourceProvider {
 
 	private static final String SEMANTIC_TAG_FILENAME_PREFIX = "semantic-tags";
+	private static final String SEMANTIC_TAG_HIERARCHY_FILENAME_PREFIX = "semantic-tag-hierarchies";
 	private static final String CASE_SIGNIFICANT_WORDS_FILENAME = "cs_words.txt";
 	private static final String US_TO_GB_TERMS_MAP_FILENAME = "us-to-gb-terms-map.txt";
+	private static final String TEXT_EXTENSION = ".txt";
+	public static final String EQUAL_SIGN_SEPARATOR = "=";
+	public static final String COMMA_SEPARATOR = ",";
 
 	private final ResourceManager resourceManager;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private final Map<String, Set<String>> semanticTagsMap;
+
+	private final Map<String, Set<String>> semanticHierarchyMap;
 	private final Set<String> caseSignificantWords;
 	private final Map<String, String> usToGbTermMap;
 
 	public TestResourceProvider(ResourceManager resourceManager) throws IOException {
 		this.resourceManager = resourceManager;
 		semanticTagsMap = loadSemanticTagsMap();
+		semanticHierarchyMap = loadSemanticHierarchyMap();
 		caseSignificantWords = loadCaseSignificantWords();
 		usToGbTermMap = doGetUsToGbTermMap();
+	}
+
+	private Map<String, Set<String>> loadSemanticHierarchyMap() throws IOException {
+		Map<String, Set<String>> tagHierarchyMap = new HashMap<String, Set<String>>();
+		Set<String> filenames = resourceManager.listFilenames(SEMANTIC_TAG_HIERARCHY_FILENAME_PREFIX);
+		for (String filename : filenames) {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceManager.readResourceStream(filename)))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					String[] array = line.split(EQUAL_SIGN_SEPARATOR);
+					if (array.length != 2) {
+						continue;
+					}
+
+					String key = array[0].trim();
+					String[] values = Arrays.stream(array[1].split(COMMA_SEPARATOR))
+                            .map(String::trim)
+                            .toArray(String[]::new) ;
+					tagHierarchyMap.put(key, new HashSet<>(Arrays.asList(values)));
+				}
+			}
+		}
+		logger.info("{} semantic tag hierarchy loaded", tagHierarchyMap.size());
+		return tagHierarchyMap;
 	}
 
 	public boolean isAnyResourcesLoaded() {
@@ -49,6 +77,10 @@ public class TestResourceProvider {
 		Set<String> allTags = new HashSet<>();
 		semanticTagsMap.values().forEach(allTags::addAll);
 		return  allTags;
+	}
+
+	public Map <String, Set <String>> getSemanticHierarchyMap() {
+		return semanticHierarchyMap;
 	}
 
 	/**
@@ -86,7 +118,7 @@ public class TestResourceProvider {
 		Set<String> allTags = new HashSet<>();
 		Set<String> filenames = resourceManager.listFilenames(SEMANTIC_TAG_FILENAME_PREFIX);
 		for (String filename : filenames) {
-			String language = filename.equalsIgnoreCase("semantic-tags.txt") ? "en" : filename.substring(filename.indexOf("_") + 1, filename.indexOf("."));
+			String language = filename.equalsIgnoreCase(SEMANTIC_TAG_FILENAME_PREFIX + TEXT_EXTENSION) ? "en" : filename.substring(filename.indexOf("_") + 1, filename.indexOf("."));
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceManager.readResourceStream(filename)))) {
 				String line;
 				Set<String> tags = new HashSet<>();

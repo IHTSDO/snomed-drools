@@ -7,11 +7,10 @@ import org.ihtsdo.drools.domain.Relationship;
 import org.ihtsdo.drools.helper.DescriptionHelper;
 import org.ihtsdo.drools.service.DescriptionService;
 import org.ihtsdo.drools.service.TestResourceProvider;
+import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
 
 public class TestDescriptionService implements DescriptionService {
 
@@ -146,5 +145,21 @@ public class TestDescriptionService implements DescriptionService {
 	@Override
 	public boolean isRecognisedSemanticTag(String termSemanticTag, String language) {
 		return testResourceProvider.getSemanticTagsByLanguage(Collections.singleton(language)).contains(termSemanticTag);
+	}
+
+	@Override
+	public boolean isSemanticTagCompatibleWithinHierarchy(String testTerm, Set<String> topLevelSemanticTags) {
+		String tag = DescriptionHelper.getTag(testTerm);
+		Map <String, Set <String>> semanticTagMap = testResourceProvider.getSemanticHierarchyMap();
+		if (tag != null) {
+			for (String topLevelSemanticTag : topLevelSemanticTags) {
+				Set<String> compatibleSemanticTags = semanticTagMap.get(topLevelSemanticTag);
+				if (!CollectionUtils.isEmpty(compatibleSemanticTags) && compatibleSemanticTags.contains(tag)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }

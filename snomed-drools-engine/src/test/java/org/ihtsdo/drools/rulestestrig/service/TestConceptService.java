@@ -26,6 +26,17 @@ public class TestConceptService implements ConceptService {
 	}
 
 	@Override
+	public boolean isInactiveConceptSameAs(String inactiveConceptId, String conceptId) {
+		Concept inactiveConcept = concepts.get(inactiveConceptId);
+		Concept activeConcept = concepts.get(conceptId);
+		String sameAsAssociationText = Constants.historicalAssociationNames.get(Constants.REFSET_SAME_AS_ASSOCIATION);
+		return inactiveConcept != null && activeConcept != null
+				&& !inactiveConcept.getAssociationTargets().isEmpty()
+				&& inactiveConcept.getAssociationTargets().containsKey(sameAsAssociationText)
+				&& inactiveConcept.getAssociationTargets().get(sameAsAssociationText).contains(conceptId);
+	}
+
+	@Override
 	public Concept findById(String conceptId) {
 		return concepts.get(conceptId);
 	}

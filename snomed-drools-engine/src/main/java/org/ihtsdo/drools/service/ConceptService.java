@@ -8,6 +8,7 @@ import java.util.Set;
 public interface ConceptService {
 
 	boolean isActive(String conceptId);
+	boolean isInactiveConceptSameAs(String inactiveConceptId, String conceptId);
 	Concept findById(String conceptId);
 	Set<String> getAllTopLevelHierarchies();
 	Set<String> findStatedAncestorsOfConcept(Concept concept);

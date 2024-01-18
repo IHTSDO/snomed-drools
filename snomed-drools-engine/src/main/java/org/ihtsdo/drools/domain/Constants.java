@@ -1,5 +1,8 @@
 package org.ihtsdo.drools.domain;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
+
 public class Constants {
 
 	public static final String FSN = "900000000000003001";
@@ -18,5 +21,30 @@ public class Constants {
 	public static final String INFERRED_RELATIONSHIP = "900000000000011006";
 	public static final String STATED_RELATIONSHIP = "900000000000010007";
 	public static final String ROOT_CONCEPT = "138875005";
-	
+
+	public static final String REFSET_POSSIBLY_EQUIVALENT_TO_ASSOCIATION = "900000000000523009";
+	public static final String REFSET_MOVED_TO_ASSOCIATION = "900000000000524003";
+	public static final String REFSET_MOVED_FROM_ASSOCIATION = "900000000000525002";
+	public static final String REFSET_REPLACED_BY_ASSOCIATION = "900000000000526001";
+	public static final String REFSET_SAME_AS_ASSOCIATION = "900000000000527005";
+	public static final String REFSET_WAS_A_ASSOCIATION = "900000000000528000";
+	public static final String REFSET_SIMILAR_TO_ASSOCIATION = "900000000000529008";
+	public static final String REFSET_ALTERNATIVE_ASSOCIATION = "900000000000530003";
+	public static final String REFSET_REFERS_TO_ASSOCIATION = "900000000000531004";
+	public static final String REFSET_PARTIALLY_EQUIVALENT_TO_ASSOCIATION = "1186924009";
+	public static final String REFSET_POSSIBLY_REPLACED_BY_ASSOCIATION = "1186921001";
+
+	public static final BiMap <String, String> historicalAssociationNames = new ImmutableBiMap.Builder<String, String>()
+			.put(REFSET_POSSIBLY_EQUIVALENT_TO_ASSOCIATION, "POSSIBLY_EQUIVALENT_TO")
+			.put(REFSET_MOVED_TO_ASSOCIATION, "MOVED_TO")
+			.put(REFSET_MOVED_FROM_ASSOCIATION, "MOVED_FROM")
+			.put(REFSET_REPLACED_BY_ASSOCIATION, "REPLACED_BY")
+			.put(REFSET_SAME_AS_ASSOCIATION, "SAME_AS")
+			.put(REFSET_WAS_A_ASSOCIATION, "WAS_A")
+			.put(REFSET_SIMILAR_TO_ASSOCIATION, "SIMILAR_TO")
+			.put(REFSET_ALTERNATIVE_ASSOCIATION, "ALTERNATIVE")
+			.put(REFSET_REFERS_TO_ASSOCIATION, "REFERS_TO")
+			.put(REFSET_PARTIALLY_EQUIVALENT_TO_ASSOCIATION, "PARTIALLY_EQUIVALENT_TO")
+			.put(REFSET_POSSIBLY_REPLACED_BY_ASSOCIATION, "POSSIBLY_REPLACED_BY")
+			.build();
 }

@@ -12,11 +12,10 @@ import org.ihtsdo.drools.validator.rf2.DroolsDescriptionIndex;
 import org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentRepository;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
+import org.springframework.util.CollectionUtils;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
 
 public class DroolsDescriptionService implements DescriptionService {
 
@@ -154,6 +153,34 @@ public class DroolsDescriptionService implements DescriptionService {
 	@Override
 	public boolean isRecognisedSemanticTag(String termSemanticTag, String language) {
 		return testResourceProvider.getSemanticTagsByLanguage(Collections.singleton(language)).contains(termSemanticTag);
+	}
+
+	@Override
+	public boolean isSemanticTagCompatibleWithinHierarchy(String testTerm, Set<String> topLevelSemanticTags) {
+		String tag = getTag(testTerm);
+		Map <String, Set <String>> semanticTagMap = testResourceProvider.getSemanticHierarchyMap();
+		if (tag != null) {
+			for (String topLevelSemanticTag : topLevelSemanticTags) {
+				Set<String> compatibleSemanticTags = semanticTagMap.get(topLevelSemanticTag);
+				if (!CollectionUtils.isEmpty(compatibleSemanticTags) && compatibleSemanticTags.contains(tag)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private static String getTag(String term) {
+		final Matcher matcher = DescriptionHelper.TAG_PATTERN.matcher(term);
+		if (matcher.matches()) {
+			String result = matcher.group(1);
+			if(result != null && (result.contains("(") || result.contains(")"))) {
+				return null;
+			}
+			return result;
+		}
+		return null;
 	}
 
 	public DroolsDescriptionIndex getDroolsDescriptionIndex() {

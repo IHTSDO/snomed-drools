@@ -1,6 +1,8 @@
 package org.ihtsdo.drools.domain;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 public interface Concept extends Component {
 
@@ -16,4 +18,5 @@ public interface Concept extends Component {
 	 * @return A set of ontology axioms which have this concept as the referencedComponentId.
 	 */
 	Collection<? extends OntologyAxiom> getOntologyAxioms();
+	Map <String, Set <String>> getAssociationTargets();
 }

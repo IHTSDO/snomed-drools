@@ -2,12 +2,10 @@ package org.ihtsdo.drools.validator.rf2;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.ihtsdo.drools.domain.Component;
+import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.response.Severity;
-import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
-import org.ihtsdo.drools.validator.rf2.domain.DroolsDescription;
-import org.ihtsdo.drools.validator.rf2.domain.DroolsOntologyAxiom;
-import org.ihtsdo.drools.validator.rf2.domain.DroolsRelationship;
+import org.ihtsdo.drools.validator.rf2.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +54,24 @@ public class SnomedDroolsComponentRepository {
 			logger.warn(message);
 		} else {
 			description.getAcceptabilityMap().put(refsetId, acceptabilityId);
+		}
+	}
+
+	public synchronized void addAssociationTargetMember(String memberId, String refsetId, String referencedComponentId, String targetComponentId) {
+		long conceptId = parseLong(referencedComponentId);
+		DroolsConcept concept = conceptMap.get(conceptId);
+		if (concept == null) {
+			// TODO: This should be a warning and part of the validation report.
+			String message = "Association reference set member " + memberId + " references Concept " + conceptId + " which can not be found.";
+			logger.warn(message);
+		} else {
+			String association = Constants.historicalAssociationNames.get(refsetId);
+			if (association == null) {
+				association = refsetId;
+			}
+			Map<String, Set<String>> associationTargetMap = concept.getAssociationTargets();
+			Set<String> associationType = associationTargetMap.computeIfAbsent(association, k -> new HashSet<>());
+			associationType.add(targetComponentId);
 		}
 	}
 

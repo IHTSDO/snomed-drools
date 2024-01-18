@@ -7,6 +7,8 @@ import org.ihtsdo.drools.domain.Relationship;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 public class TestConcept<D extends Description, R extends Relationship> implements Concept, TestComponent {
 
@@ -74,6 +76,11 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	@Override
 	public Collection<OntologyAxiom> getOntologyAxioms() {
 		return ontologyAxioms;
+	}
+
+	@Override
+	public Map <String, Set<String>> getAssociationTargets() {
+		return null;
 	}
 
 	public void setId(String id) {

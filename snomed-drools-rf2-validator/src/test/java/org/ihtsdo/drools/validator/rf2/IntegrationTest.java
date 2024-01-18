@@ -30,6 +30,7 @@ public class IntegrationTest {
 				Collections.singleton(extractedRF2FilesDirectory),
                 null,
                 Collections.singleton("unit-test"),
+                null,
                 "20190131",
                 null,
 				false);
