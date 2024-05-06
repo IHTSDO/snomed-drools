@@ -113,7 +113,7 @@ public class DroolsConceptService implements ConceptService {
 				if(Constants.IS_A.equals(relationship.getTypeId())) {
 					DroolsConcept sourceConcept = repository.getConcept(relationship.getSourceId());
 					if (sourceConcept.getModuleId().equals(moduleId)) {
-						resultSet.add(conceptId);
+						resultSet.add(sourceConcept.getId());
 					}
 				}
 			}
