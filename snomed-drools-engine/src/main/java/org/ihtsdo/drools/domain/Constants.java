@@ -21,7 +21,7 @@ public class Constants {
 	public static final String INFERRED_RELATIONSHIP = "900000000000011006";
 	public static final String STATED_RELATIONSHIP = "900000000000010007";
 	public static final String ROOT_CONCEPT = "138875005";
-
+	public static final String LANGUAGE_TYPE_CONCEPT = "900000000000506000";
 	public static final String REFSET_POSSIBLY_EQUIVALENT_TO_ASSOCIATION = "900000000000523009";
 	public static final String REFSET_MOVED_TO_ASSOCIATION = "900000000000524003";
 	public static final String REFSET_MOVED_FROM_ASSOCIATION = "900000000000525002";

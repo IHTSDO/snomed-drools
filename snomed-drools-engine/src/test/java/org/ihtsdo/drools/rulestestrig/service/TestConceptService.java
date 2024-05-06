@@ -111,5 +111,22 @@ public class TestConceptService implements ConceptService {
 		}
 		return ancestorIds;
 	}
-	
+
+	@Override
+	public Set<String> findLanguageReferenceSetByModule(String moduleId) {
+		Set<String> languageReferenceSet = new HashSet<>();
+		for (Concept concept : concepts.values()) {
+			for (Relationship relationship : concept.getRelationships()) {
+				if (relationship.isActive()
+					&& !relationship.isAxiomGCI()
+					&& Constants.IS_A.equals(relationship.getTypeId())
+					&& Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())
+					&& Constants.LANGUAGE_TYPE_CONCEPT.equals(relationship.getDestinationId())
+					&& concept.getModuleId().equals(moduleId)) {
+					languageReferenceSet.add(concept.getId());
+				}
+			}
+		}
+		return languageReferenceSet;
+	}
 }

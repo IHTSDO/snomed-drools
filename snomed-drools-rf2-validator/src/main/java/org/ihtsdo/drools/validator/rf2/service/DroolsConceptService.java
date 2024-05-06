@@ -93,4 +93,31 @@ public class DroolsConceptService implements ConceptService {
 		}
 		return resultSet;
 	}
+
+	@Override
+	public Set<String> findLanguageReferenceSetByModule(String moduleId) {
+		Set<String> resultSet = new HashSet<>();
+		DroolsConcept languageTypeConcept = repository.getConcept(Constants.LANGUAGE_TYPE_CONCEPT);
+		Set<String> children = new HashSet<>();
+		for (DroolsRelationship relationship : languageTypeConcept.getActiveInboundStatedRelationships()) {
+			if(Constants.IS_A.equals(relationship.getTypeId())) {
+				children.add(relationship.getSourceId());
+			}
+		}
+		for (String conceptId : children) {
+			DroolsConcept concept = repository.getConcept(conceptId);
+			if (concept.getModuleId().equals(moduleId)) {
+				resultSet.add(conceptId);
+			}
+			for (DroolsRelationship relationship : concept.getActiveInboundStatedRelationships()) {
+				if(Constants.IS_A.equals(relationship.getTypeId())) {
+					DroolsConcept sourceConcept = repository.getConcept(relationship.getSourceId());
+					if (sourceConcept.getModuleId().equals(moduleId)) {
+						resultSet.add(conceptId);
+					}
+				}
+			}
+		}
+		return  resultSet;
+	}
 }
