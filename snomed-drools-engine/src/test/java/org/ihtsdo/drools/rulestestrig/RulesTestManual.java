@@ -147,7 +147,7 @@ public class RulesTestManual {
 					ruleSetNames,
 					null,
 					Collections.singleton(concept),
-					conceptService, descriptionService, relationshipService, false, false);
+					conceptService, descriptionService, relationshipService, false, true);
 
 			Set<String> uniqueComponentAssertionSet = new HashSet<>();
 			for (InvalidContent content : invalidContent) {

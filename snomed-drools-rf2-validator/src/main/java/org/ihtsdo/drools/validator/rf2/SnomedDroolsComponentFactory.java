@@ -51,10 +51,8 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 
 	@Override
 	public void newRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
-		if (!characteristicTypeId.equals(INFERRED_RELATIONSHIP)) {
-			repository.addRelationship(new DroolsRelationship(null, false, id, isActive(active), moduleId, sourceId, destinationId, Integer.parseInt(relationshipGroup), typeId, characteristicTypeId,
-					isThisStatePublished(effectiveTime), isThisRelationshipReleased(id, effectiveTime), null));
-		}
+		repository.addRelationship(new DroolsRelationship(null, false, id, isActive(active), moduleId, sourceId, destinationId, Integer.parseInt(relationshipGroup), typeId, characteristicTypeId,
+				isThisStatePublished(effectiveTime), isThisRelationshipReleased(id, effectiveTime), null));
 	}
 
 	@Override

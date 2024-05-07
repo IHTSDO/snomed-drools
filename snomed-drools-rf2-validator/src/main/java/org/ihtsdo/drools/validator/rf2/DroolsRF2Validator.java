@@ -203,7 +203,7 @@ public class DroolsRF2Validator {
 
 		Collection<DroolsConcept> concepts = repository.getConcepts();
 		logger.info("Running tests");
-		List<InvalidContent> invalidContents = ruleExecutor.execute(ruleSetNamesToRun, excludedRules, concepts, conceptService, descriptionService, relationshipService, true, false);
+		List<InvalidContent> invalidContents = ruleExecutor.execute(ruleSetNamesToRun, excludedRules, concepts, conceptService, descriptionService, relationshipService, true, true);
 		invalidContents.addAll(repository.getComponentLoadingErrors());
 
 		//Filter only invalid components that are in the specified modules list, if modules list is not specified, return all invalid components
