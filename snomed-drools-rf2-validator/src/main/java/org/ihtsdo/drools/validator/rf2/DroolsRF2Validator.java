@@ -49,12 +49,12 @@ public class DroolsRF2Validator {
 
 	private final RuleExecutor ruleExecutor;
 	private final TestResourceProvider testResourceProvider;
-	private final Logger logger = LoggerFactory.getLogger(DroolsRF2Validator.class);
+	private static final Logger logger = LoggerFactory.getLogger(DroolsRF2Validator.class);
 
 	public static void main(String[] args) throws IOException {
 		if (args.length != 4 && args.length != 5 && args.length != 6) {
 			// NOTE - Keep in sync with README.md file.
-			System.out.println("Usage: java -jar snomed-drools-rf2-*executable.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> " +
+			logger.info("Usage: java -jar snomed-drools-rf2-*executable.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> " +
 					"<extractedRF2FilesDirectories> <currentEffectiveTime> <includedModules(optional)> <previousReleaseRf2Directories(optional)>");
 			System.exit(1);
 		}
@@ -66,7 +66,7 @@ public class DroolsRF2Validator {
 		Set<String> extractedRF2FilesDirectories = Sets.newHashSet(args[2].split(","));
 		String currentEffectiveTime = args[3];
 		if (!currentEffectiveTime.matches("\\d{8}")) {
-			System.out.println("Expecting <currentEffectiveTime> using format yyyymmdd");
+			logger.info("Expecting <currentEffectiveTime> using format yyyymmdd");
 			System.exit(1);
 		}
 
@@ -99,7 +99,7 @@ public class DroolsRF2Validator {
 			final String[] dirs = arg.split(",");
 			for (String dir : dirs) {
 				if (!new File(dir).isDirectory()) {
-					System.err.printf("Path '%s' is not a directory.%n", dir);
+					logger.error("Path {} is not a directory.", dir);
 					return false;
 				}
 			}
@@ -140,7 +140,11 @@ public class DroolsRF2Validator {
 					includedModuleSets, false);
 
 			// Write report
-			report.createNewFile();
+			boolean isCreated = report.createNewFile();
+			if (!isCreated) {
+				logger.error("Failed to create report file.");
+				return;
+			}
 			try (BufferedWriter reportWriter = new BufferedWriter(new FileWriter(report))) {
 				reportWriter.write("conceptId\tcomponentId\tmessage\tseverity\tignorePublishedCheck");
 				reportWriter.newLine();
@@ -208,7 +212,8 @@ public class DroolsRF2Validator {
 
 		//Filter only invalid components that are in the specified modules list, if modules list is not specified, return all invalid components
 		if(includedModules != null && !includedModules.isEmpty()) {
-			logger.info("Filtering invalid contents for included module ids: {}", String.join(",", includedModules));
+			String includedModulesStr = String.join(",", includedModules);
+			logger.info("Filtering invalid contents for included module ids: {}", includedModulesStr);
 			invalidContents = invalidContents.stream().filter(content -> includedModules.contains(content.getComponent().getModuleId())).collect(Collectors.toList());
 		}
 
