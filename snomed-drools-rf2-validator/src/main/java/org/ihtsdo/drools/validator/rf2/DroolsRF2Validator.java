@@ -202,7 +202,7 @@ public class DroolsRF2Validator {
 		logger.info("Components loaded");
 
 		DroolsConceptService conceptService = new DroolsConceptService(repository);
-		DroolsDescriptionService descriptionService = new DroolsDescriptionService(repository, testResourceProvider);
+		DroolsDescriptionService descriptionService = new DroolsDescriptionService(repository, conceptService, testResourceProvider);
 		DroolsRelationshipService relationshipService = new DroolsRelationshipService(repository);
 
 		Collection<DroolsConcept> concepts = repository.getConcepts();
