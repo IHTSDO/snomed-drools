@@ -28,7 +28,8 @@ public class DroolsDescriptionServiceTest extends BaseServiceTest{
         loadConceptsIntoRepository();
         loadDescriptionsIntoRepository();
         ResourceManager resourceManager = new ResourceManager(DroolsRF2Validator.BLANK_RESOURCES_CONFIGURATION, null);
-        droolsDescriptionService = new DroolsDescriptionService(repository, new TestResourceProvider(resourceManager));
+        DroolsConceptService droolsConceptService = new DroolsConceptService(repository);
+        droolsDescriptionService = new DroolsDescriptionService(repository, droolsConceptService, new TestResourceProvider(resourceManager));
     }
 
     @Test

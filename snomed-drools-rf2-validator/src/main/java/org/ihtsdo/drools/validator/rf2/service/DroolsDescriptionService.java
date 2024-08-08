@@ -5,7 +5,6 @@ import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
 import org.ihtsdo.drools.domain.Relationship;
 import org.ihtsdo.drools.helper.DescriptionHelper;
-import org.ihtsdo.drools.service.ConceptService;
 import org.ihtsdo.drools.service.DescriptionService;
 import org.ihtsdo.drools.service.TestResourceProvider;
 import org.ihtsdo.drools.validator.rf2.DroolsDescriptionIndex;
@@ -16,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 public class DroolsDescriptionService implements DescriptionService {
 
@@ -24,11 +24,13 @@ public class DroolsDescriptionService implements DescriptionService {
 	private final SnomedDroolsComponentRepository repository;
 	private final DroolsDescriptionIndex droolsDescriptionIndex;
 	private final TestResourceProvider testResourceProvider;
+	private final DroolsConceptService conceptService;
 
-	public DroolsDescriptionService(SnomedDroolsComponentRepository repository, TestResourceProvider testResourceProvider) {
+	public DroolsDescriptionService(SnomedDroolsComponentRepository repository, DroolsConceptService conceptService, TestResourceProvider testResourceProvider) {
 		this.repository = repository;
 		this.droolsDescriptionIndex = new DroolsDescriptionIndex(repository);
 		this.testResourceProvider = testResourceProvider;
+		this.conceptService = conceptService;
 	}
 
 
@@ -36,25 +38,33 @@ public class DroolsDescriptionService implements DescriptionService {
 	public Set<String> getFSNs(Set<String> conceptIds, String... languageRefsetIds) {
 		Set<String> fsns = new HashSet<>();
 		for (String conceptId : conceptIds) {
-			DroolsConcept concept = repository.getConcept(conceptId);
-			if(concept != null) {
-				Collection<DroolsDescription> descriptions = concept.getDescriptions();
-				for (DroolsDescription description : descriptions) {
-					if (description.isActive() && description.getTypeId().equals(FULLY_SPECIFIED_NAME)) {
-						if(languageRefsetIds != null && languageRefsetIds.length > 0) {
-							for (String languageRefsetId : languageRefsetIds) {
-								if (PREFERRED_ACCEPTABILITY.equals(description.getAcceptabilityMap().get(languageRefsetId))) {
-									fsns.add(description.getTerm());
-								}
-							}
-						} else {
-							fsns.add(description.getTerm());
-						}
-					}
-				}
-			}
+			findFSNFromConcept(languageRefsetIds, conceptId, fsns);
 		}
 		return fsns;
+	}
+
+	private void findFSNFromConcept(String[] languageRefsetIds, String conceptId, Set<String> fsns) {
+		DroolsConcept concept = repository.getConcept(conceptId);
+		if(concept != null) {
+			Collection<DroolsDescription> descriptions = concept.getDescriptions();
+			for (DroolsDescription description : descriptions) {
+				findFSNFromDescription(languageRefsetIds, fsns, description);
+			}
+		}
+	}
+
+	private void findFSNFromDescription(String[] languageRefsetIds, Set<String> fsns, DroolsDescription description) {
+		if (description.isActive() && description.getTypeId().equals(FULLY_SPECIFIED_NAME)) {
+			if(languageRefsetIds != null && languageRefsetIds.length > 0) {
+				for (String languageRefsetId : languageRefsetIds) {
+					if (PREFERRED_ACCEPTABILITY.equals(description.getAcceptabilityMap().get(languageRefsetId))) {
+						fsns.add(description.getTerm());
+					}
+				}
+			} else {
+				fsns.add(description.getTerm());
+			}
+		}
 	}
 
 	@Override
@@ -82,30 +92,31 @@ public class DroolsDescriptionService implements DescriptionService {
 	}
 
 	@Override
-	// FIXME: Currently only finds matching description in ancestors.
-	// Should search all descendants of the second highest ancestor (the ancestor which is a direct child of root).
 	public Set<Description> findMatchingDescriptionInHierarchy(Concept concept, Description description) {
 		if(concept == null || concept.getId().equals(Constants.ROOT_CONCEPT)) {
 			return Collections.emptySet();
 		}
-		Set<Description> resultSet = new HashSet<>();
-
 		String languageCode = description.getLanguageCode();
 		String term = description.getTerm();
 		if(term == null || term.trim().isEmpty()) return Collections.emptySet();
-		
-		ConceptService conceptService = new DroolsConceptService(repository);
-		Set<String> conceptAncestorIds = conceptService.findStatedAncestorsOfConcept(concept);
-		for (String conceptAncestorId : conceptAncestorIds) {
-			Concept conceptAncestor = repository.getConcept(conceptAncestorId);
-			for (Description ancestorsDescription : conceptAncestor.getDescriptions()) {
-				if(ancestorsDescription.isActive() && ancestorsDescription.getLanguageCode().equals(languageCode)
-						&& ancestorsDescription.getTerm().equals(term)) {
-					resultSet.add(ancestorsDescription);
-				}
+
+		Set<org.ihtsdo.drools.domain.Description> matchingDescriptions = findActiveDescriptionByExactTerm(description.getTerm())
+				.stream().filter(d -> d.getLanguageCode().equals(languageCode)).collect(Collectors.toSet());
+
+		if (!matchingDescriptions.isEmpty()) {
+			// Filter matching descriptions by hierarchy
+
+			// Find root for this concept
+			Set<String> conceptHierarchyRootIds = conceptService.findTopLevelHierarchiesOfConcept(concept);
+			if (conceptHierarchyRootIds != null) {
+				return matchingDescriptions.stream().filter(d -> {
+					Set<String> statedAncestors = conceptService.findStatedAncestorsOfConcepts(Collections.singletonList(d.getConceptId()));
+					return statedAncestors.stream().anyMatch(conceptHierarchyRootIds::contains);
+				}).collect(Collectors.toSet());
 			}
 		}
-		return resultSet;
+
+		return Collections.emptySet();
 	}
 
 
@@ -123,31 +134,40 @@ public class DroolsDescriptionService implements DescriptionService {
 	public Set<String> findParentsNotContainingSemanticTag(Concept concept, String termSematicTag, String... languageRefsetIds) {
 		Set<String> conceptIds = new HashSet<>();
 		for (Relationship relationship : concept.getRelationships()) {
-			if (relationship.isActive()
-					&& Constants.IS_A.equals(relationship.getTypeId())
-					&& !relationship.isAxiomGCI()
-					&& Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
+			if (validIsaStatedRelationship(relationship)) {
 				Concept parent = repository.getConcept(relationship.getDestinationId());
-				for (Description description : parent.getDescriptions()) {
-					boolean matchedAcceptability = false;
+				parent.getDescriptions().forEach(description -> {
 					if (description.isActive() && Constants.FSN.equals(description.getTypeId())) {
-						if(languageRefsetIds != null && languageRefsetIds.length > 0) {
-							for (String languageRefsetId : languageRefsetIds) {
-								if (PREFERRED_ACCEPTABILITY.equals(description.getAcceptabilityMap().get(languageRefsetId))) {
-									matchedAcceptability = true;
-									break;
-								}
-							}
-						}
+						boolean matchedAcceptability = isMatchedAcceptability(languageRefsetIds, description);
 
 						if((languageRefsetIds == null || matchedAcceptability) && !termSematicTag.equals(DescriptionHelper.getTag(description.getTerm()))) {
 							conceptIds.add(relationship.getDestinationId());
 						}
 					}
-				}
+				});
 			}
 		}
 		return conceptIds;
+	}
+
+	private boolean validIsaStatedRelationship(Relationship relationship) {
+		return relationship.isActive()
+				&& Constants.IS_A.equals(relationship.getTypeId())
+				&& !relationship.isAxiomGCI()
+				&& Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId());
+	}
+
+	private boolean isMatchedAcceptability(String[] languageRefsetIds, Description description) {
+		boolean matchedAcceptability = false;
+		if(languageRefsetIds != null) {
+			for (String languageRefsetId : languageRefsetIds) {
+				if (PREFERRED_ACCEPTABILITY.equals(description.getAcceptabilityMap().get(languageRefsetId))) {
+					matchedAcceptability = true;
+					break;
+				}
+			}
+		}
+		return matchedAcceptability;
 	}
 
 	@Override
