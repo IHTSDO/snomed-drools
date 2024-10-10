@@ -1,11 +1,5 @@
 package org.ihtsdo.drools;
 
-import org.springframework.util.CollectionUtils;
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
-import software.amazon.awssdk.services.s3.S3Client;
-
 import org.apache.commons.lang3.StringUtils;
 import org.ihtsdo.drools.domain.*;
 import org.ihtsdo.drools.exception.BadRequestRuleExecutorException;
@@ -24,6 +18,10 @@ import org.kie.api.runtime.StatelessKieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snomed.otf.script.dao.SimpleStorageResourceLoader;
+import org.springframework.util.CollectionUtils;
+import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.IOException;
 import java.util.*;
@@ -113,86 +111,14 @@ public class RuleExecutor {
 			assertComponentIdsPresent(concept);
 		}
 
-		Date start = new Date();
+		checkComponentsIntegrity(concepts, conceptService);
 
 		final List<List<InvalidContent>> sessionInvalidContent = new ArrayList<>();
 		final List<InvalidContent> exceptionContents = new ArrayList<>();
-		final Map<String, IntegrityIssueReport> integrityIssueReportMap = new HashMap<>();
-		for (Concept concept : concepts) {
-			IntegrityIssueReport report = findAllComponentsWithBadIntegrity(concept, conceptService);
-			if (!report.isEmpty()) {
-				integrityIssueReportMap.put(concept.getId(), report);
-			}
-		}
-		if (!integrityIssueReportMap.isEmpty()) {
-			StringBuilder builder = new StringBuilder();
-			for (String key : integrityIssueReportMap.keySet()) {
-				IntegrityIssueReport report = integrityIssueReportMap.get(key);
-				builder.append("Unable to find ");
-				if (report.isRelationshipTypeNotFound() && report.isRelationshipTargetNotFound()) {
-					builder.append("the relationship type ").append(report.getRelationshipWithNotFoundType()).append(" and relationship target ").append(report.getRelationshipWithNotFoundDestination());
-				} else if (report.isRelationshipTypeNotFound()) {
-					builder.append("the relationship type ").append(report.getRelationshipWithNotFoundType());
-				} else if (report.isRelationshipTargetNotFound()) {
-					builder.append("the relationship target ").append(report.getRelationshipWithNotFoundDestination());
-				}
-				builder.append(" for source concept ").append(key).append(". ");
+		int threads = concepts.size() == 1 ? 1 : 10;
 
-			}
-			throw new RuleExecutorException("Structural integrity issues. Details: " + builder.toString().trim());
-		}
-		for (String ruleSetName : ruleSetNames) {
-			final KieContainer kieContainer = assertionGroupContainers.get(ruleSetName);
-			if (kieContainer == null) {
-				throw new RuleExecutorException("Rule set not found for name '" + ruleSetName + "'");
-			}
-
-			int threads = concepts.size() == 1 ? 1 : 10;
-			ExecutorService executorService = Executors.newFixedThreadPool(threads);
-			List<StatelessKieSession> sessions = new ArrayList<>();
-			for (int s = 0; s < threads; s++) {
-				ArrayList<InvalidContent> invalidContent = new ArrayList<>();// List per thread to avoid concurrency issues.
-				sessionInvalidContent.add(invalidContent);
-				sessions.add(newStatelessKieSession(kieContainer, conceptService, descriptionService, relationshipService, invalidContent));
-			}
-			List<Concept> conceptList = new ArrayList<>(concepts);
-			List<Callable<String>> tasks = new ArrayList<>();
-			String total = String.format("%,d", concepts.size());
-			int i = 0;
-			while (i < concepts.size()) {
-				Set<Component> components = new HashSet<>();
-				Concept concept = conceptList.get(i++);
-				addConcept(components, concept, includeInferredRelationships);
-				int sessionIndex = tasks.size();
-				tasks.add(() -> {
-					try {
-						StatelessKieSession statelessKieSession = sessions.get(sessionIndex);
-						statelessKieSession.execute(components);
-						components.clear();
-						// Clear memory use
-						statelessKieSession.getKieBase().newKieSession();
-					} catch (Exception e) {
-						exceptionContents.add(new InvalidContent(concept.getId(),concept, "An error occurred while running concept validation. Technical detail: " + e.getMessage(), Severity.ERROR));
-					}
-					return null;
-				});
-
-				if (tasks.size() == threads) {
-					runTasks(executorService, tasks);
-					tasks.clear();
-				}
-				if (i % 10_000 == 0) {
-					logger.info("Validated {} of {}", String.format("%,d", i), total);
-				}
-			}
-			if (!tasks.isEmpty()) {
-				runTasks(executorService, tasks);
-			}
-			executorService.shutdown();
-			logger.info("Validated {} of {}", String.format("%,d", i), total);
-
-			logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
-		}
+		Map<String, List<StatelessKieSession>> sessionMap = createKieSessionMap(ruleSetNames, conceptService, descriptionService, relationshipService, threads, sessionInvalidContent);
+		doValidateComponents(concepts, includeInferredRelationships, sessionMap, exceptionContents, threads);
 
 		List<InvalidContent> invalidContent = sessionInvalidContent.stream().flatMap(Collection::stream).filter(Objects::nonNull).collect(Collectors.toList());
 		invalidContent.addAll(exceptionContents);
@@ -217,6 +143,94 @@ public class RuleExecutor {
 		}
 
 		return invalidContent;
+	}
+
+	private void doValidateComponents(Collection<? extends Concept> concepts, boolean includeInferredRelationships, Map<String, List<StatelessKieSession>> sessionMap, List<InvalidContent> exceptionContents, int threads) {
+		Date start = new Date();
+		ExecutorService executorService = Executors.newFixedThreadPool(threads);
+		List<Concept> conceptList = new ArrayList<>(concepts);
+		List<Callable<String>> tasks = new ArrayList<>();
+		String total = String.format("%,d", concepts.size());
+		int i = 0;
+		while (i < concepts.size()) {
+			Set<Component> components = new HashSet<>();
+			Concept concept = conceptList.get(i++);
+			addConcept(components, concept, includeInferredRelationships);
+			int sessionIndex = tasks.size();
+			tasks.add(() -> {
+				try {
+					List<StatelessKieSession> statelessKieSessions = sessionMap.get(String.valueOf(sessionIndex));
+					statelessKieSessions.parallelStream().forEach(statelessKieSession -> {
+						statelessKieSession.execute(components);
+						statelessKieSession.getKieBase().newKieSession();
+					});
+					components.clear();
+				} catch (Exception e) {
+					exceptionContents.add(new InvalidContent(concept.getId(),concept, "An error occurred while running concept validation. Technical detail: " + e.getMessage(), Severity.ERROR));
+				}
+				return null;
+			});
+
+			if (tasks.size() == threads) {
+				runTasks(executorService, tasks);
+				tasks.clear();
+			}
+			if (i % 10_000 == 0) {
+				logger.info("Validated {} of {}", String.format("%,d", i), total);
+			}
+		}
+		if (!tasks.isEmpty()) {
+			runTasks(executorService, tasks);
+		}
+
+		executorService.shutdown();
+		logger.info("Validated {} of {}", String.format("%,d", i), total);
+
+		logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
+	}
+
+	private Map<String, List<StatelessKieSession>> createKieSessionMap(Set<String> ruleSetNames, ConceptService conceptService, DescriptionService descriptionService, RelationshipService relationshipService, int threads, List<List<InvalidContent>> sessionInvalidContent) {
+		Map<String, List<StatelessKieSession>> sessionMap = new HashMap<>();
+		for (int i = 0; i < threads; i++) {
+			for (String ruleSetName : ruleSetNames) {
+				final KieContainer kieContainer = assertionGroupContainers.get(ruleSetName);
+				if (kieContainer == null) {
+					throw new RuleExecutorException("Rule set not found for name '" + ruleSetName + "'");
+				}
+				ArrayList<InvalidContent> invalidContent = new ArrayList<>();// List per thread to avoid concurrency issues.
+				sessionInvalidContent.add(invalidContent);
+				sessionMap.computeIfAbsent(String.valueOf(i), k -> new ArrayList<>()).add(newStatelessKieSession(kieContainer, conceptService, descriptionService, relationshipService, invalidContent));
+			}
+		}
+
+		return sessionMap;
+	}
+
+	private void checkComponentsIntegrity(Collection<? extends Concept> concepts, ConceptService conceptService) {
+		final Map<String, IntegrityIssueReport> integrityIssueReportMap = new HashMap<>();
+		for (Concept concept : concepts) {
+			IntegrityIssueReport report = findAllComponentsWithBadIntegrity(concept, conceptService);
+			if (!report.isEmpty()) {
+				integrityIssueReportMap.put(concept.getId(), report);
+			}
+		}
+		if (!integrityIssueReportMap.isEmpty()) {
+			StringBuilder builder = new StringBuilder();
+			for (Map.Entry<String, IntegrityIssueReport> entry : integrityIssueReportMap.entrySet()) {
+				IntegrityIssueReport report = entry.getValue();
+				builder.append("Unable to find ");
+				if (report.isRelationshipTypeNotFound() && report.isRelationshipTargetNotFound()) {
+					builder.append("the relationship type ").append(report.getRelationshipWithNotFoundType()).append(" and relationship target ").append(report.getRelationshipWithNotFoundDestination());
+				} else if (report.isRelationshipTypeNotFound()) {
+					builder.append("the relationship type ").append(report.getRelationshipWithNotFoundType());
+				} else if (report.isRelationshipTargetNotFound()) {
+					builder.append("the relationship target ").append(report.getRelationshipWithNotFoundDestination());
+				}
+				builder.append(" for source concept ").append(entry.getKey()).append(". ");
+
+			}
+			throw new RuleExecutorException("Structural integrity issues. Details: " + builder.toString().trim());
+		}
 	}
 
 	private IntegrityIssueReport findAllComponentsWithBadIntegrity(Concept concept, ConceptService conceptService) {
