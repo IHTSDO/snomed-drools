@@ -16,7 +16,6 @@ import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.ReleaseImporter;
 import org.ihtsdo.otf.snomedboot.domain.Concept;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
-import org.ihtsdo.otf.snomedboot.factory.implementation.HighLevelComponentFactoryAdapterImpl;
 import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
