@@ -6,15 +6,19 @@ import org.ihtsdo.drools.service.ConceptService;
 import org.ihtsdo.drools.validator.rf2.SnomedDroolsComponentRepository;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsRelationship;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DroolsConceptService implements ConceptService {
 
 	private final SnomedDroolsComponentRepository repository;
+
+	private Set<String> topLevelHierarchies;
 
 	public DroolsConceptService(SnomedDroolsComponentRepository repository) {
 		this.repository = repository;
@@ -43,14 +47,20 @@ public class DroolsConceptService implements ConceptService {
 
 	@Override
 	public Set<String> getAllTopLevelHierarchies() {
-		DroolsConcept rootConcept = repository.getConcept(Constants.ROOT_CONCEPT);
-		Set<String> resultSet = new HashSet<>();
-		for (DroolsRelationship relationship : rootConcept.getActiveInboundStatedRelationships()) {
-			if(Constants.IS_A.equals(relationship.getTypeId())) {
-				resultSet.add(relationship.getSourceId());
+		if (!CollectionUtils.isEmpty(topLevelHierarchies)) return topLevelHierarchies;
+
+		synchronized (this) {
+			if (!CollectionUtils.isEmpty(topLevelHierarchies)) return topLevelHierarchies;
+			
+			DroolsConcept rootConcept = repository.getConcept(Constants.ROOT_CONCEPT);
+			topLevelHierarchies = new HashSet<>();
+			for (DroolsRelationship relationship : rootConcept.getActiveInboundStatedRelationships()) {
+				if(Constants.IS_A.equals(relationship.getTypeId())) {
+					topLevelHierarchies.add(relationship.getSourceId());
+				}
 			}
+			return  topLevelHierarchies;
 		}
-		return  resultSet;
 	}
 
 	@Override
@@ -58,28 +68,20 @@ public class DroolsConceptService implements ConceptService {
 		if(concept == null || concept.getId().equals(Constants.ROOT_CONCEPT)) {
 			return Collections.emptySet();
 		}
-		DroolsConcept droolsConcept = repository.getConcept(concept.getId());
-		Set<String> statedParents = new HashSet<>();
-		for (DroolsRelationship relationship : droolsConcept.getRelationships()) {
-			if(relationship.isActive() 
-					&& !relationship.isAxiomGCI() 
-					&& Constants.IS_A.equals(relationship.getTypeId())
-					&& Constants.STATED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
-				statedParents.add(relationship.getDestinationId());
-			}
+
+		DroolsConcept droolsConcept = this.repository.getConcept(concept.getId());
+		if (droolsConcept != null && droolsConcept.getStatedAncestorIds() != null) {
+			return droolsConcept.getStatedAncestorIds().stream().map(Object::toString).collect(Collectors.toSet());
 		}
-		Set<String> resultSet = new HashSet<>(statedParents);
-		for (String statedParent : statedParents) {
-			resultSet.addAll(findStatedAncestorsOfConcept(repository.getConcept(statedParent)));
-		}
-		return resultSet;
+
+		return Collections.emptySet();
 	}
 
 	@Override
 	public Set<String> findTopLevelHierarchiesOfConcept(Concept concept) {
 		Set<String> statedAncestors = findStatedAncestorsOfConcept(concept);
-		Set<String> topLevelHierarchies = getAllTopLevelHierarchies();
-		statedAncestors.retainAll(topLevelHierarchies);
+		Set<String> allTopLevelHierarchies = getAllTopLevelHierarchies();
+		statedAncestors.retainAll(allTopLevelHierarchies);
 
 		return statedAncestors;
 	}

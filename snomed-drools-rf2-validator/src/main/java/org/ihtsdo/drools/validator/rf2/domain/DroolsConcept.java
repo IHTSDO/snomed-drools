@@ -12,6 +12,7 @@ public class DroolsConcept extends DroolsComponent implements Concept {
 	private final Set<DroolsRelationship> activeInboundStatedRelationships;
 	private final Set<DroolsOntologyAxiom> ontologyAxioms;
 	private Map<String, Set<String>> associationTargets;
+    private Set<Long> statedAncestorIds;
 
 	public DroolsConcept(String id, boolean active, String moduleId, String definitionStatusId, boolean published, boolean released) {
 		super(id, active, moduleId, published, released);
@@ -50,5 +51,14 @@ public class DroolsConcept extends DroolsComponent implements Concept {
 	@Override
 	public Map <String, Set<String>> getAssociationTargets() {
 		return associationTargets;
+	}
+
+	public DroolsConcept setStatedAncestorIds(Set<Long> statedAncestorIds) {
+		this.statedAncestorIds = statedAncestorIds;
+		return this;
+	}
+
+	public Set<Long> getStatedAncestorIds() {
+		return statedAncestorIds;
 	}
 }
