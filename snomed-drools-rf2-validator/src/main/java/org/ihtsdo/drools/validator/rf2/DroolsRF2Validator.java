@@ -14,7 +14,10 @@ import org.ihtsdo.otf.resourcemanager.ResourceConfiguration;
 import org.ihtsdo.otf.resourcemanager.ResourceManager;
 import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.ReleaseImporter;
+import org.ihtsdo.otf.snomedboot.domain.Concept;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
+import org.ihtsdo.otf.snomedboot.factory.implementation.HighLevelComponentFactoryAdapterImpl;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snomed.otf.script.dao.SimpleStorageResourceLoader;
@@ -27,12 +30,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DroolsRF2Validator {
 
@@ -45,7 +45,8 @@ public class DroolsRF2Validator {
 			.withoutAllRefsets()
 			.withIncludedReferenceSetFilenamePattern(".*_cRefset_.*Language.*")
 			.withIncludedReferenceSetFilenamePattern(".*_cRefset_.*Association.*")
-			.withIncludedReferenceSetFilenamePattern(".*_sRefset_.*OWL.*");
+			.withIncludedReferenceSetFilenamePattern(".*_sRefset_.*OWL.*")
+			.withEffectiveComponentFilter();
 
 	private final RuleExecutor ruleExecutor;
 	private final TestResourceProvider testResourceProvider;
@@ -250,9 +251,9 @@ public class DroolsRF2Validator {
 	private SnomedDroolsComponentRepository loadComponentsFromRF2(Set<String> extractedRF2FilesDirectories, String currentEffectiveTime,
 			PreviousReleaseComponentFactory previousReleaseComponentIds) throws ReleaseImportException {
 
-		ReleaseImporter importer = new ReleaseImporter();
+		ReleaseImporter releaseImporter = new ReleaseImporter();
 
-		boolean loadDelta = anyDeltaFilesPresent(extractedRF2FilesDirectories);
+		boolean loadDelta = RF2ReleaseFilesUtil.anyDeltaFilesPresent(extractedRF2FilesDirectories);
 		if (loadDelta) {
 			logger.info("Delta files detected, validating combination of snapshot and delta.");
 		} else {
@@ -260,29 +261,24 @@ public class DroolsRF2Validator {
 		}
 
 		SnomedDroolsComponentRepository repository = new SnomedDroolsComponentRepository();
-		SnomedDroolsComponentFactory componentFactory = new SnomedDroolsComponentFactory(repository, currentEffectiveTime, previousReleaseComponentIds);
+		SnomedDroolsComponentFactory componentFactory = new SnomedDroolsComponentFactory(new ComponentStore(), repository, currentEffectiveTime, previousReleaseComponentIds);
+
 		if (loadDelta) {
-			importer.loadEffectiveSnapshotAndDeltaReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, false);
+			releaseImporter.loadEffectiveSnapshotAndDeltaReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, false);
 		} else {
-			importer.loadEffectiveSnapshotReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, false);
+			releaseImporter.loadEffectiveSnapshotReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, false);
 		}
 
+		final Map<Long, ? extends Concept> conceptMap = componentFactory.getComponentStore().getConcepts();
+		repository.getConcepts().forEach(item -> {
+			Concept concept = conceptMap.get(Long.parseLong(item.getId()));
+			if (concept != null) {
+				item.setStatedAncestorIds(concept.getStatedAncestorIds());
+			}
+		});
 		return repository;
 	}
 
-	private boolean anyDeltaFilesPresent(Set<String> extractedRF2FilesDirectories) throws ReleaseImportException {
-		for (String extractedRF2FilesDirectory : extractedRF2FilesDirectories) {
-			try (final Stream<Path> pathStream = Files.find(new File(extractedRF2FilesDirectory).toPath(), 50,
-					(path, basicFileAttributes) -> path.toFile().getName().matches("x?(sct|rel)2_Concept_[^_]*Delta_.*.txt"))) {
-				if (pathStream.findFirst().isPresent()) {
-					return true;
-				}
-			} catch (IOException e) {
-				throw new ReleaseImportException("Error while searching input files.", e);
-			}
-		}
-		return false;
-	}
 
 	public RuleExecutor getRuleExecutor() {
 		return ruleExecutor;

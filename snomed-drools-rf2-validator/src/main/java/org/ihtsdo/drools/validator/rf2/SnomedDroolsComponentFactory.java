@@ -3,7 +3,9 @@ package org.ihtsdo.drools.validator.rf2;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.validator.rf2.domain.*;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
-import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentStore;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentStoreComponentFactoryImpl;
+import org.jetbrains.annotations.NotNull;
 import org.semanticweb.owlapi.io.OWLParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,28 +19,33 @@ import java.util.stream.Collectors;
 
 import static java.lang.Long.parseLong;
 
-public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
+public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactoryImpl {
 
 	private static final String TEXT_DEFINITION = "900000000000550004";
-	private static final String INFERRED_RELATIONSHIP = "900000000000011006";
 	private static final String OWL_AXIOM_REFSET = "733073007";
-	static final String MRCM_ATTRIBUTE_DOMAIN_INTERNATIONAL_REFSET = "723561005";
-
 	private final SnomedDroolsComponentRepository repository;
 	private final String authoringEffectiveTime;
 	private final PreviousReleaseComponentFactory previousReleaseComponentIds;
 	private final AxiomRelationshipConversionService axiomConverter;
+	private final ComponentStore componentStore;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	SnomedDroolsComponentFactory(SnomedDroolsComponentRepository repository, String authoringEffectiveTime, PreviousReleaseComponentFactory previousReleaseComponentIds) {
-		this.repository = repository;
+	SnomedDroolsComponentFactory(ComponentStore componentStore, SnomedDroolsComponentRepository repository, String authoringEffectiveTime, PreviousReleaseComponentFactory previousReleaseComponentIds) {
+        super(componentStore);
+		this.componentStore = componentStore;
+        this.repository = repository;
 		this.authoringEffectiveTime = authoringEffectiveTime;
 		this.previousReleaseComponentIds = previousReleaseComponentIds;
 		axiomConverter = new AxiomRelationshipConversionService(Collections.emptySet());// The set of ungrouped attributes are not needed to convert axioms to relationships.
 	}
 
+	public ComponentStore getComponentStore() {
+		return this.componentStore;
+	}
+
 	@Override
 	public void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
+		super.newConceptState(conceptId, effectiveTime, active, moduleId, definitionStatusId);
 		repository.addConcept(new DroolsConcept(conceptId, isActive(active), moduleId, definitionStatusId,
 				isThisStatePublished(effectiveTime), isThisConceptReleased(conceptId, effectiveTime)));
 	}
@@ -110,17 +117,26 @@ public class SnomedDroolsComponentFactory extends ImpotentComponentFactory {
 			Relationship.ConcreteValue concreteValue = relationship.getValue();
 
 			// Build a composite identifier for this 'relationship' (which is actually a fragment of an axiom expression) because it doesn't have its own component identifier.
-			final String destinationOrConcrete = concreteValue == null ?
-					"/Destination_" + (destinationId != -1 ? destinationId : "")
-					: "/ConcreteValue_" + concreteValue.asString();
-			String compositeIdentifier = axiomId + "/Group_" + group + "/Type_" + typeId + destinationOrConcrete;
+			String compositeIdentifier = getCompositeIdentifier(axiomId, group, concreteValue, destinationId, typeId);
 
-			DroolsRelationship relationship1 = new DroolsRelationship(axiomId, isGCI, compositeIdentifier, true, moduleId,
+			DroolsRelationship droolsRelationship = new DroolsRelationship(axiomId, isGCI, compositeIdentifier, true, moduleId,
 					namedConcept.toString(), destinationId != -1 ? destinationId + "" : null,
 					group, typeId + "", ConceptConstants.STATED_RELATIONSHIP, published, released, concreteValue != null ? concreteValue.asString() : null);
-			logger.debug("Add axiom relationship {}", relationship1);
-			repository.addRelationship(relationship1);
+			logger.debug("Add axiom relationship {}", droolsRelationship);
+			repository.addRelationship(droolsRelationship);
+
+			if (!isGCI && ConceptConstants.isA.equals(typeId + "")) {
+				this.addStatedConceptParent(namedConcept.toString(), destinationId + "");
+				this.addStatedConceptChild(namedConcept.toString(), destinationId + "");
+			}
 		}));
+	}
+
+	@NotNull
+	private static String getCompositeIdentifier(String axiomId, Integer group, Relationship.ConcreteValue concreteValue, long destinationId, long typeId) {
+		final String destination = destinationId != -1 ? String.valueOf(destinationId) : "";
+		final String destinationOrConcrete = concreteValue == null ? "/Destination_" + destination : "/ConcreteValue_" + concreteValue.asString();
+		return (axiomId + "/Group_" + group + "/Type_" + typeId + destinationOrConcrete);
 	}
 
 	private boolean isActive(String active) {

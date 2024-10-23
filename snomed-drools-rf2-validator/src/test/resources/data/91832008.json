@@ -193,5 +193,6 @@
   "active": true,
   "moduleId": "900000000000207008",
   "published": true,
-  "released": true
+  "released": true,
+  "statedAncestorIds": [123037004, 138875005]
 }
