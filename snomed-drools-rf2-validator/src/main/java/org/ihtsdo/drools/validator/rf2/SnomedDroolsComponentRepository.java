@@ -3,6 +3,7 @@ package org.ihtsdo.drools.validator.rf2;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.ihtsdo.drools.domain.Component;
 import org.ihtsdo.drools.domain.Constants;
+import org.ihtsdo.drools.helper.IdentifierHelper;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.response.Severity;
 import org.ihtsdo.drools.validator.rf2.domain.*;
@@ -58,6 +59,8 @@ public class SnomedDroolsComponentRepository {
 	}
 
 	public synchronized void addAssociationTargetMember(String memberId, String refsetId, String referencedComponentId, String targetComponentId) {
+		if (!IdentifierHelper.isConceptId(referencedComponentId)) return;
+		
 		long conceptId = parseLong(referencedComponentId);
 		DroolsConcept concept = conceptMap.get(conceptId);
 		if (concept == null) {
