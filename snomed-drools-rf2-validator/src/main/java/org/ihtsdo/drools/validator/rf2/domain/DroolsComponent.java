@@ -5,13 +5,15 @@ import org.ihtsdo.drools.domain.Component;
 public class DroolsComponent implements Component {
 
 	private final String id;
+	private final String effectiveTime;
 	private final boolean active;
 	private final String moduleId;
 	private final boolean published;
 	private final boolean released;
 
-	public DroolsComponent(String id, boolean active, String moduleId, boolean published, boolean released) {
+	public DroolsComponent(String id, String effectiveTime, boolean active, String moduleId, boolean published, boolean released) {
 		this.id = id;
+		this.effectiveTime = effectiveTime;
 		this.moduleId = moduleId;
 		this.active = active;
 		this.published = published;
@@ -41,5 +43,10 @@ public class DroolsComponent implements Component {
 	@Override
 	public String getModuleId() {
 		return moduleId;
+	}
+
+	@Override
+	public String getEffectiveTime() {
+		return effectiveTime;
 	}
 }

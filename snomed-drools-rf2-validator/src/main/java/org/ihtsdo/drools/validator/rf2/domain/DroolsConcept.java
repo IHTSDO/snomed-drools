@@ -14,8 +14,8 @@ public class DroolsConcept extends DroolsComponent implements Concept {
 	private Map<String, Set<String>> associationTargets;
     private Set<Long> statedAncestorIds;
 
-	public DroolsConcept(String id, boolean active, String moduleId, String definitionStatusId, boolean published, boolean released) {
-		super(id, active, moduleId, published, released);
+	public DroolsConcept(String id, String effectiveTime, boolean active, String moduleId, String definitionStatusId, boolean published, boolean released) {
+		super(id, effectiveTime, active, moduleId, published, released);
 		this.definitionStatusId = definitionStatusId;
 		descriptions = new HashSet<>();
 		relationships = new HashSet<>();

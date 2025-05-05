@@ -18,10 +18,13 @@ public class DroolsConceptService implements ConceptService {
 
 	private final SnomedDroolsComponentRepository repository;
 
+	private final String currentEffectiveTime;
+
 	private Set<String> topLevelHierarchies;
 
-	public DroolsConceptService(SnomedDroolsComponentRepository repository) {
+	public DroolsConceptService(SnomedDroolsComponentRepository repository, String currentEffectiveTime) {
 		this.repository = repository;
+		this.currentEffectiveTime = currentEffectiveTime;
 	}
 
 	@Override
@@ -38,6 +41,16 @@ public class DroolsConceptService implements ConceptService {
 				&& !inactiveConcept.getAssociationTargets().isEmpty()
 				&& inactiveConcept.getAssociationTargets().containsKey(sameAsAssociationText)
 				&& inactiveConcept.getAssociationTargets().get(sameAsAssociationText).contains(conceptId);
+	}
+
+	@Override
+	public boolean isModellingChangedOnBaseSubstanceConcept(String conceptId) {
+		DroolsConcept concept = repository.getConcept(conceptId);
+		boolean isModellingChanged = concept.getOntologyAxioms().stream().anyMatch(axiom -> axiom.getEffectiveTime().equals(this.currentEffectiveTime));
+		if (!isModellingChanged) {
+			isModellingChanged = concept.getRelationships().stream().anyMatch(relationship -> relationship.getEffectiveTime().equals(this.currentEffectiveTime));
+		}
+		return isModellingChanged;
 	}
 
 	@Override

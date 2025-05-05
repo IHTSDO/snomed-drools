@@ -11,8 +11,8 @@ public class DroolsOntologyAxiom extends DroolsComponent implements OntologyAxio
 	private final String owlExpression;
 	private final Set<String> owlExpressionNamedConcepts;
 
-	public DroolsOntologyAxiom(String id, boolean active, String moduleId, String referencedComponentId, String owlExpression, Set<String> owlExpressionNamedConcepts, boolean published, boolean released, boolean primitive) {
-		super(id, active, moduleId, published, released);
+	public DroolsOntologyAxiom(String id, String effectiveTime, boolean active, String moduleId, String referencedComponentId, String owlExpression, Set<String> owlExpressionNamedConcepts, boolean published, boolean released, boolean primitive) {
+		super(id, effectiveTime, active, moduleId, published, released);
 		this.referencedComponentId = referencedComponentId;
 		this.owlExpression = owlExpression;
 		this.owlExpressionNamedConcepts = owlExpressionNamedConcepts;

@@ -13,8 +13,8 @@ public class DroolsRelationship extends DroolsComponent implements Relationship 
 	private final String characteristicTypeId;
 	private String concreteValue;
 
-	public DroolsRelationship(String axiomId, boolean isAxiomGCI, String id, boolean active, String moduleId, String sourceId, String destinationId, int group, String typeId, String characteristicTypeId, boolean published, boolean released, String concreteValue) {
-		super(id, active, moduleId, published, released);
+	public DroolsRelationship(String axiomId, String effectiveTime, boolean isAxiomGCI, String id, boolean active, String moduleId, String sourceId, String destinationId, int group, String typeId, String characteristicTypeId, boolean published, boolean released, String concreteValue) {
+		super(id, effectiveTime, active, moduleId, published, released);
 		this.axiomId = axiomId;
 		this.isAxiomGCI = isAxiomGCI;
 		this.sourceId = sourceId;

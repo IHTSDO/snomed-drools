@@ -46,19 +46,19 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 	@Override
 	public void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
 		super.newConceptState(conceptId, effectiveTime, active, moduleId, definitionStatusId);
-		repository.addConcept(new DroolsConcept(conceptId, isActive(active), moduleId, definitionStatusId,
+		repository.addConcept(new DroolsConcept(conceptId, effectiveTime, isActive(active), moduleId, definitionStatusId,
 				isThisStatePublished(effectiveTime), isThisConceptReleased(conceptId, effectiveTime)));
 	}
 
 	@Override
 	public void newDescriptionState(String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
-		repository.addDescription(new DroolsDescription(id, isActive(active), moduleId, conceptId, languageCode, typeId, term, caseSignificanceId, TEXT_DEFINITION.equals(typeId),
+		repository.addDescription(new DroolsDescription(id, effectiveTime, isActive(active), moduleId, conceptId, languageCode, typeId, term, caseSignificanceId, TEXT_DEFINITION.equals(typeId),
 				isThisStatePublished(effectiveTime), isThisDescriptionReleased(id, effectiveTime)));
 	}
 
 	@Override
 	public void newRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
-		repository.addRelationship(new DroolsRelationship(null, false, id, isActive(active), moduleId, sourceId, destinationId, Integer.parseInt(relationshipGroup), typeId, characteristicTypeId,
+		repository.addRelationship(new DroolsRelationship(null, effectiveTime, false, id, isActive(active), moduleId, sourceId, destinationId, Integer.parseInt(relationshipGroup), typeId, characteristicTypeId,
 				isThisStatePublished(effectiveTime), isThisRelationshipReleased(id, effectiveTime), null));
 	}
 
@@ -78,24 +78,24 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 				if (axiom != null) {
 					if (axiom.getLeftHandSideNamedConcept() != null && axiom.getRightHandSideRelationships() != null) {
 						// Regular axiom
-						addRelationships(id, false, axiom.getLeftHandSideNamedConcept(), axiom.getRightHandSideRelationships(), moduleId, published, released);
+						addRelationships(id, effectiveTime, false, axiom.getLeftHandSideNamedConcept(), axiom.getRightHandSideRelationships(), moduleId, published, released);
 						// compare referencedComponentID and named concept in OWL expression
-						validateComponentIdAndNamedConcept(id, activeBool, moduleId, parseLong(referencedComponentId), axiom.getLeftHandSideNamedConcept());
+						validateComponentIdAndNamedConcept(id, effectiveTime, activeBool, moduleId, parseLong(referencedComponentId), axiom.getLeftHandSideNamedConcept());
 					} else if (axiom.getRightHandSideNamedConcept() != null && axiom.getLeftHandSideRelationships() != null) {
 						// GCI OntologyAxiom
-						addRelationships(id, true, axiom.getRightHandSideNamedConcept(), axiom.getLeftHandSideRelationships(), moduleId, published, released);
+						addRelationships(id, effectiveTime, true, axiom.getRightHandSideNamedConcept(), axiom.getLeftHandSideRelationships(), moduleId, published, released);
 						// compare referencedComponentID and named concept in OWL expression
-						validateComponentIdAndNamedConcept(id, activeBool, moduleId, parseLong(referencedComponentId), axiom.getRightHandSideNamedConcept());
+						validateComponentIdAndNamedConcept(id, effectiveTime, activeBool, moduleId, parseLong(referencedComponentId), axiom.getRightHandSideNamedConcept());
 					}
-					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, activeBool, moduleId, referencedComponentId, owlExpression, null, published, released, axiom.isPrimitive()));
+					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, effectiveTime, activeBool, moduleId, referencedComponentId, owlExpression, null, published, released, axiom.isPrimitive()));
 				} else {
 					// Can't be converted to relationships
 					Set<String> namedConceptIds = axiomConverter.getIdsOfConceptsNamedInAxiom(owlExpression).stream().map(Object::toString).collect(Collectors.toSet());
-					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, activeBool, moduleId, referencedComponentId, owlExpression, namedConceptIds, published, released, true));
+					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, effectiveTime, activeBool, moduleId, referencedComponentId, owlExpression, namedConceptIds, published, released, true));
 				}
 			} catch (ConversionException | OWLParserException e) {
 				logger.warn("OntologyAxiom conversion failed for refset member " + id, e);
-				repository.addComponentLoadingError(parseLong(referencedComponentId), new DroolsComponent(id, activeBool, moduleId, false, false),
+				repository.addComponentLoadingError(parseLong(referencedComponentId), new DroolsComponent(id, effectiveTime, activeBool, moduleId, false, false),
 						"Error parsing Axiom owlExpression for Axiom " + id);
 			}
 
@@ -109,7 +109,7 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 		}
 	}
 
-	private void addRelationships(String axiomId, boolean isGCI, Long namedConcept, Map<Integer, List<Relationship>> groups, String moduleId, boolean published, boolean released) {
+	private void addRelationships(String axiomId, String effectiveTime, boolean isGCI, Long namedConcept, Map<Integer, List<Relationship>> groups, String moduleId, boolean published, boolean released) {
 		groups.forEach((group, relationships) -> relationships.forEach(relationship -> {
 
 			long typeId = relationship.getTypeId();
@@ -119,7 +119,7 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 			// Build a composite identifier for this 'relationship' (which is actually a fragment of an axiom expression) because it doesn't have its own component identifier.
 			String compositeIdentifier = getCompositeIdentifier(axiomId, group, concreteValue, destinationId, typeId);
 
-			DroolsRelationship droolsRelationship = new DroolsRelationship(axiomId, isGCI, compositeIdentifier, true, moduleId,
+			DroolsRelationship droolsRelationship = new DroolsRelationship(axiomId, effectiveTime, isGCI, compositeIdentifier, true, moduleId,
 					namedConcept.toString(), destinationId != -1 ? destinationId + "" : null,
 					group, typeId + "", ConceptConstants.STATED_RELATIONSHIP, published, released, concreteValue != null ? concreteValue.asString() : null);
 			logger.debug("Add axiom relationship {}", droolsRelationship);
@@ -143,9 +143,9 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 		return "1".equals(active);
 	}
 
-	private void validateComponentIdAndNamedConcept(String axiomId, boolean active, String moduleId, Long referencedComponentId, Long namedConceptId) {
+	private void validateComponentIdAndNamedConcept(String axiomId, String effectiveTime, boolean active, String moduleId, Long referencedComponentId, Long namedConceptId) {
 		if(!referencedComponentId.equals(namedConceptId)) {
-			repository.addComponentLoadingError(referencedComponentId, new DroolsComponent(axiomId, active, moduleId, false, false),
+			repository.addComponentLoadingError(referencedComponentId, new DroolsComponent(axiomId, effectiveTime, active, moduleId, false, false),
 					"ReferencedComponentId " + referencedComponentId + " does not match named concept " + namedConceptId + " in Axiom " + axiomId);
 		}
 	}

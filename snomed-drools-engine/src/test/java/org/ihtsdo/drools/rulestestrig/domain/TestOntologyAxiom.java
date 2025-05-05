@@ -7,6 +7,7 @@ import java.util.*;
 public class TestOntologyAxiom implements OntologyAxiom, TestComponent {
 
 	private String id;
+	private String effectiveTime;
 	private boolean active;
 	private boolean published;
 	private boolean released;
@@ -91,6 +92,15 @@ public class TestOntologyAxiom implements OntologyAxiom, TestComponent {
 	@Override
 	public Collection<String> getOwlExpressionNamedConcepts() {
 		return owlExpressionNamedConcepts;
+	}
+
+	@Override
+	public String getEffectiveTime() {
+		return effectiveTime;
+	}
+
+	public void setEffectiveTime(String effectiveTime) {
+		this.effectiveTime = effectiveTime;
 	}
 
 	public void setOwlExpressionNamedConcepts(Collection<String> owlExpressionNamedConcepts) {

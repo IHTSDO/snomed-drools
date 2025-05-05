@@ -45,6 +45,11 @@ public class RelationshipImpl implements Relationship {
 		return moduleId;
 	}
 
+	@Override
+	public String getEffectiveTime() {
+		return null;
+	}
+
 	public void setModuleId(String moduleId) {
 		this.moduleId = moduleId;
 	}

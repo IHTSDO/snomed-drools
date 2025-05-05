@@ -6,6 +6,7 @@ import org.ihtsdo.drools.domain.Relationship;
 public class TestRelationship implements Relationship, TestComponent {
 
 	private String id;
+	private String effectiveTime;
 	private String axiomId;
 	private boolean axiomGCI;
 	private boolean active;
@@ -61,6 +62,15 @@ public class TestRelationship implements Relationship, TestComponent {
 
 	public void setModuleId(String moduleId) {
 		this.moduleId = moduleId;
+	}
+
+	@Override
+	public String getEffectiveTime() {
+		return effectiveTime;
+	}
+
+	public void setEffectiveTime(String effectiveTime) {
+		this.effectiveTime = effectiveTime;
 	}
 
 	@Override

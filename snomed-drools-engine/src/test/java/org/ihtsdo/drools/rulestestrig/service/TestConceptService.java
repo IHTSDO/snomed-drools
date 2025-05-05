@@ -37,6 +37,11 @@ public class TestConceptService implements ConceptService {
 	}
 
 	@Override
+	public boolean isModellingChangedOnBaseSubstanceConcept(String conceptId) {
+		return false;
+	}
+
+	@Override
 	public Concept findById(String conceptId) {
 		return concepts.get(conceptId);
 	}

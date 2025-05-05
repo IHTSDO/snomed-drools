@@ -13,6 +13,7 @@ import java.util.Set;
 public class TestConcept<D extends Description, R extends Relationship> implements Concept, TestComponent {
 
 	private String id;
+	private String effectiveTime;
 	private boolean active;
 	private boolean published;
 	private boolean released;
@@ -46,6 +47,15 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 
 	public void setModuleId(String moduleId) {
 		this.moduleId = moduleId;
+	}
+
+	@Override
+	public String getEffectiveTime() {
+		return effectiveTime;
+	}
+
+	public void setEffectiveTime(String effectiveTime) {
+		this.effectiveTime = effectiveTime;
 	}
 
 	@Override

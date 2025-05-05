@@ -20,7 +20,7 @@ public class DroolsConceptServiceTest extends BaseServiceTest {
     @Before
     public void setup() throws FileNotFoundException {
         loadConceptsIntoRepository();
-        droolsConceptService = new DroolsConceptService(repository);
+        droolsConceptService = new DroolsConceptService(repository, null);
     }
 
     @Test
@@ -43,18 +43,18 @@ public class DroolsConceptServiceTest extends BaseServiceTest {
 
     @Test
     public void testFindStatedAncestorsOfConcept() {
-        Concept concept = new DroolsConcept("1263005", true, "900000000000207008", "900000000000073002", true, true);
+        Concept concept = new DroolsConcept("1263005", "20250501", true, "900000000000207008", "900000000000073002", true, true);
         Set<String> results = droolsConceptService.findStatedAncestorsOfConcept(concept);
         Assert.assertEquals(7, results.size());
 
-        concept = new DroolsConcept("91832008", true, "900000000000207008", "900000000000073002", true, true);
+        concept = new DroolsConcept("91832008", "20250501", true, "900000000000207008", "900000000000073002", true, true);
         results = droolsConceptService.findStatedAncestorsOfConcept(concept);
         Assert.assertEquals(2, results.size());
     }
 
     @Test
     public void testFindTopLevelHierachiesOfConcept() {
-        Concept concept = new DroolsConcept("1263005", true, "900000000000207008", "900000000000073002", true, true);
+        Concept concept = new DroolsConcept("1263005", "20250501", true, "900000000000207008", "900000000000073002", true, true);
         Set<String> results = droolsConceptService.findTopLevelHierarchiesOfConcept(concept);
         Assert.assertEquals(1, results.size());
         Assert.assertTrue(results.contains("123037004"));

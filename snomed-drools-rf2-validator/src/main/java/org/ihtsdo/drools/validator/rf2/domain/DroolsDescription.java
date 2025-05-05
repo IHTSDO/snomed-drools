@@ -15,8 +15,8 @@ public class DroolsDescription extends DroolsComponent implements Description {
 	private final boolean textDefinition;
 	private final Map<String, String> acceptabilityMap;
 
-	public DroolsDescription(String id, boolean active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId, boolean textDefinition, boolean published, boolean released) {
-		super(id, active, moduleId, published, released);
+	public DroolsDescription(String id, String effectiveTime, boolean active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId, boolean textDefinition, boolean published, boolean released) {
+		super(id, effectiveTime, active, moduleId, published, released);
 		this.conceptId = conceptId;
 		this.languageCode = languageCode;
 		this.typeId = typeId;

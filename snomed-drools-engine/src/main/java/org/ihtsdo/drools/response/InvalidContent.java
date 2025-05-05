@@ -147,5 +147,10 @@ public class InvalidContent {
 		public String getModuleId() {
 			return Constants.ROOT_CONCEPT;
 		}
+
+		@Override
+		public String getEffectiveTime() {
+			return null;
+		}
 	}
 }

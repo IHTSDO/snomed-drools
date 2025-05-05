@@ -8,6 +8,7 @@ import java.util.Map;
 public class TestDescription implements Description, TestComponent {
 
 	private String id;
+	private String effectiveTime;
 	private boolean active;
 	private boolean published;
 	private boolean released;
@@ -52,6 +53,15 @@ public class TestDescription implements Description, TestComponent {
 
 	public void setModuleId(String moduleId) {
 		this.moduleId = moduleId;
+	}
+
+	@Override
+	public String getEffectiveTime() {
+		return effectiveTime;
+	}
+
+	public void setEffectiveTime(String effectiveTime) {
+		this.effectiveTime = effectiveTime;
 	}
 
 	@Override

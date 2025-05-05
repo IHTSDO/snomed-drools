@@ -20,7 +20,7 @@ public class BaseServiceTest {
         repository.addConcept(FileLoaderTestUtils.fileToObject("data/67185001.json", DroolsConcept.class));
         repository.addConcept(FileLoaderTestUtils.fileToObject("data/91723000.json", DroolsConcept.class));
         repository.addConcept(FileLoaderTestUtils.fileToObject("data/442083009.json", DroolsConcept.class));
-        repository.addConcept(new DroolsConcept("12345678",true,"900000000000207008", "900000000000073002",true,true));
+        repository.addConcept(new DroolsConcept("12345678", "20250501",true,"900000000000207008", "900000000000073002",true,true));
     }
 
     protected void loadDescriptionsIntoRepository() {

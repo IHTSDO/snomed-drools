@@ -21,4 +21,5 @@ public interface Component {
 
 	String getModuleId();
 
+	String getEffectiveTime();
 }

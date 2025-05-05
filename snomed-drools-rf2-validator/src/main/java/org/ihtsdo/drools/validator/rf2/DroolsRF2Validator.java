@@ -201,7 +201,7 @@ public class DroolsRF2Validator {
 		SnomedDroolsComponentRepository repository = loadComponentsFromRF2(extractedRF2FilesDirectories, currentEffectiveTime, previousReleaseComponentFactory);
 		logger.info("Components loaded");
 
-		DroolsConceptService conceptService = new DroolsConceptService(repository);
+		DroolsConceptService conceptService = new DroolsConceptService(repository, currentEffectiveTime);
 		DroolsDescriptionService descriptionService = new DroolsDescriptionService(repository, conceptService, testResourceProvider);
 		DroolsRelationshipService relationshipService = new DroolsRelationshipService(repository);
 

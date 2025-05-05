@@ -41,6 +41,11 @@ public class DescriptionImpl implements Description {
 		return moduleId;
 	}
 
+	@Override
+	public String getEffectiveTime() {
+		return null;
+	}
+
 	public void setModuleId(String moduleId) {
 		this.moduleId = moduleId;
 	}

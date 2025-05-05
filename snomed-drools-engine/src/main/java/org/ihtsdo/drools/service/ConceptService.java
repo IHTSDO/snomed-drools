@@ -9,6 +9,7 @@ public interface ConceptService {
 
 	boolean isActive(String conceptId);
 	boolean isInactiveConceptSameAs(String inactiveConceptId, String conceptId);
+	boolean isModellingChangedOnBaseSubstanceConcept(String conceptId);
 	Concept findById(String conceptId);
 	Set<String> getAllTopLevelHierarchies();
 	Set<String> findStatedAncestorsOfConcept(Concept concept);
