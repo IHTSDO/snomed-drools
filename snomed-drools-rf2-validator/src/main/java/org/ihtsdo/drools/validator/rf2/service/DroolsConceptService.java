@@ -44,14 +44,14 @@ public class DroolsConceptService implements ConceptService {
 	}
 
 	@Override
-	public boolean isModellingChangedOnBaseSubstanceConcept(String conceptId) {
-		DroolsConcept concept = repository.getConcept(conceptId);
-		boolean isModellingChanged = concept.getOntologyAxioms().stream().anyMatch(axiom -> axiom.getEffectiveTime().equals(this.currentEffectiveTime));
-		if (!isModellingChanged) {
-			isModellingChanged = concept.getRelationships().stream().anyMatch(relationship -> relationship.getEffectiveTime().equals(this.currentEffectiveTime));
+	public boolean isConceptModellingChanged(Concept concept) {
+		DroolsConcept droolsConcept = repository.getConcept(concept.getId());
+		boolean changed = droolsConcept.getOntologyAxioms().stream().anyMatch(axiom -> !axiom.isAxiomGCI() && axiom.getEffectiveTime().equals(this.currentEffectiveTime));
+		if (!changed) {
+			changed = droolsConcept.getRelationships().stream().anyMatch(relationship -> relationship.getAxiomId() == null && Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId()) && relationship.getEffectiveTime().equals(this.currentEffectiveTime));
 		}
-		return isModellingChanged;
-	}
+		return changed;
+}
 
 	@Override
 	public Concept findById(String conceptId) {

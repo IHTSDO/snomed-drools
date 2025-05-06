@@ -7,16 +7,18 @@ import java.util.Set;
 public class DroolsOntologyAxiom extends DroolsComponent implements OntologyAxiom {
 
 	private final boolean primitive;
+	private final boolean axiomGCI;
 	private final String referencedComponentId;
 	private final String owlExpression;
 	private final Set<String> owlExpressionNamedConcepts;
 
-	public DroolsOntologyAxiom(String id, String effectiveTime, boolean active, String moduleId, String referencedComponentId, String owlExpression, Set<String> owlExpressionNamedConcepts, boolean published, boolean released, boolean primitive) {
+	public DroolsOntologyAxiom(String id, String effectiveTime, boolean active, String moduleId, String referencedComponentId, String owlExpression, Set<String> owlExpressionNamedConcepts, boolean published, boolean released, boolean primitive, boolean axiomGCI) {
 		super(id, effectiveTime, active, moduleId, published, released);
 		this.referencedComponentId = referencedComponentId;
 		this.owlExpression = owlExpression;
 		this.owlExpressionNamedConcepts = owlExpressionNamedConcepts;
 		this.primitive = primitive;
+		this.axiomGCI = axiomGCI;
 	}
 
 	@Override
@@ -32,6 +34,11 @@ public class DroolsOntologyAxiom extends DroolsComponent implements OntologyAxio
 	@Override
 	public Set<String> getOwlExpressionNamedConcepts() {
 		return owlExpressionNamedConcepts;
+	}
+
+	@Override
+	public boolean isAxiomGCI() {
+		return axiomGCI;
 	}
 
 	@Override

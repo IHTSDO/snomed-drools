@@ -76,6 +76,7 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 				final boolean published = isThisStatePublished(effectiveTime);
 				final boolean released = isThisRefsetMemberReleased(id, effectiveTime);
 				if (axiom != null) {
+					boolean axiomGCI = false;
 					if (axiom.getLeftHandSideNamedConcept() != null && axiom.getRightHandSideRelationships() != null) {
 						// Regular axiom
 						addRelationships(id, effectiveTime, false, axiom.getLeftHandSideNamedConcept(), axiom.getRightHandSideRelationships(), moduleId, published, released);
@@ -83,15 +84,16 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 						validateComponentIdAndNamedConcept(id, effectiveTime, activeBool, moduleId, parseLong(referencedComponentId), axiom.getLeftHandSideNamedConcept());
 					} else if (axiom.getRightHandSideNamedConcept() != null && axiom.getLeftHandSideRelationships() != null) {
 						// GCI OntologyAxiom
+						axiomGCI = true;
 						addRelationships(id, effectiveTime, true, axiom.getRightHandSideNamedConcept(), axiom.getLeftHandSideRelationships(), moduleId, published, released);
 						// compare referencedComponentID and named concept in OWL expression
 						validateComponentIdAndNamedConcept(id, effectiveTime, activeBool, moduleId, parseLong(referencedComponentId), axiom.getRightHandSideNamedConcept());
 					}
-					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, effectiveTime, activeBool, moduleId, referencedComponentId, owlExpression, null, published, released, axiom.isPrimitive()));
+					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, effectiveTime, activeBool, moduleId, referencedComponentId, owlExpression, null, published, released, axiom.isPrimitive(), axiomGCI));
 				} else {
 					// Can't be converted to relationships
 					Set<String> namedConceptIds = axiomConverter.getIdsOfConceptsNamedInAxiom(owlExpression).stream().map(Object::toString).collect(Collectors.toSet());
-					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, effectiveTime, activeBool, moduleId, referencedComponentId, owlExpression, namedConceptIds, published, released, true));
+					repository.addOntologyAxiom(new DroolsOntologyAxiom(id, effectiveTime, activeBool, moduleId, referencedComponentId, owlExpression, namedConceptIds, published, released, true, false));
 				}
 			} catch (ConversionException | OWLParserException e) {
 				logger.warn("OntologyAxiom conversion failed for refset member " + id, e);

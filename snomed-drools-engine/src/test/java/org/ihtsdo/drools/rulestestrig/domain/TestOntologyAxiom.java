@@ -15,6 +15,7 @@ public class TestOntologyAxiom implements OntologyAxiom, TestComponent {
 	private boolean primitive;
 	private String referencedComponentId;
 	private String owlExpression;
+	private boolean axiomGCI;
 	private Collection<String> owlExpressionNamedConcepts;
 
 	@Override
@@ -92,6 +93,15 @@ public class TestOntologyAxiom implements OntologyAxiom, TestComponent {
 	@Override
 	public Collection<String> getOwlExpressionNamedConcepts() {
 		return owlExpressionNamedConcepts;
+	}
+
+	@Override
+	public boolean isAxiomGCI() {
+		return axiomGCI;
+	}
+
+	public void setAxiomGCI(boolean axiomGCI) {
+		this.axiomGCI = axiomGCI;
 	}
 
 	@Override

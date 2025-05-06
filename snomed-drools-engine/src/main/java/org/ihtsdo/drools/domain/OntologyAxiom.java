@@ -17,4 +17,6 @@ public interface OntologyAxiom extends Component {
 
 	Collection<String> getOwlExpressionNamedConcepts();
 
+	public boolean isAxiomGCI();
+
 }
