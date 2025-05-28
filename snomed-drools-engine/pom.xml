@@ -20,11 +20,6 @@
 			<groupId>org.drools</groupId>
 			<artifactId>drools-mvel</artifactId>
 		</dependency>
-		<dependency>
-			<!-- Newer version of xstream to avoid vulnerability -->
-			<groupId>com.thoughtworks.xstream</groupId>
-			<artifactId>xstream</artifactId>
-		</dependency>
 
 		<!-- Resource Loading -->
 		<dependency>
