@@ -2,11 +2,22 @@ package org.ihtsdo.drools.helper;
 
 import java.util.*;
 
+import org.ihtsdo.drools.domain.Component;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Relationship;
+import org.ihtsdo.otf.RF2Constants;
+import org.springframework.util.CollectionUtils;
 
 public class ConceptHelper {
+
+    public static boolean isAllComponentsBelongToCoreModule(Collection<Component> components) {
+        return !CollectionUtils.isEmpty(components) && components.stream().allMatch(item -> RF2Constants.SCTID_CORE_MODULE.equals(item.getModuleId()) || RF2Constants.SCTID_MODEL_MODULE.equals(item.getModuleId()));
+    }
+
+    public static boolean isCoreModule(String module) {
+        return RF2Constants.SCTID_CORE_MODULE.equals(module) || RF2Constants.SCTID_MODEL_MODULE.equals(module);
+    }
 	
 	public static boolean containsAnyConcept(List<String> conceptIdList, String... restrictConcepts){
 		List<String> restrictList = new ArrayList<>(List.of(restrictConcepts));

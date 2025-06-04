@@ -3,7 +3,6 @@ package org.ihtsdo.drools.helper;
 import org.ihtsdo.drools.domain.Concept;
 import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.domain.Description;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -31,7 +30,7 @@ public class DescriptionHelper {
 		return descriptions;
 	}
 
-	public static boolean isMoreThanOneAcceptabilityPerDialect(Concept concept, boolean active, String typeId, String acceptability) {
+	public static Collection<Description> findDescriptionsWithMoreThanOneAcceptabilityPerDialect(Concept concept, boolean active, String typeId, String acceptability) {
 		List<String> dialects = new ArrayList<>();
 		dialects.add(Constants.US_EN_LANG_REFSET);
 		dialects.add(Constants.GB_EN_LANG_REFSET);
@@ -45,19 +44,18 @@ public class DescriptionHelper {
 				}				
 			}
 		}
-		
-		for(String dialect : dialects) {			
-			List<Description> descriptions = concept.getDescriptions().stream()
+		List<Description> descriptions = new ArrayList<>();
+		for(String dialect : dialects) {
+			List<Description> filterDescriptions = concept.getDescriptions().stream()
 					.filter(desc -> desc.isActive() == active
 							&& typeId.equals(desc.getTypeId())
 							&& acceptability.equals(desc.getAcceptabilityMap().get(dialect)))
 					.collect(Collectors.toList());
-			if(descriptions.size() > 1) {
-				return true;
+			if (filterDescriptions.size() > 1) {
+				descriptions.addAll(filterDescriptions);
 			}
 		}
-		
-		return false;
+		return descriptions;
 	}
 	
 	public static Collection<Description> filterByActiveAndType(Concept concept, boolean active, String typeId) {

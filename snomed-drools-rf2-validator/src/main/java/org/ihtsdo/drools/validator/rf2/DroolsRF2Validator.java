@@ -3,6 +3,7 @@ package org.ihtsdo.drools.validator.rf2;
 import com.google.common.collect.Sets;
 import org.ihtsdo.drools.RuleExecutor;
 import org.ihtsdo.drools.RuleExecutorFactory;
+import org.ihtsdo.drools.domain.Constants;
 import org.ihtsdo.drools.response.InvalidContent;
 import org.ihtsdo.drools.service.TestResourceProvider;
 import org.ihtsdo.drools.validator.rf2.domain.DroolsConcept;
@@ -21,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snomed.otf.script.dao.SimpleStorageResourceLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -211,10 +213,12 @@ public class DroolsRF2Validator {
 		invalidContents.addAll(repository.getComponentLoadingErrors());
 
 		//Filter only invalid components that are in the specified modules list, if modules list is not specified, return all invalid components
-		if(includedModules != null && !includedModules.isEmpty()) {
-			String includedModulesStr = String.join(",", includedModules);
-			logger.info("Filtering invalid contents for included module ids: {}", includedModulesStr);
-			invalidContents = invalidContents.stream().filter(content -> includedModules.contains(content.getComponent().getModuleId())).collect(Collectors.toList());
+		if(!CollectionUtils.isEmpty(includedModules)) {
+			invalidContents = invalidContents.stream().filter(content -> Constants.ERROR_COMPONENT_RULE_ID.equals(content.getRuleId())
+					|| Constants.WARNING_COMPONENT_RULE_ID.equals(content.getRuleId())
+					|| parseUUIDOrNull(content.getRuleId()) == null
+					|| content.isIgnoreModuleCheck()
+					|| includedModules.contains(content.getComponent().getModuleId())).collect(Collectors.toList());
 		}
 
 		// Filter only active concepts
@@ -296,6 +300,14 @@ public class DroolsRF2Validator {
 			return new ResourceManager(testResourcesConfiguration, new SimpleStorageResourceLoader(s3Client), s3Client);
 		} else {
 			return new ResourceManager(BLANK_RESOURCES_CONFIGURATION, null);
+		}
+	}
+
+	private UUID parseUUIDOrNull(String uuid) {
+		try{
+			return UUID.fromString(uuid);
+		} catch (IllegalArgumentException exception){
+			return null;
 		}
 	}
 

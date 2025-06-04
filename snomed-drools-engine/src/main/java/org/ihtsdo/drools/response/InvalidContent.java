@@ -12,6 +12,13 @@ public class InvalidContent {
 	private Severity severity;
 	private boolean ignorePublishedCheck;
 
+	/**
+	 * The ignoreModuleCheck field indicates whether a specific rule should skip module checking
+	 * This flag is used for Extensions or Derivatives only.
+	 * Purpose: we don't want to return the INT failures when validating the extension content.
+	 */
+	private boolean ignoreModuleCheck;
+
 	public static InvalidContent getGeneralWarning(String message) {
 		return new InvalidContent("setup-issue", Constants.ROOT_CONCEPT, new DummyComponent(), message, Severity.WARNING);
 	}
@@ -24,12 +31,29 @@ public class InvalidContent {
 		this.severity = severity;
 	}
 
+	public InvalidContent(String ruleId, String conceptId, Component component, String message, boolean ignoreModuleCheck, Severity severity) {
+		this.ruleId = ruleId;
+		this.conceptId = conceptId;
+		this.component = component;
+		this.message = message;
+		this.ignoreModuleCheck = ignoreModuleCheck;
+		this.severity = severity;
+	}
+
 	public InvalidContent(String ruleId, Concept concept, String message, Severity severity) {
 		this(ruleId, concept.getId(), concept, message, severity);
 	}
 
 	public InvalidContent(String ruleId, Concept concept, String message) {
 		this(ruleId, concept, message, Severity.ERROR);
+	}
+
+	public InvalidContent(String ruleId, Concept concept, String message, boolean ignoreModuleCheck, Severity severity) {
+		this(ruleId, concept.getId(), concept, message, ignoreModuleCheck, severity);
+	}
+
+	public InvalidContent(String ruleId, Concept concept, String message, boolean ignoreModuleCheck) {
+		this(ruleId, concept, message, ignoreModuleCheck, Severity.ERROR);
 	}
 
 	public InvalidContent(String ruleId, Description description, String message, Severity severity) {
@@ -40,6 +64,14 @@ public class InvalidContent {
 		this(ruleId, description, message, Severity.ERROR);
 	}
 
+	public InvalidContent(String ruleId, Description description, String message, boolean ignoreModuleCheck, Severity severity) {
+		this(ruleId, description.getConceptId(), description, message, ignoreModuleCheck, severity);
+	}
+
+	public InvalidContent(String ruleId, Description description, String message, boolean ignoreModuleCheck) {
+		this(ruleId, description, message, ignoreModuleCheck, Severity.ERROR);
+	}
+
 	public InvalidContent(String ruleId, Relationship relationship, String message, Severity severity) {
 		this(ruleId, relationship.getSourceId(), relationship, message, severity);
 	}
@@ -48,12 +80,28 @@ public class InvalidContent {
 		this(ruleId, relationship, message, Severity.ERROR);
 	}
 
+	public InvalidContent(String ruleId, Relationship relationship, String message, boolean ignoreModuleCheck, Severity severity) {
+		this(ruleId, relationship.getSourceId(), relationship, message, ignoreModuleCheck, severity);
+	}
+
+	public InvalidContent(String ruleId, Relationship relationship, String message, boolean ignoreModuleCheck) {
+		this(ruleId, relationship, message, ignoreModuleCheck, Severity.ERROR);
+	}
+
 	public InvalidContent(String ruleId, OntologyAxiom ontologyAxiom, String message, Severity severity) {
 		this(ruleId, ontologyAxiom.getReferencedComponentId(), ontologyAxiom, message, severity);
 	}
 
 	public InvalidContent(String ruleId, OntologyAxiom ontologyAxiom, String message) {
 		this(ruleId, ontologyAxiom, message, Severity.ERROR);
+	}
+
+	public InvalidContent(String ruleId, OntologyAxiom ontologyAxiom, String message, boolean ignoreModuleCheck, Severity severity) {
+		this(ruleId, ontologyAxiom.getReferencedComponentId(), ontologyAxiom, message, ignoreModuleCheck, severity);
+	}
+
+	public InvalidContent(String ruleId, OntologyAxiom ontologyAxiom, String message, boolean ignoreModuleCheck) {
+		this(ruleId, ontologyAxiom, message, ignoreModuleCheck, Severity.ERROR);
 	}
 
 	// This method used to return the object instance in the style of the Builder Pattern but this caused strange drools behaviour so have been removed.
@@ -84,6 +132,10 @@ public class InvalidContent {
 
 	public boolean isPublished() {
 		return component.isPublished();
+	}
+
+	public boolean isIgnoreModuleCheck() {
+		return ignoreModuleCheck;
 	}
 
 	public String getMessage() {

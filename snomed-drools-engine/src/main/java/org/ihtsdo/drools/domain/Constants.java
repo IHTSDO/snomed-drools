@@ -34,6 +34,10 @@ public class Constants {
 	public static final String REFSET_PARTIALLY_EQUIVALENT_TO_ASSOCIATION = "1186924009";
 	public static final String REFSET_POSSIBLY_REPLACED_BY_ASSOCIATION = "1186921001";
 
+	public static final String ERROR_COMPONENT_RULE_ID = "component-loading-error";
+
+	public static final String WARNING_COMPONENT_RULE_ID = "component-loading-warning";
+
 	public static final BiMap <String, String> historicalAssociationNames = new ImmutableBiMap.Builder<String, String>()
 			.put(REFSET_POSSIBLY_EQUIVALENT_TO_ASSOCIATION, "POSSIBLY_EQUIVALENT_TO")
 			.put(REFSET_MOVED_TO_ASSOCIATION, "MOVED_TO")
