@@ -47,6 +47,7 @@ public class DroolsRF2Validator {
 			.withIncludedReferenceSetFilenamePattern(".*_cRefset_.*Language.*")
 			.withIncludedReferenceSetFilenamePattern(".*_cRefset_.*Association.*")
 			.withIncludedReferenceSetFilenamePattern(".*_sRefset_.*OWL.*")
+			.withIncludedReferenceSetFilenamePattern(".*_scsRefset_.*ComponentAnnotation.*")
 			.withEffectiveComponentFilter();
 
 	private final RuleExecutor ruleExecutor;

@@ -8,6 +8,7 @@ public class DroolsConcept extends DroolsComponent implements Concept {
 
 	private final String definitionStatusId;
 	private final Set<DroolsDescription> descriptions;
+	private final Set<DroolsAnnotation> annotations;
 	private final Set<DroolsRelationship> relationships;
 	private final Set<DroolsRelationship> activeInboundStatedRelationships;
 	private final Set<DroolsOntologyAxiom> ontologyAxioms;
@@ -18,6 +19,7 @@ public class DroolsConcept extends DroolsComponent implements Concept {
 		super(id, effectiveTime, active, moduleId, published, released);
 		this.definitionStatusId = definitionStatusId;
 		descriptions = new HashSet<>();
+		annotations = new HashSet<>();
 		relationships = new HashSet<>();
 		activeInboundStatedRelationships = new HashSet<>();
 		ontologyAxioms = new HashSet<>();
@@ -32,6 +34,11 @@ public class DroolsConcept extends DroolsComponent implements Concept {
 	@Override
 	public Collection<DroolsDescription> getDescriptions() {
 		return descriptions;
+	}
+
+	@Override
+	public Collection<DroolsAnnotation> getAnnotations() {
+		return annotations;
 	}
 
 	@Override

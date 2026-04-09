@@ -5,7 +5,6 @@ import org.ihtsdo.drools.validator.rf2.domain.*;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentStore;
 import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentStoreComponentFactoryImpl;
-import org.jetbrains.annotations.NotNull;
 import org.semanticweb.owlapi.io.OWLParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +22,7 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 
 	private static final String TEXT_DEFINITION = "900000000000550004";
 	private static final String OWL_AXIOM_REFSET = "733073007";
+	private static final String STRING_ANNOTATION_REFSET = "1292992004";
 	private final SnomedDroolsComponentRepository repository;
 	private final String authoringEffectiveTime;
 	private final PreviousReleaseComponentFactory previousReleaseComponentIds;
@@ -108,6 +108,11 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 		} else if (activeBool && (Constants.historicalAssociationNames.keySet().contains(refsetId))) {
 			String targetComponentId = otherValues[0];
 			repository.addAssociationTargetMember(id, refsetId, referencedComponentId, targetComponentId);
+		} else if (activeBool && refsetId.equals(STRING_ANNOTATION_REFSET)) {
+			String languageDialectCode = otherValues[0];
+			String typeId = otherValues[1];
+			String value = otherValues[2];
+			repository.addAnnotation(new DroolsAnnotation(id, effectiveTime, isActive(active), moduleId, isThisStatePublished(effectiveTime), isThisRefsetMemberReleased(id, effectiveTime), referencedComponentId, languageDialectCode, typeId, value));
 		}
 	}
 
@@ -134,7 +139,6 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 		}));
 	}
 
-	@NotNull
 	private static String getCompositeIdentifier(String axiomId, Integer group, Relationship.ConcreteValue concreteValue, long destinationId, long typeId) {
 		final String destination = destinationId != -1 ? String.valueOf(destinationId) : "";
 		final String destinationOrConcrete = concreteValue == null ? "/Destination_" + destination : "/ConcreteValue_" + concreteValue.asString();
@@ -169,6 +173,6 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 	}
 
 	private boolean isThisRefsetMemberReleased(String id, String effectiveTime) {
-		return (previousReleaseComponentIds != null && previousReleaseComponentIds.getReleaseRefsetMemberIds().contains(id)) || isThisStatePublished(effectiveTime);
+		return (previousReleaseComponentIds != null && previousReleaseComponentIds.getReleasedRefsetMemberIds().contains(id)) || isThisStatePublished(effectiveTime);
 	}
 }

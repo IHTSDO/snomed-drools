@@ -1,9 +1,6 @@
 package org.ihtsdo.drools.unittest.domain;
 
-import org.ihtsdo.drools.domain.Concept;
-import org.ihtsdo.drools.domain.Description;
-import org.ihtsdo.drools.domain.OntologyAxiom;
-import org.ihtsdo.drools.domain.Relationship;
+import org.ihtsdo.drools.domain.*;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -16,6 +13,7 @@ public class ConceptImpl implements Concept {
 	private String moduleId;
 	private String definitionStatusId;
 	private Collection<Description> descriptions;
+	private Collection<Annotation> annotations;
 	private Collection<Relationship> relationships;
 	private Collection<OntologyAxiom> ontologyAxioms;
 	private boolean released;
@@ -23,6 +21,7 @@ public class ConceptImpl implements Concept {
 	public ConceptImpl(String id) {
 		this.id = id;
 		descriptions = new HashSet<>();
+		this.annotations = new HashSet<>();
 		relationships = new HashSet<>();
 		ontologyAxioms = new HashSet<>();
 	}
@@ -91,8 +90,18 @@ public class ConceptImpl implements Concept {
 		return descriptions;
 	}
 
+
 	public void setDescriptions(Collection<Description> descriptions) {
 		this.descriptions = descriptions;
+	}
+
+	@Override
+	public Collection<? extends Annotation> getAnnotations() {
+		return annotations;
+	}
+
+	public void setAnnotations(Collection<Annotation> annotations) {
+		this.annotations = annotations;
 	}
 
 	@Override

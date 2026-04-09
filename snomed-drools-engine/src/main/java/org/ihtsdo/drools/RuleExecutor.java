@@ -330,6 +330,7 @@ public class RuleExecutor {
 	private static void addConcept(Set<Component> components, Concept concept, boolean includeInferredRelationships) {
 		components.add(concept);
 		components.addAll(concept.getDescriptions());
+		components.addAll(concept.getAnnotations());
 		for (Relationship relationship : concept.getRelationships()) {
 			if (includeInferredRelationships || !Constants.INFERRED_RELATIONSHIP.equals(relationship.getCharacteristicTypeId())) {
 				components.add(relationship);

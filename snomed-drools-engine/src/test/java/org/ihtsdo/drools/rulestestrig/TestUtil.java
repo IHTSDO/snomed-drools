@@ -7,14 +7,8 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import org.ihtsdo.drools.domain.Concept;
-import org.ihtsdo.drools.domain.Description;
-import org.ihtsdo.drools.domain.OntologyAxiom;
-import org.ihtsdo.drools.domain.Relationship;
-import org.ihtsdo.drools.rulestestrig.domain.TestConcept;
-import org.ihtsdo.drools.rulestestrig.domain.TestDescription;
-import org.ihtsdo.drools.rulestestrig.domain.TestOntologyAxiom;
-import org.ihtsdo.drools.rulestestrig.domain.TestRelationship;
+import org.ihtsdo.drools.domain.*;
+import org.ihtsdo.drools.rulestestrig.domain.*;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -30,8 +24,9 @@ public class TestUtil {
 
 	static {
 		gson = new GsonBuilder()
-				.registerTypeAdapter(Concept.class, (InstanceCreator<Concept>) type -> new TestConcept<TestDescription, TestRelationship>())
+				.registerTypeAdapter(Concept.class, (InstanceCreator<Concept>) type -> new TestConcept<TestDescription, TestAnnotation, TestRelationship>())
 				.registerTypeAdapter(Description.class, (InstanceCreator<Description>) type -> new TestDescription())
+				.registerTypeAdapter(Annotation.class, (InstanceCreator<Annotation>) type -> new TestAnnotation())
 				.registerTypeAdapter(Relationship.class, (InstanceCreator<Relationship>) type -> new TestRelationship())
 				.registerTypeAdapter(OntologyAxiom.class, new TypeAdapter<OntologyAxiom>() {
 					@Override
@@ -69,8 +64,8 @@ public class TestUtil {
 				.create();
 	}
 	
-	public static final Map<String, List<TestConcept<TestDescription, TestRelationship>>> loadConceptMap(File jsonFile) throws FileNotFoundException {
-		return gson.fromJson(new FileReader(jsonFile), new TypeToken<Map<String, List<TestConcept<TestDescription, TestRelationship>>>>() {}.getType());
+	public static final Map<String, List<TestConcept<TestDescription, TestAnnotation, TestRelationship>>> loadConceptMap(File jsonFile) throws FileNotFoundException {
+		return gson.fromJson(new FileReader(jsonFile), new TypeToken<Map<String, List<TestConcept<TestDescription, TestAnnotation, TestRelationship>>>>() {}.getType());
 	}
 
 	public static final FileFilter DIRECTORY_FILTER = file -> file.isDirectory() && !file.isHidden();

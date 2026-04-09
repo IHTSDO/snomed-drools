@@ -20,6 +20,8 @@ public class SnomedDroolsComponentRepository {
 
 	private final Map<Long, DroolsConcept> conceptMap;
 	private final Map<Long, DroolsDescription> descriptionMap;
+
+	private final Set<DroolsAnnotation> annotations;
 	private final Set<DroolsOntologyAxiom> ontologyAxioms;
 	private final List<InvalidContent> componentLoadingErrors;
 
@@ -28,6 +30,7 @@ public class SnomedDroolsComponentRepository {
 	public SnomedDroolsComponentRepository() {
 		conceptMap = new Long2ObjectOpenHashMap<>();
 		descriptionMap = new Long2ObjectOpenHashMap<>();
+		annotations = new HashSet<>();
 		ontologyAxioms = new HashSet<>();
 		componentLoadingErrors = new ArrayList<>();
 	}
@@ -44,6 +47,12 @@ public class SnomedDroolsComponentRepository {
 				descriptionMap.put(parseLong(description.getId()), description);
 			}
 		});
+	}
+
+	public void addAnnotation(DroolsAnnotation annotation) {
+		annotations.add(annotation);
+		Optional<DroolsConcept> conceptOptional = getConceptOrRecordError(parseLong(annotation.getConceptId()), annotation);
+		conceptOptional.ifPresent(concept -> concept.getAnnotations().add(annotation));
 	}
 
 	public synchronized void addLanguageReferenceSetMember(String memberId, String referencedComponentId, String refsetId, String acceptabilityId) {
@@ -111,6 +120,8 @@ public class SnomedDroolsComponentRepository {
 			StringBuilder errorMessageBuilder = new StringBuilder();
 			if (component instanceof DroolsDescription) {
 				errorMessageBuilder.append("Description ");
+			} else if (component instanceof DroolsAnnotation) {
+				errorMessageBuilder.append("Annotation ");
 			} else if (component instanceof DroolsRelationship) {
 				errorMessageBuilder.append("Relationship ");
 			} else if (component instanceof DroolsOntologyAxiom) {
@@ -149,6 +160,10 @@ public class SnomedDroolsComponentRepository {
 		return descriptionMap.get(parseLong(descriptionId));
 	}
 
+	public Set<DroolsAnnotation> getAnnotations() {
+		return annotations;
+	}
+
 	public Set<DroolsOntologyAxiom> getOntologyAxioms() {
 		return ontologyAxioms;
 	}
@@ -160,6 +175,7 @@ public class SnomedDroolsComponentRepository {
 	public void cleanup() {
 		conceptMap.clear();
 		descriptionMap.clear();
+		annotations.clear();
 		ontologyAxioms.clear();
 	}
 }

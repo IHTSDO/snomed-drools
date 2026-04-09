@@ -34,7 +34,7 @@ public class RulesTestManual {
 	
 	private final RuleExecutor ruleExecutor;
 	private final Map<String, Concept> concepts;
-	private Map<String, List<TestConcept<TestDescription, TestRelationship>>> testConcepts;
+	private Map<String, List<TestConcept<TestDescription, TestAnnotation, TestRelationship>>> testConcepts;
 	private Map<String, String> ruleIdToMessageMap = new HashMap<>();
 
 	private TestConceptService conceptService;
@@ -76,9 +76,9 @@ public class RulesTestManual {
 			
 			setConceptIdReferencesAndTempIds(testConcepts);
 
-			final List<TestConcept<TestDescription, TestRelationship>> givenConcepts = testConcepts.get(GIVEN_CONCEPTS);
+			final List<TestConcept<TestDescription, TestAnnotation, TestRelationship>> givenConcepts = testConcepts.get(GIVEN_CONCEPTS);
 			if (givenConcepts != null) {
-				for (TestConcept<TestDescription, TestRelationship> givenConcept : givenConcepts) {
+				for (TestConcept<TestDescription, TestAnnotation, TestRelationship> givenConcept : givenConcepts) {
 					String id = givenConcept.getId();
 					Assert.assertNotNull("Concepts in the set '" + GIVEN_CONCEPTS + "' must have an ID", id);
 					concepts.put(id, givenConcept);
@@ -98,18 +98,18 @@ public class RulesTestManual {
 
 	@Test
 	public void testRulesInDirectory() {
-		final List<TestConcept<TestDescription, TestRelationship>> conceptsThatShouldPass = testConcepts.get(ASSERT_CONCEPTS_PASS);
+		final List<TestConcept<TestDescription, TestAnnotation, TestRelationship>> conceptsThatShouldPass = testConcepts.get(ASSERT_CONCEPTS_PASS);
 		Assert.assertNotNull("The set of concepts '" + ASSERT_CONCEPTS_PASS + "' is required.", conceptsThatShouldPass);
 		executeRulesAndAssertExpectations(ruleExecutor, conceptsThatShouldPass, true);
 
-		final List<TestConcept<TestDescription, TestRelationship>> conceptsThatShouldFail = testConcepts.get(ASSERT_CONCEPTS_FAIL);
+		final List<TestConcept<TestDescription, TestAnnotation, TestRelationship>> conceptsThatShouldFail = testConcepts.get(ASSERT_CONCEPTS_FAIL);
 		Assert.assertNotNull("The set of concepts '" + ASSERT_CONCEPTS_FAIL + "' is required.", conceptsThatShouldPass);
 		executeRulesAndAssertExpectations(ruleExecutor, conceptsThatShouldFail, false);
 	}
 
-	private void setConceptIdReferencesAndTempIds(Map<String, List<TestConcept<TestDescription, TestRelationship>>> testConcepts) {
-		for (List<TestConcept<TestDescription, TestRelationship>> concepts : testConcepts.values()) {
-			for (TestConcept<TestDescription, TestRelationship> concept : concepts) {
+	private void setConceptIdReferencesAndTempIds(Map<String, List<TestConcept<TestDescription, TestAnnotation, TestRelationship>>> testConcepts) {
+		for (List<TestConcept<TestDescription, TestAnnotation, TestRelationship>> concepts : testConcepts.values()) {
+			for (TestConcept<TestDescription, TestAnnotation, TestRelationship> concept : concepts) {
 				setTempIdIfMissing(concept);
 				final String id = concept.getId();
 				for (TestRelationship relationship : concept.getRelationships()) {
@@ -123,6 +123,10 @@ public class RulesTestManual {
 					if (description.isTextDefinition()) {
 						description.setTypeId(Constants.TEXT_DEFINITION);
 					}
+				}
+				for (TestAnnotation annotation : concept.getAnnotations()) {
+					setTempIdIfMissing(annotation);
+					annotation.setConceptId(id);
 				}
 				for (OntologyAxiom ontologyAxiom : concept.getOntologyAxioms()) {
 					TestOntologyAxiom testOntologyAxiom = (TestOntologyAxiom) ontologyAxiom;
@@ -139,8 +143,8 @@ public class RulesTestManual {
 		}
 	}
 
-	private void executeRulesAndAssertExpectations(RuleExecutor ruleExecutor, List<TestConcept<TestDescription, TestRelationship>> conceptsToTest, boolean expectPass) {
-		for (TestConcept<TestDescription, TestRelationship> concept : conceptsToTest) {
+	private void executeRulesAndAssertExpectations(RuleExecutor ruleExecutor, List<TestConcept<TestDescription, TestAnnotation, TestRelationship>> conceptsToTest, boolean expectPass) {
+		for (TestConcept<TestDescription, TestAnnotation, TestRelationship> concept : conceptsToTest) {
 			final HashSet<String> ruleSetNames = new HashSet<>();
 			ruleSetNames.add("OneRule");
 			final List<InvalidContent> invalidContent = ruleExecutor.execute(
