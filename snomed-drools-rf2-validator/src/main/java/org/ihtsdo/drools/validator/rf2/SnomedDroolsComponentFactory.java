@@ -63,7 +63,7 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 	}
 
 	@Override
-	public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
+	public void newReferenceSetMemberState(String filename, String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
 		boolean activeBool = isActive(active);
 
 		if (activeBool && refsetId.equals(OWL_AXIOM_REFSET)) {

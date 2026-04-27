@@ -37,7 +37,7 @@ public class PreviousReleaseComponentFactory extends ImpotentComponentFactory {
 	}
 
     @Override
-    public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
+    public void newReferenceSetMemberState(String filename, String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
         releasedRefsetMemberIds.add(id);
     }
 
