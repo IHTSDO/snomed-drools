@@ -10,6 +10,8 @@ public interface Concept extends Component {
 
 	Collection<? extends Description> getDescriptions();
 
+	Collection<? extends Annotation> getAnnotations();
+
 	Collection<? extends Relationship> getRelationships();
 
 	/**

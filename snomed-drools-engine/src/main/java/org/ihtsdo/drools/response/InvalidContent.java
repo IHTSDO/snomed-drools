@@ -72,6 +72,22 @@ public class InvalidContent {
 		this(ruleId, description, message, ignoreModuleCheck, Severity.ERROR);
 	}
 
+	public InvalidContent(String ruleId, Annotation annotation, String message, Severity severity) {
+		this(ruleId, annotation.getConceptId(), annotation, message, severity);
+	}
+
+	public InvalidContent(String ruleId, Annotation annotation, String message) {
+		this(ruleId, annotation, message, Severity.ERROR);
+	}
+
+	public InvalidContent(String ruleId, Annotation annotation, String message, boolean ignoreModuleCheck, Severity severity) {
+		this(ruleId, annotation.getConceptId(), annotation, message, ignoreModuleCheck, severity);
+	}
+
+	public InvalidContent(String ruleId, Annotation annotation, String message, boolean ignoreModuleCheck) {
+		this(ruleId, annotation, message, ignoreModuleCheck, Severity.ERROR);
+	}
+
 	public InvalidContent(String ruleId, Relationship relationship, String message, Severity severity) {
 		this(ruleId, relationship.getSourceId(), relationship, message, severity);
 	}

@@ -1,16 +1,10 @@
 package org.ihtsdo.drools.rulestestrig.domain;
 
-import org.ihtsdo.drools.domain.Concept;
-import org.ihtsdo.drools.domain.Description;
-import org.ihtsdo.drools.domain.OntologyAxiom;
-import org.ihtsdo.drools.domain.Relationship;
+import org.ihtsdo.drools.domain.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class TestConcept<D extends Description, R extends Relationship> implements Concept, TestComponent {
+public class TestConcept<D extends Description, A extends Annotation, R extends Relationship> implements Concept, TestComponent {
 
 	private String id;
 	private String effectiveTime;
@@ -20,12 +14,14 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	private String moduleId;
 	private String definitionStatusId;
 	private Collection<D> descriptions;
+	private Collection<A> annotations;
 	private Collection<R> relationships;
 	private Collection<OntologyAxiom> ontologyAxioms;
 
 	public TestConcept() {
 		active = true;
 		descriptions = new ArrayList<>();
+		annotations = new ArrayList<>();
 		relationships = new ArrayList<>();
 		ontologyAxioms = new ArrayList<>();
 	}
@@ -79,6 +75,11 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 	}
 
 	@Override
+	public Collection<A> getAnnotations() {
+		return annotations;
+	}
+
+	@Override
 	public Collection<R> getRelationships() {
 		return relationships;
 	}
@@ -117,6 +118,10 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 		this.descriptions = descriptions;
 	}
 
+	public void setAnnotations(Collection<A> annotations) {
+		this.annotations = annotations;
+	}
+
 	public void setRelationships(Collection<R> relationships) {
 		this.relationships = relationships;
 	}
@@ -133,6 +138,7 @@ public class TestConcept<D extends Description, R extends Relationship> implemen
 				", published=" + published +
 				", definitionStatusId=" + definitionStatusId +
 				", descriptions=" + descriptions +
+				", annotations=" + annotations +
 				", relationships=" + relationships +
 				", ontologyAxioms=" + ontologyAxioms +
 				'}';

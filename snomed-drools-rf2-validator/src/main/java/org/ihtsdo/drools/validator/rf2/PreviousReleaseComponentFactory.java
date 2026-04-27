@@ -14,7 +14,7 @@ public class PreviousReleaseComponentFactory extends ImpotentComponentFactory {
     private final Set<Long> releasedConceptIds = Collections.synchronizedSet(new LongOpenHashSet());
     private final Set<Long> releasedDescriptionIds = Collections.synchronizedSet(new LongOpenHashSet());
     private final Set<Long> releasedRelationshipIds = Collections.synchronizedSet(new LongOpenHashSet());
-    private final Set<String> releaseRefsetMemberIds = Collections.synchronizedSet(new HashSet<>());
+    private final Set<String> releasedRefsetMemberIds = Collections.synchronizedSet(new HashSet<>());
 
     @Override
     public void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
@@ -38,7 +38,7 @@ public class PreviousReleaseComponentFactory extends ImpotentComponentFactory {
 
     @Override
     public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
-        releaseRefsetMemberIds.add(id);
+        releasedRefsetMemberIds.add(id);
     }
 
 	public Set<Long> getReleasedConceptIds() {
@@ -53,7 +53,7 @@ public class PreviousReleaseComponentFactory extends ImpotentComponentFactory {
 		return releasedRelationshipIds;
 	}
 
-	public Set<String> getReleaseRefsetMemberIds() {
-		return releaseRefsetMemberIds;
+	public Set<String> getReleasedRefsetMemberIds() {
+		return releasedRefsetMemberIds;
 	}
 }
