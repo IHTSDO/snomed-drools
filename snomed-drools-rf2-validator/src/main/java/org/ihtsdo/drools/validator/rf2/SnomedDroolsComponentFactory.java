@@ -44,26 +44,26 @@ public class SnomedDroolsComponentFactory extends ComponentStoreComponentFactory
 	}
 
 	@Override
-	public void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
-		super.newConceptState(conceptId, effectiveTime, active, moduleId, definitionStatusId);
+	public void newConceptState(String filename, long lineNumber, String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
+		super.newConceptState(filename, lineNumber, conceptId, effectiveTime, active, moduleId, definitionStatusId);
 		repository.addConcept(new DroolsConcept(conceptId, effectiveTime, isActive(active), moduleId, definitionStatusId,
 				isThisStatePublished(effectiveTime), isThisConceptReleased(conceptId, effectiveTime)));
 	}
 
 	@Override
-	public void newDescriptionState(String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
+	public void newDescriptionState(String filename, long lineNumber, String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
 		repository.addDescription(new DroolsDescription(id, effectiveTime, isActive(active), moduleId, conceptId, languageCode, typeId, term, caseSignificanceId, TEXT_DEFINITION.equals(typeId),
 				isThisStatePublished(effectiveTime), isThisDescriptionReleased(id, effectiveTime)));
 	}
 
 	@Override
-	public void newRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
+	public void newRelationshipState(String filename, long lineNumber, String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
 		repository.addRelationship(new DroolsRelationship(null, effectiveTime, false, id, isActive(active), moduleId, sourceId, destinationId, Integer.parseInt(relationshipGroup), typeId, characteristicTypeId,
 				isThisStatePublished(effectiveTime), isThisRelationshipReleased(id, effectiveTime), null));
 	}
 
 	@Override
-	public void newReferenceSetMemberState(String filename, String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
+	public void newReferenceSetMemberState(String filename, long lineNumber, String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
 		boolean activeBool = isActive(active);
 
 		if (activeBool && refsetId.equals(OWL_AXIOM_REFSET)) {
