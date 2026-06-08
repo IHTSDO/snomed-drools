@@ -147,46 +147,45 @@ public class RuleExecutor {
 
 	private void doValidateComponents(Collection<? extends Concept> concepts, boolean includeInferredRelationships, Map<String, List<StatelessKieSession>> sessionMap, List<InvalidContent> exceptionContents, int threads) {
 		Date start = new Date();
-		ExecutorService executorService = Executors.newFixedThreadPool(threads);
-		List<Concept> conceptList = new ArrayList<>(concepts);
-		List<Callable<String>> tasks = new ArrayList<>();
-		String total = String.format("%,d", concepts.size());
-		int i = 0;
-		while (i < concepts.size()) {
-			Set<Component> components = new HashSet<>();
-			Concept concept = conceptList.get(i++);
-			addConcept(components, concept, includeInferredRelationships);
-			int sessionIndex = tasks.size();
-			tasks.add(() -> {
-				try {
-					List<StatelessKieSession> statelessKieSessions = sessionMap.get(String.valueOf(sessionIndex));
-					statelessKieSessions.parallelStream().forEach(statelessKieSession -> {
-						statelessKieSession.execute(components);
-						statelessKieSession.getKieBase().newKieSession();
-					});
-					components.clear();
-				} catch (Exception e) {
-					exceptionContents.add(new InvalidContent(concept.getId(),concept, "An error occurred while running concept validation. Technical detail: " + e.getMessage(), Severity.ERROR));
+		try (ExecutorService executorService = Executors.newFixedThreadPool(threads)) {
+			List<Concept> conceptList = new ArrayList<>(concepts);
+			List<Callable<String>> tasks = new ArrayList<>();
+			String total = String.format("%,d", concepts.size());
+			int i = 0;
+			while (i < concepts.size()) {
+				Set<Component> components = new HashSet<>();
+				Concept concept = conceptList.get(i++);
+				addConcept(components, concept, includeInferredRelationships);
+				int sessionIndex = tasks.size();
+				tasks.add(() -> {
+					try {
+						List<StatelessKieSession> statelessKieSessions = sessionMap.get(String.valueOf(sessionIndex));
+						statelessKieSessions.parallelStream().forEach(statelessKieSession -> {
+							statelessKieSession.execute(components);
+							statelessKieSession.getKieBase().newKieSession();
+						});
+						components.clear();
+					} catch (Exception e) {
+						exceptionContents.add(new InvalidContent(concept.getId(), concept, "An error occurred while running concept validation. Technical detail: " + e.getMessage(), Severity.ERROR));
+					}
+					return null;
+				});
+
+				if (tasks.size() == threads) {
+					runTasks(executorService, tasks);
+					tasks.clear();
 				}
-				return null;
-			});
-
-			if (tasks.size() == threads) {
+				if (i % 10_000 == 0) {
+					logger.info("Validated {} of {}", String.format("%,d", i), total);
+				}
+			}
+			if (!tasks.isEmpty()) {
 				runTasks(executorService, tasks);
-				tasks.clear();
 			}
-			if (i % 10_000 == 0) {
-				logger.info("Validated {} of {}", String.format("%,d", i), total);
-			}
-		}
-		if (!tasks.isEmpty()) {
-			runTasks(executorService, tasks);
-		}
 
-		executorService.shutdown();
-		logger.info("Validated {} of {}", String.format("%,d", i), total);
-
-		logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
+			logger.info("Validated {} of {}", String.format("%,d", i), total);
+			logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
+		}
 	}
 
 	private Map<String, List<StatelessKieSession>> createKieSessionMap(Set<String> ruleSetNames, ConceptService conceptService, DescriptionService descriptionService, RelationshipService relationshipService, int threads, List<List<InvalidContent>> sessionInvalidContent) {
