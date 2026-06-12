@@ -160,10 +160,7 @@ public class RuleExecutor {
 				tasks.add(() -> {
 					try {
 						List<StatelessKieSession> statelessKieSessions = sessionMap.get(String.valueOf(sessionIndex));
-						statelessKieSessions.parallelStream().forEach(statelessKieSession -> {
-							statelessKieSession.execute(components);
-							statelessKieSession.getKieBase().newKieSession();
-						});
+						statelessKieSessions.forEach(statelessKieSession -> statelessKieSession.execute(components));
 						components.clear();
 					} catch (Exception e) {
 						exceptionContents.add(new InvalidContent(concept.getId(), concept, "An error occurred while running concept validation. Technical detail: " + e.getMessage(), Severity.ERROR));
