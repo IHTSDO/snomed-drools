@@ -16,6 +16,7 @@ import org.ihtsdo.otf.resourcemanager.ResourceManager;
 import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.ReleaseImporter;
 import org.ihtsdo.otf.snomedboot.domain.Concept;
+import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentStore;
 import org.slf4j.Logger;
@@ -49,6 +50,8 @@ public class DroolsRF2Validator {
 			.withIncludedReferenceSetFilenamePattern(".*_sRefset_.*OWL.*")
 			.withIncludedReferenceSetFilenamePattern(".*_scsRefset_.*ComponentAnnotation.*")
 			.withEffectiveComponentFilter();
+	private static final LoadingProfile SINGLE_SNAPSHOT_LOADING_PROFILE =
+			LOADING_PROFILE.withoutEffectiveComponentFilter();
 
 	private final RuleExecutor ruleExecutor;
 	private final TestResourceProvider testResourceProvider;
@@ -248,8 +251,22 @@ public class DroolsRF2Validator {
 	private PreviousReleaseComponentFactory loadPreviousReleaseComponentIds(Set<String> previousReleaseDirectories) throws ReleaseImportException {
 		ReleaseImporter importer = new ReleaseImporter();
 		final PreviousReleaseComponentFactory componentFactory = new PreviousReleaseComponentFactory();
-		importer.loadEffectiveSnapshotReleaseFiles(previousReleaseDirectories, LOADING_PROFILE, componentFactory, true);
+		loadSnapshotReleaseFiles(importer, previousReleaseDirectories, componentFactory, true,
+				RF2ReleaseFilesUtil.isSingleSnapshotRelease(previousReleaseDirectories));
 		return componentFactory;
+	}
+
+	private static void loadSnapshotReleaseFiles(ReleaseImporter releaseImporter,
+			Set<String> extractedRF2FilesDirectories, ComponentFactory componentFactory,
+			boolean multiThreaded, boolean singleSnapshotRelease) throws ReleaseImportException {
+		if (singleSnapshotRelease) {
+			logger.info("Single Snapshot release detected; skipping effective component filtering pre-pass.");
+			releaseImporter.loadSnapshotReleaseFiles(extractedRF2FilesDirectories.iterator().next(),
+					SINGLE_SNAPSHOT_LOADING_PROFILE, componentFactory, multiThreaded);
+		} else {
+			releaseImporter.loadEffectiveSnapshotReleaseFiles(extractedRF2FilesDirectories,
+					LOADING_PROFILE, componentFactory, multiThreaded);
+		}
 	}
 
 	private SnomedDroolsComponentRepository loadComponentsFromRF2(Set<String> extractedRF2FilesDirectories, String currentEffectiveTime,
@@ -257,7 +274,9 @@ public class DroolsRF2Validator {
 
 		ReleaseImporter releaseImporter = new ReleaseImporter();
 
-		boolean loadDelta = RF2ReleaseFilesUtil.anyDeltaFilesPresent(extractedRF2FilesDirectories);
+		boolean singleSnapshotRelease = RF2ReleaseFilesUtil.isSingleSnapshotRelease(extractedRF2FilesDirectories);
+		boolean loadDelta = !singleSnapshotRelease
+				&& RF2ReleaseFilesUtil.anyDeltaFilesPresent(extractedRF2FilesDirectories);
 		if (loadDelta) {
 			logger.info("Delta files detected, validating combination of snapshot and delta.");
 		} else {
@@ -270,7 +289,8 @@ public class DroolsRF2Validator {
 		if (loadDelta) {
 			releaseImporter.loadEffectiveSnapshotAndDeltaReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, false);
 		} else {
-			releaseImporter.loadEffectiveSnapshotReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, false);
+			loadSnapshotReleaseFiles(releaseImporter, extractedRF2FilesDirectories, componentFactory,
+					false, singleSnapshotRelease);
 		}
 
 		final Map<Long, ? extends Concept> conceptMap = componentFactory.getComponentStore().getConcepts();
