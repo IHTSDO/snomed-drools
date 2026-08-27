@@ -50,6 +50,27 @@ public class DroolsRF2Validator {
 			.withIncludedReferenceSetFilenamePattern(".*_scsRefset_.*ComponentAnnotation.*")
 			.withEffectiveComponentFilter();
 
+	/**
+	 * Escape hatch for loading the RF2 files one at a time, as this did before
+	 * {@link SnomedDroolsComponentRepository} was made safe for concurrent writes.
+	 * Set to {@code false} only to rule the loader out while diagnosing something.
+	 */
+	public static final String PARALLEL_LOADING_PROPERTY = "snomed.drools.parallelLoading";
+
+	/**
+	 * Whether the RF2 files may be read concurrently.
+	 *
+	 * <p>{@code ReleaseImporter} loads the concept file inline first, then the core
+	 * component files as one concurrent phase, then the reference set files as
+	 * another. Those barriers are what make this safe: descriptions can resolve
+	 * their concept, and language reference set members can resolve their
+	 * description, because the phase they depend on has completed. Writes within a
+	 * phase are guarded by {@link SnomedDroolsComponentRepository}.
+	 */
+	private static boolean parallelLoading() {
+		return !"false".equalsIgnoreCase(System.getProperty(PARALLEL_LOADING_PROPERTY));
+	}
+
 	private final RuleExecutor ruleExecutor;
 	private final TestResourceProvider testResourceProvider;
 	private static final Logger logger = LoggerFactory.getLogger(DroolsRF2Validator.class);
@@ -267,10 +288,11 @@ public class DroolsRF2Validator {
 		SnomedDroolsComponentRepository repository = new SnomedDroolsComponentRepository();
 		SnomedDroolsComponentFactory componentFactory = new SnomedDroolsComponentFactory(new ComponentStore(), repository, currentEffectiveTime, previousReleaseComponentIds);
 
+		boolean multiThreaded = parallelLoading();
 		if (loadDelta) {
-			releaseImporter.loadEffectiveSnapshotAndDeltaReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, false);
+			releaseImporter.loadEffectiveSnapshotAndDeltaReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, multiThreaded);
 		} else {
-			releaseImporter.loadEffectiveSnapshotReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, false);
+			releaseImporter.loadEffectiveSnapshotReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, multiThreaded);
 		}
 
 		final Map<Long, ? extends Concept> conceptMap = componentFactory.getComponentStore().getConcepts();
