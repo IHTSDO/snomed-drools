@@ -1,0 +1,10 @@
+import org.ihtsdo.drools.domain.Concept
+import org.ihtsdo.drools.unittest.RuleSchedulingProbe
+
+rule "Scheduling probe"
+	dialect "mvel"
+	when
+		c : Concept()
+		eval(RuleSchedulingProbe.visit(c.id))
+	then
+end
