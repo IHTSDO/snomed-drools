@@ -14,6 +14,13 @@ public class DescriptionHelper {
 	public static final Pattern TAG_PATTERN = Pattern.compile("^.*\\((.*)\\)$");
 	public static final Pattern FULL_TAG_PATTERN = Pattern.compile("^.*(\\s\\([^\\)]+\\))$");
 	public static final Pattern FIRST_WORD_PATTERN = Pattern.compile("([^\\s]*).*$");
+	/**
+	 * {@code String.split} only avoids the regex engine for a single literal
+	 * character, so splitting on {@code "\\s+"} compiles this pattern afresh on
+	 * every call. Both call sites run once per reported finding rather than once
+	 * per description, so this is hygiene rather than a measurable saving.
+	 */
+	private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 
 	private DescriptionHelper () {}
 	
@@ -261,7 +268,7 @@ public class DescriptionHelper {
 			return result.toString();
 		}
 
-		String[] words = description.getTerm().split("\\s+");
+		String[] words = WHITESPACE_PATTERN.split(description.getTerm());
 
 		for (String word : words) {
 
@@ -291,7 +298,7 @@ public class DescriptionHelper {
 			return errorMessage.toString();
 		}
 
-		String[] words = description.getTerm().split("\\s+");
+		String[] words = WHITESPACE_PATTERN.split(description.getTerm());
 
 		String usAcc = description.getAcceptabilityMap().get(Constants.US_EN_LANG_REFSET);
 		String gbAcc = description.getAcceptabilityMap().get(Constants.GB_EN_LANG_REFSET);
