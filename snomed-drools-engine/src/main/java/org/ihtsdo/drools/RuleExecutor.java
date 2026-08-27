@@ -38,9 +38,64 @@ public class RuleExecutor {
 	private boolean testResourcesEmpty;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
+	/**
+	 * System property allowing the worker count to be set without a code change,
+	 * for operators tuning a deployed validation service.
+	 */
+	public static final String VALIDATION_THREADS_PROPERTY = "snomed.drools.validation.threads";
+
+	/**
+	 * Workers used to validate a batch of concepts.
+	 *
+	 * <p>Defaults to the number of processors available to the JVM. This was fixed
+	 * at 10, which under-uses anything larger and over-subscribes anything smaller.
+	 *
+	 * <p>Raise it deliberately rather than reflexively: {@link #createKieSessionMap}
+	 * builds one {@link StatelessKieSession} per worker per rule set, so memory
+	 * grows with this value multiplied by the number of rule sets being run.
+	 */
+	private int validationThreads = defaultValidationThreads();
+
 	protected RuleExecutor(Map<String, KieContainer> assertionGroupContainers, Map<String, Integer> assertionGroupRuleCounts) {
 		this.assertionGroupContainers = assertionGroupContainers;
 		this.assertionGroupRuleCounts = assertionGroupRuleCounts;
+	}
+
+	private static int defaultValidationThreads() {
+		String configured = System.getProperty(VALIDATION_THREADS_PROPERTY);
+		if (configured != null && !configured.isBlank()) {
+			try {
+				return requirePositive(Integer.parseInt(configured.trim()));
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException(String.format(
+						"System property %s must be a positive integer but was '%s'.",
+						VALIDATION_THREADS_PROPERTY, configured), e);
+			}
+		}
+		return Runtime.getRuntime().availableProcessors();
+	}
+
+	private static int requirePositive(int threads) {
+		if (threads < 1) {
+			throw new IllegalArgumentException("Validation threads must be at least 1 but was " + threads + ".");
+		}
+		return threads;
+	}
+
+	/**
+	 * Workers this executor will use to validate a batch of concepts.
+	 */
+	public int getValidationThreads() {
+		return validationThreads;
+	}
+
+	/**
+	 * Overrides the number of workers used to validate a batch of concepts.
+	 *
+	 * @param validationThreads workers to use, at least 1.
+	 */
+	public void setValidationThreads(int validationThreads) {
+		this.validationThreads = requirePositive(validationThreads);
 	}
 
 	/**
@@ -107,6 +162,32 @@ public class RuleExecutor {
 			boolean includePublishedComponents,
 			boolean includeInferredRelationships) throws RuleExecutorException {
 
+		return execute(ruleSetNames, excludedRules, concepts, conceptService, descriptionService,
+				relationshipService, includePublishedComponents, includeInferredRelationships, validationThreads);
+	}
+
+	/**
+	 * As {@link #execute(Set, Set, Collection, ConceptService, DescriptionService, RelationshipService, boolean, boolean)},
+	 * with the worker count given explicitly for this call rather than taken from
+	 * {@link #getValidationThreads()}.
+	 *
+	 * @param validationThreads workers to use, at least 1. A single concept is
+	 *                          always validated on one worker regardless, since
+	 *                          there is no second concept for another to take.
+	 */
+	public List<InvalidContent> execute(
+			Set<String> ruleSetNames,
+			Set<String> excludedRules,
+			Collection<? extends Concept> concepts,
+			ConceptService conceptService,
+			DescriptionService descriptionService,
+			RelationshipService relationshipService,
+			boolean includePublishedComponents,
+			boolean includeInferredRelationships,
+			int validationThreads) throws RuleExecutorException {
+
+		requirePositive(validationThreads);
+
 		for (Concept concept : concepts) {
 			assertComponentIdsPresent(concept);
 		}
@@ -115,7 +196,8 @@ public class RuleExecutor {
 
 		final List<List<InvalidContent>> sessionInvalidContent = new ArrayList<>();
 		final List<InvalidContent> exceptionContents = new ArrayList<>();
-		int threads = concepts.size() == 1 ? 1 : 10;
+		// Never start more workers than there are concepts to validate.
+		int threads = Math.min(validationThreads, Math.max(1, concepts.size()));
 
 		Map<String, List<StatelessKieSession>> sessionMap = createKieSessionMap(ruleSetNames, conceptService, descriptionService, relationshipService, threads, sessionInvalidContent);
 		doValidateComponents(concepts, includeInferredRelationships, sessionMap, exceptionContents, threads);

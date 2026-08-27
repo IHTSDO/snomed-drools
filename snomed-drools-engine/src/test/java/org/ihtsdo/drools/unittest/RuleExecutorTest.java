@@ -138,4 +138,50 @@ public class RuleExecutorTest {
 		invalidContents = ruleExecutor.execute(RULE_SET_NAMES, excludedRules, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
 		Assert.assertEquals(0, invalidContents.size());
 	}
+
+	@Test
+	public void defaultsWorkerCountToAvailableProcessors() {
+		Assert.assertEquals(Runtime.getRuntime().availableProcessors(), ruleExecutor.getValidationThreads());
+	}
+
+	@Test
+	public void honoursAnOverriddenWorkerCount() {
+		ruleExecutor.setValidationThreads(3);
+		Assert.assertEquals(3, ruleExecutor.getValidationThreads());
+
+		final Concept concept = new ConceptImpl("1").addDescription(new DescriptionImpl("2", "a  "));
+		final List<InvalidContent> invalidContent = ruleExecutor.execute(RULE_SET_NAMES, null,
+				Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
+
+		Assert.assertEquals(1, invalidContent.size());
+	}
+
+	@Test
+	public void findsTheSameContentWhateverTheWorkerCount() {
+		List<Concept> concepts = new ArrayList<>();
+		for (int i = 1; i <= 25; i++) {
+			concepts.add(new ConceptImpl(String.valueOf(i)).addDescription(new DescriptionImpl("90" + i, "term  " + i)));
+		}
+
+		Set<String> onOneWorker = messages(ruleExecutor.execute(RULE_SET_NAMES, null, concepts,
+				conceptService, descriptionService, relationshipService, true, false, 1));
+		Set<String> onManyWorkers = messages(ruleExecutor.execute(RULE_SET_NAMES, null, concepts,
+				conceptService, descriptionService, relationshipService, true, false, 16));
+
+		Assert.assertEquals(25, onOneWorker.size());
+		Assert.assertEquals(onOneWorker, onManyWorkers);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsAWorkerCountBelowOne() {
+		ruleExecutor.setValidationThreads(0);
+	}
+
+	private Set<String> messages(List<InvalidContent> invalidContent) {
+		Set<String> messages = new HashSet<>();
+		for (InvalidContent content : invalidContent) {
+			messages.add(content.getConceptId() + "|" + content.getComponentId() + "|" + content.getMessage());
+		}
+		return messages;
+	}
 }
