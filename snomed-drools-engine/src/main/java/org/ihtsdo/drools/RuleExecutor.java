@@ -26,8 +26,11 @@ import software.amazon.awssdk.services.s3.S3Client;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class RuleExecutor {
@@ -114,7 +117,7 @@ public class RuleExecutor {
 		checkComponentsIntegrity(concepts, conceptService);
 
 		final List<List<InvalidContent>> sessionInvalidContent = new ArrayList<>();
-		final List<InvalidContent> exceptionContents = new ArrayList<>();
+		final List<InvalidContent> exceptionContents = Collections.synchronizedList(new ArrayList<>());
 		int threads = concepts.size() == 1 ? 1 : 10;
 
 		Map<String, List<StatelessKieSession>> sessionMap = createKieSessionMap(ruleSetNames, conceptService, descriptionService, relationshipService, threads, sessionInvalidContent);
@@ -149,38 +152,38 @@ public class RuleExecutor {
 		Date start = new Date();
 		try (ExecutorService executorService = Executors.newFixedThreadPool(threads)) {
 			List<Concept> conceptList = new ArrayList<>(concepts);
-			List<Callable<String>> tasks = new ArrayList<>();
+			List<Callable<String>> workers = new ArrayList<>(threads);
+			AtomicInteger nextConceptIndex = new AtomicInteger();
+			AtomicInteger completedConceptCount = new AtomicInteger();
 			String total = String.format("%,d", concepts.size());
-			int i = 0;
-			while (i < concepts.size()) {
-				Set<Component> components = new HashSet<>();
-				Concept concept = conceptList.get(i++);
-				addConcept(components, concept, includeInferredRelationships);
-				int sessionIndex = tasks.size();
-				tasks.add(() -> {
-					try {
-						List<StatelessKieSession> statelessKieSessions = sessionMap.get(String.valueOf(sessionIndex));
-						statelessKieSessions.forEach(statelessKieSession -> statelessKieSession.execute(components));
-						components.clear();
-					} catch (Exception e) {
-						exceptionContents.add(new InvalidContent(concept.getId(), concept, "An error occurred while running concept validation. Technical detail: " + e.getMessage(), Severity.ERROR));
+
+			for (int workerIndex = 0; workerIndex < threads; workerIndex++) {
+				List<StatelessKieSession> statelessKieSessions = sessionMap.get(String.valueOf(workerIndex));
+				workers.add(() -> {
+					int conceptIndex;
+					while ((conceptIndex = nextConceptIndex.getAndIncrement()) < conceptList.size()) {
+						Concept concept = conceptList.get(conceptIndex);
+						Set<Component> components = new HashSet<>();
+						addConcept(components, concept, includeInferredRelationships);
+						try {
+							statelessKieSessions.forEach(statelessKieSession -> statelessKieSession.execute(components));
+						} catch (Exception e) {
+							exceptionContents.add(new InvalidContent(concept.getId(), concept, "An error occurred while running concept validation. Technical detail: " + e.getMessage(), Severity.ERROR));
+						} finally {
+							components.clear();
+						}
+
+						int completed = completedConceptCount.incrementAndGet();
+						if (completed % 10_000 == 0) {
+							logger.info("Validated {} of {}", String.format("%,d", completed), total);
+						}
 					}
 					return null;
 				});
-
-				if (tasks.size() == threads) {
-					runTasks(executorService, tasks);
-					tasks.clear();
-				}
-				if (i % 10_000 == 0) {
-					logger.info("Validated {} of {}", String.format("%,d", i), total);
-				}
 			}
-			if (!tasks.isEmpty()) {
-				runTasks(executorService, tasks);
-			}
+			runTasks(executorService, workers);
 
-			logger.info("Validated {} of {}", String.format("%,d", i), total);
+			logger.info("Validated {} of {}", String.format("%,d", completedConceptCount.get()), total);
 			logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
 		}
 	}
@@ -317,9 +320,14 @@ public class RuleExecutor {
 
 	private void runTasks(ExecutorService executorService, List<Callable<String>> tasks) {
 		try {
-			executorService.invokeAll(tasks);
+			for (Future<String> task : executorService.invokeAll(tasks)) {
+				task.get();
+			}
 		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 			throw new RuleExecutorException("Validation tasks were interrupted.", e);
+		} catch (ExecutionException e) {
+			throw new RuleExecutorException("A validation worker failed.", e.getCause());
 		}
 	}
 
