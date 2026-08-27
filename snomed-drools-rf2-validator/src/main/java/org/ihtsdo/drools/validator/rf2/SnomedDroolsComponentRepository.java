@@ -42,7 +42,13 @@ public class SnomedDroolsComponentRepository {
 	public void addDescription(DroolsDescription description) {
 		Optional<DroolsConcept> conceptOptional = getConceptOrRecordError(parseLong(description.getConceptId()), description);
 		conceptOptional.ifPresent(concept -> {
-			concept.getDescriptions().add(description);
+			// The description and text definition files are loaded concurrently and
+			// both append here, so the concept's own collection has to be guarded.
+			// Locking the concept stripes by concept rather than globally; rows
+			// touching the same concept in the same instant are rare.
+			synchronized (concept) {
+				concept.getDescriptions().add(description);
+			}
 			synchronized (descriptionMap) {
 				descriptionMap.put(parseLong(description.getId()), description);
 			}
@@ -50,9 +56,15 @@ public class SnomedDroolsComponentRepository {
 	}
 
 	public void addAnnotation(DroolsAnnotation annotation) {
-		annotations.add(annotation);
+		synchronized (annotations) {
+			annotations.add(annotation);
+		}
 		Optional<DroolsConcept> conceptOptional = getConceptOrRecordError(parseLong(annotation.getConceptId()), annotation);
-		conceptOptional.ifPresent(concept -> concept.getAnnotations().add(annotation));
+		conceptOptional.ifPresent(concept -> {
+			synchronized (concept) {
+				concept.getAnnotations().add(annotation);
+			}
+		});
 	}
 
 	public synchronized void addLanguageReferenceSetMember(String memberId, String referencedComponentId, String refsetId, String acceptabilityId) {
@@ -90,7 +102,11 @@ public class SnomedDroolsComponentRepository {
 	public void addRelationship(DroolsRelationship relationship) {
 		Optional<DroolsConcept> conceptOptional = getConceptOrRecordError(parseLong(relationship.getSourceId()), relationship);
 		conceptOptional.ifPresent(concept -> {
-			concept.getRelationships().add(relationship);
+			// The relationship, concrete relationship and stated relationship files
+			// are loaded concurrently and all append to the source concept.
+			synchronized (concept) {
+				concept.getRelationships().add(relationship);
+			}
 			if (relationship.isActive() && relationship.getCharacteristicTypeId().equals(STATED_RELATIONSHIP_CHARACTERISTIC_TYPE_ID)) {
 				if (relationship.getDestinationId() != null) {
 					long destinationId = parseLong(relationship.getDestinationId());
@@ -101,7 +117,13 @@ public class SnomedDroolsComponentRepository {
 						logger.warn(message);
 						addComponentLoadingWarning(parseLong(concept.getId()), relationship, message);
 					} else {
-						destinationConcept.getActiveInboundStatedRelationships().add(relationship);
+						// Deliberately NOT nested inside the lock on the source
+						// concept above. A relationship pair pointing at each other
+						// would give two threads the same two locks in opposite
+						// order, which is a deadlock. One lock at a time.
+						synchronized (destinationConcept) {
+							destinationConcept.getActiveInboundStatedRelationships().add(relationship);
+						}
 					}
 				}
 			}
@@ -109,9 +131,15 @@ public class SnomedDroolsComponentRepository {
 	}
 
 	public void addOntologyAxiom(DroolsOntologyAxiom droolsOntologyAxiom) {
-		ontologyAxioms.add(droolsOntologyAxiom);
+		synchronized (ontologyAxioms) {
+			ontologyAxioms.add(droolsOntologyAxiom);
+		}
 		Optional<DroolsConcept> conceptOptional = getConceptOrRecordError(parseLong(droolsOntologyAxiom.getReferencedComponentId()), droolsOntologyAxiom);
-		conceptOptional.ifPresent(concept -> concept.getOntologyAxioms().add(droolsOntologyAxiom));
+		conceptOptional.ifPresent(concept -> {
+			synchronized (concept) {
+				concept.getOntologyAxioms().add(droolsOntologyAxiom);
+			}
+		});
 	}
 
 	private Optional<DroolsConcept> getConceptOrRecordError(long conceptId, Component component) {
