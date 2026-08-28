@@ -25,6 +25,7 @@ import java.util.*;
 public class RuleExecutorTest {
 
 	private static final Set<String> RULE_SET_NAMES = Collections.singleton("Common");
+	private static final Set<String> SCHEDULING_RULE_SET_NAMES = Collections.singleton("Scheduling");
 	private RuleExecutor ruleExecutor;
 	private TestConceptService conceptService;
 	private TestDescriptionService descriptionService;
