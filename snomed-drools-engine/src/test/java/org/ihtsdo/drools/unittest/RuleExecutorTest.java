@@ -25,6 +25,7 @@ import java.util.*;
 public class RuleExecutorTest {
 
 	private static final Set<String> RULE_SET_NAMES = Collections.singleton("Common");
+	private static final Set<String> SCHEDULING_RULE_SET_NAMES = Collections.singleton("Scheduling");
 	private RuleExecutor ruleExecutor;
 	private TestConceptService conceptService;
 	private TestDescriptionService descriptionService;
@@ -137,5 +138,21 @@ public class RuleExecutorTest {
 		Set<String> excludedRules = Collections.singleton("d04c89b7-962c-4dbc-ac5e-0033e808e913");
 		invalidContents = ruleExecutor.execute(RULE_SET_NAMES, excludedRules, Collections.singleton(concept), conceptService, descriptionService, relationshipService, true, false);
 		Assert.assertEquals(0, invalidContents.size());
+	}
+
+	@Test
+	public void testWorkersClaimNextConceptWithoutBatchBarrier() {
+		List<Concept> concepts = new ArrayList<>();
+		for (int i = 1; i <= 11; i++) {
+			concepts.add(new ConceptImpl(String.valueOf(i)));
+		}
+		RuleSchedulingProbe.reset();
+
+		ruleExecutor.execute(SCHEDULING_RULE_SET_NAMES, null, concepts, conceptService,
+				descriptionService, relationshipService, true, false);
+
+		Assert.assertEquals(11, RuleSchedulingProbe.getVisitedConceptCount());
+		Assert.assertTrue("A free worker should claim concept 11 while concept 1 is still running.",
+				RuleSchedulingProbe.wasBlockedConceptReleasedByLaterConcept());
 	}
 }
