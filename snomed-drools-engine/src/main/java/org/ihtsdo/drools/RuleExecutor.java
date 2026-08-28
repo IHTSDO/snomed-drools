@@ -26,8 +26,11 @@ import software.amazon.awssdk.services.s3.S3Client;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class RuleExecutor {
@@ -38,9 +41,64 @@ public class RuleExecutor {
 	private boolean testResourcesEmpty;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
+	/**
+	 * System property allowing the worker count to be set without a code change,
+	 * for operators tuning a deployed validation service.
+	 */
+	public static final String VALIDATION_THREADS_PROPERTY = "snomed.drools.validation.threads";
+
+	/**
+	 * Workers used to validate a batch of concepts.
+	 *
+	 * <p>Defaults to the number of processors available to the JVM. This was fixed
+	 * at 10, which under-uses anything larger and over-subscribes anything smaller.
+	 *
+	 * <p>Raise it deliberately rather than reflexively: {@link #createKieSessionMap}
+	 * builds one {@link StatelessKieSession} per worker per rule set, so memory
+	 * grows with this value multiplied by the number of rule sets being run.
+	 */
+	private int validationThreads = defaultValidationThreads();
+
 	protected RuleExecutor(Map<String, KieContainer> assertionGroupContainers, Map<String, Integer> assertionGroupRuleCounts) {
 		this.assertionGroupContainers = assertionGroupContainers;
 		this.assertionGroupRuleCounts = assertionGroupRuleCounts;
+	}
+
+	private static int defaultValidationThreads() {
+		String configured = System.getProperty(VALIDATION_THREADS_PROPERTY);
+		if (configured != null && !configured.isBlank()) {
+			try {
+				return requirePositive(Integer.parseInt(configured.trim()));
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException(String.format(
+						"System property %s must be a positive integer but was '%s'.",
+						VALIDATION_THREADS_PROPERTY, configured), e);
+			}
+		}
+		return Runtime.getRuntime().availableProcessors();
+	}
+
+	private static int requirePositive(int threads) {
+		if (threads < 1) {
+			throw new IllegalArgumentException("Validation threads must be at least 1 but was " + threads + ".");
+		}
+		return threads;
+	}
+
+	/**
+	 * Workers this executor will use to validate a batch of concepts.
+	 */
+	public int getValidationThreads() {
+		return validationThreads;
+	}
+
+	/**
+	 * Overrides the number of workers used to validate a batch of concepts.
+	 *
+	 * @param validationThreads workers to use, at least 1.
+	 */
+	public void setValidationThreads(int validationThreads) {
+		this.validationThreads = requirePositive(validationThreads);
 	}
 
 	/**
@@ -107,6 +165,32 @@ public class RuleExecutor {
 			boolean includePublishedComponents,
 			boolean includeInferredRelationships) throws RuleExecutorException {
 
+		return execute(ruleSetNames, excludedRules, concepts, conceptService, descriptionService,
+				relationshipService, includePublishedComponents, includeInferredRelationships, validationThreads);
+	}
+
+	/**
+	 * As {@link #execute(Set, Set, Collection, ConceptService, DescriptionService, RelationshipService, boolean, boolean)},
+	 * with the worker count given explicitly for this call rather than taken from
+	 * {@link #getValidationThreads()}.
+	 *
+	 * @param validationThreads workers to use, at least 1. A single concept is
+	 *                          always validated on one worker regardless, since
+	 *                          there is no second concept for another to take.
+	 */
+	public List<InvalidContent> execute(
+			Set<String> ruleSetNames,
+			Set<String> excludedRules,
+			Collection<? extends Concept> concepts,
+			ConceptService conceptService,
+			DescriptionService descriptionService,
+			RelationshipService relationshipService,
+			boolean includePublishedComponents,
+			boolean includeInferredRelationships,
+			int validationThreads) throws RuleExecutorException {
+
+		requirePositive(validationThreads);
+
 		for (Concept concept : concepts) {
 			assertComponentIdsPresent(concept);
 		}
@@ -115,7 +199,8 @@ public class RuleExecutor {
 
 		final List<List<InvalidContent>> sessionInvalidContent = new ArrayList<>();
 		final List<InvalidContent> exceptionContents = new ArrayList<>();
-		int threads = concepts.size() == 1 ? 1 : 10;
+		// Never start more workers than there are concepts to validate.
+		int threads = Math.min(validationThreads, Math.max(1, concepts.size()));
 
 		Map<String, List<StatelessKieSession>> sessionMap = createKieSessionMap(ruleSetNames, conceptService, descriptionService, relationshipService, threads, sessionInvalidContent);
 		doValidateComponents(concepts, includeInferredRelationships, sessionMap, exceptionContents, threads);
@@ -149,38 +234,38 @@ public class RuleExecutor {
 		Date start = new Date();
 		try (ExecutorService executorService = Executors.newFixedThreadPool(threads)) {
 			List<Concept> conceptList = new ArrayList<>(concepts);
-			List<Callable<String>> tasks = new ArrayList<>();
+			List<Callable<String>> workers = new ArrayList<>(threads);
+			AtomicInteger nextConceptIndex = new AtomicInteger();
+			AtomicInteger completedConceptCount = new AtomicInteger();
 			String total = String.format("%,d", concepts.size());
-			int i = 0;
-			while (i < concepts.size()) {
-				Set<Component> components = new HashSet<>();
-				Concept concept = conceptList.get(i++);
-				addConcept(components, concept, includeInferredRelationships);
-				int sessionIndex = tasks.size();
-				tasks.add(() -> {
-					try {
-						List<StatelessKieSession> statelessKieSessions = sessionMap.get(String.valueOf(sessionIndex));
-						statelessKieSessions.forEach(statelessKieSession -> statelessKieSession.execute(components));
-						components.clear();
-					} catch (Exception e) {
-						exceptionContents.add(new InvalidContent(concept.getId(), concept, "An error occurred while running concept validation. Technical detail: " + e.getMessage(), Severity.ERROR));
+
+			for (int workerIndex = 0; workerIndex < threads; workerIndex++) {
+				List<StatelessKieSession> statelessKieSessions = sessionMap.get(String.valueOf(workerIndex));
+				workers.add(() -> {
+					int conceptIndex;
+					while ((conceptIndex = nextConceptIndex.getAndIncrement()) < conceptList.size()) {
+						Concept concept = conceptList.get(conceptIndex);
+						Set<Component> components = new HashSet<>();
+						addConcept(components, concept, includeInferredRelationships);
+						try {
+							statelessKieSessions.forEach(statelessKieSession -> statelessKieSession.execute(components));
+						} catch (Exception e) {
+							exceptionContents.add(new InvalidContent(concept.getId(), concept, "An error occurred while running concept validation. Technical detail: " + e.getMessage(), Severity.ERROR));
+						} finally {
+							components.clear();
+						}
+
+						int completed = completedConceptCount.incrementAndGet();
+						if (completed % 10_000 == 0) {
+							logger.info("Validated {} of {}", String.format("%,d", completed), total);
+						}
 					}
 					return null;
 				});
-
-				if (tasks.size() == threads) {
-					runTasks(executorService, tasks);
-					tasks.clear();
-				}
-				if (i % 10_000 == 0) {
-					logger.info("Validated {} of {}", String.format("%,d", i), total);
-				}
 			}
-			if (!tasks.isEmpty()) {
-				runTasks(executorService, tasks);
-			}
+			runTasks(executorService, workers);
 
-			logger.info("Validated {} of {}", String.format("%,d", i), total);
+			logger.info("Validated {} of {}", String.format("%,d", completedConceptCount.get()), total);
 			logger.info("Rule execution took {} seconds", (new Date().getTime() - start.getTime()) / 1000);
 		}
 	}
@@ -317,9 +402,14 @@ public class RuleExecutor {
 
 	private void runTasks(ExecutorService executorService, List<Callable<String>> tasks) {
 		try {
-			executorService.invokeAll(tasks);
+			for (Future<String> task : executorService.invokeAll(tasks)) {
+				task.get();
+			}
 		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 			throw new RuleExecutorException("Validation tasks were interrupted.", e);
+		} catch (ExecutionException e) {
+			throw new RuleExecutorException("A validation worker failed.", e.getCause());
 		}
 	}
 
