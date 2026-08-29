@@ -1,2 +1,3 @@
 product=finding
 finding=disorder
+redundant-isa-exempt-modules=999999001000000104
