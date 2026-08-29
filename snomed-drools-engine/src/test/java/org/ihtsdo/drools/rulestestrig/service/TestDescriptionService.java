@@ -162,4 +162,19 @@ public class TestDescriptionService implements DescriptionService {
 
 		return false;
 	}
+
+	/**
+	 * Without this the rules test rig always sees the interface default,
+	 * {@code false}, so a rule driven by a named set could only ever be tested in
+	 * its unconfigured state - the set would appear empty however the test
+	 * resources were written.
+	 */
+	@Override
+	public boolean isInNamedSet(String setKey, String value) {
+		if (setKey == null || value == null) {
+			return false;
+		}
+		Set<String> members = testResourceProvider.getSemanticHierarchyMap().get(setKey);
+		return !CollectionUtils.isEmpty(members) && members.contains(value);
+	}
 }
