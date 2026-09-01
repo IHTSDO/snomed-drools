@@ -198,7 +198,7 @@ public class RuleExecutor {
 		checkComponentsIntegrity(concepts, conceptService);
 
 		final List<List<InvalidContent>> sessionInvalidContent = new ArrayList<>();
-		final List<InvalidContent> exceptionContents = Collections.synchronizedList(new ArrayList<>());
+		final List<InvalidContent> exceptionContents = new ArrayList<>();
 		// Never start more workers than there are concepts to validate.
 		int threads = Math.min(validationThreads, Math.max(1, concepts.size()));
 

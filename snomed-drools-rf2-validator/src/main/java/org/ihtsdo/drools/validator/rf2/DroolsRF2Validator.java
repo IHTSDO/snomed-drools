@@ -311,8 +311,7 @@ public class DroolsRF2Validator {
 		if (loadDelta) {
 			releaseImporter.loadEffectiveSnapshotAndDeltaReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, multiThreaded);
 		} else {
-			loadSnapshotReleaseFiles(releaseImporter, extractedRF2FilesDirectories, componentFactory,
-					multiThreaded, singleSnapshotRelease);
+			releaseImporter.loadEffectiveSnapshotReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, multiThreaded);
 		}
 
 		final Map<Long, ? extends Concept> conceptMap = componentFactory.getComponentStore().getConcepts();

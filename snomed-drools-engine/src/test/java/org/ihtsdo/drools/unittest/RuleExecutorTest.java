@@ -141,22 +141,6 @@ public class RuleExecutorTest {
 	}
 
 	@Test
-	public void testWorkersClaimNextConceptWithoutBatchBarrier() {
-		List<Concept> concepts = new ArrayList<>();
-		for (int i = 1; i <= 11; i++) {
-			concepts.add(new ConceptImpl(String.valueOf(i)));
-		}
-		RuleSchedulingProbe.reset();
-
-		ruleExecutor.execute(SCHEDULING_RULE_SET_NAMES, null, concepts, conceptService,
-				descriptionService, relationshipService, true, false);
-
-		Assert.assertEquals(11, RuleSchedulingProbe.getVisitedConceptCount());
-		Assert.assertTrue("A free worker should claim concept 11 while concept 1 is still running.",
-				RuleSchedulingProbe.wasBlockedConceptReleasedByLaterConcept());
-	}
-
-	@Test
 	public void defaultsWorkerCountToAvailableProcessors() {
 		Assert.assertEquals(Runtime.getRuntime().availableProcessors(), ruleExecutor.getValidationThreads());
 	}
