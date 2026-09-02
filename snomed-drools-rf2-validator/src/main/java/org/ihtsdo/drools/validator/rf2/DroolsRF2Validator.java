@@ -311,7 +311,12 @@ public class DroolsRF2Validator {
 		if (loadDelta) {
 			releaseImporter.loadEffectiveSnapshotAndDeltaReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, multiThreaded);
 		} else {
-			releaseImporter.loadEffectiveSnapshotReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, multiThreaded);
+			// A single snapshot holds exactly one row per component, so the
+			// effective-component filter cannot select anything different and
+			// its pre-pass is a second full read of the release for no gain.
+			// loadSnapshotReleaseFiles makes that choice for both callers.
+			loadSnapshotReleaseFiles(releaseImporter, extractedRF2FilesDirectories,
+					componentFactory, multiThreaded, singleSnapshotRelease);
 		}
 
 		final Map<Long, ? extends Concept> conceptMap = componentFactory.getComponentStore().getConcepts();
