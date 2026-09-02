@@ -55,8 +55,9 @@ public class DroolsRF2Validator {
 
 	/**
 	 * Escape hatch for loading the RF2 files one at a time, as this did before
-	 * {@link SnomedDroolsComponentRepository} was made safe for concurrent writes.
-	 * Set to {@code false} only to rule the loader out while diagnosing something.
+	 * {@link SnomedDroolsComponentRepository} was made safe for concurrent writes,
+	 * and parsing the OWL axioms on the calling thread. Set to {@code false} only
+	 * to rule the loader out while diagnosing something.
 	 */
 	public static final String PARALLEL_LOADING_PROPERTY = "snomed.drools.parallelLoading";
 
@@ -305,9 +306,10 @@ public class DroolsRF2Validator {
 		}
 
 		SnomedDroolsComponentRepository repository = new SnomedDroolsComponentRepository();
-		SnomedDroolsComponentFactory componentFactory = new SnomedDroolsComponentFactory(new ComponentStore(), repository, currentEffectiveTime, previousReleaseComponentIds);
-
 		boolean multiThreaded = parallelLoading();
+		SnomedDroolsComponentFactory componentFactory = new SnomedDroolsComponentFactory(new ComponentStore(), repository, currentEffectiveTime,
+				previousReleaseComponentIds, multiThreaded);
+
 		if (loadDelta) {
 			releaseImporter.loadEffectiveSnapshotAndDeltaReleaseFiles(extractedRF2FilesDirectories, LOADING_PROFILE, componentFactory, multiThreaded);
 		} else {

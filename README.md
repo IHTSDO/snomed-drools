@@ -44,7 +44,7 @@ They are read with `System.getProperty`, so they must be passed as `-D` options 
 | Property | Module | Default | Description |
 |---|---|---|---|
 | `snomed.drools.validation.threads` | `snomed-drools-engine` | Number of available processors | Number of workers used to validate concepts in parallel. Must be a positive integer. Memory grows with this value because each worker has its own Drools session per assertion group. |
-| `snomed.drools.parallelLoading` | `snomed-drools-rf2-validator` | `true` | Read RF2 files concurrently. Set to `false` only to rule out the loader while diagnosing a problem. |
+| `snomed.drools.parallelLoading` | `snomed-drools-rf2-validator` | `true` | Read RF2 files concurrently and parse OWL axioms on all cores. Set to `false` only to rule out the loader while diagnosing a problem. |
 
 Example:
 ```
