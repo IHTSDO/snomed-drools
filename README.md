@@ -26,5 +26,33 @@ The following implementations use the SNOMED Drools Engine and implement the int
   * [SNOMED Release Validation Framework](https://github.com/IHTSDO/release-validation-framework) uses the RF2 Validator (in production)
 * [Snow Owl Terminology Server](https://github.com/IHTSDO/snow-owl) (now retired)
 
+## Running the RF2 Validator
+The `snomed-drools-rf2-validator` module builds an executable jar which validates extracted RF2 files and writes the results to `validation-report-<timestamp>.txt` in the working directory.
+
+```
+java -jar snomed-drools-rf2-validator-<version>-executable.jar <snomedDroolsRulesPath> <assertionGroup1,assertionGroup2,etc> <extractedRF2FilesDirectories> <currentEffectiveTime> <includedModules(optional)> <previousReleaseRf2Directories(optional)>
+```
+
+- `currentEffectiveTime` uses the format `yyyymmdd`.
+- `extractedRF2FilesDirectories` and `previousReleaseRf2Directories` are comma separated directory paths.
+- `includedModules` is a comma separated list of module ids.
+
+## Configuration
+The engine and the RF2 Validator read the following JVM system properties.
+They are read with `System.getProperty`, so they must be passed as `-D` options to the JVM of the application using this library (e.g. Snowstorm, RVF or the RF2 Validator jar). Spring `application.properties` entries are not picked up.
+
+| Property | Module | Default | Description |
+|---|---|---|---|
+| `snomed.drools.validation.threads` | `snomed-drools-engine` | Number of available processors | Number of workers used to validate concepts in parallel. Must be a positive integer. Memory grows with this value because each worker has its own Drools session per assertion group. |
+| `snomed.drools.parallelLoading` | `snomed-drools-rf2-validator` | `true` | Read RF2 files concurrently. Set to `false` only to rule out the loader while diagnosing a problem. |
+
+Example:
+```
+java -Dsnomed.drools.validation.threads=8 -jar snomed-drools-rf2-validator-<version>-executable.jar ...
+```
+
+The worker count is read when a `RuleExecutor` is created. Snowstorm creates one at startup and on rule reload, RVF creates one per validation run.
+It can also be set in code with `RuleExecutor.setValidationThreads(int)`.
+
 ## The Assertion Rules
 The rules for this engine are maintained separately in the [SNOMED Drools Rules project](https://github.com/IHTSDO/snomed-drools-rules).
