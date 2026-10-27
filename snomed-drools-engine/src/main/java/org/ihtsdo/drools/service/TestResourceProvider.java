@@ -18,7 +18,7 @@ public class TestResourceProvider {
 	private static final String SEMANTIC_TAG_FILENAME_PREFIX = "semantic-tags";
 	private static final String SEMANTIC_TAG_HIERARCHY_FILENAME_PREFIX = "semantic-tag-hierarchies";
 	private static final String CASE_SIGNIFICANT_WORDS_FILENAME = "cs_words.txt";
-	private static final String US_TO_GB_TERMS_MAP_FILENAME = "us-to-gb-terms-map.txt";
+	private static final String US_TO_GB_TERMS_MAP_FILENAME = "us-to-gb-preferred-terms-map.txt";
 	private static final String TEXT_EXTENSION = ".txt";
 	public static final String EQUAL_SIGN_SEPARATOR = "=";
 	public static final String COMMA_SEPARATOR = ",";
