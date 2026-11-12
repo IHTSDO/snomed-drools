@@ -191,6 +191,15 @@ public class DroolsDescriptionService implements DescriptionService {
 		return false;
 	}
 
+	@Override
+	public boolean isInNamedSet(String setKey, String value) {
+		if (setKey == null || value == null) {
+			return false;
+		}
+		Set<String> members = testResourceProvider.getSemanticHierarchyMap().get(setKey);
+		return !CollectionUtils.isEmpty(members) && members.contains(value);
+	}
+
 	private static String getTag(String term) {
 		final Matcher matcher = DescriptionHelper.TAG_PATTERN.matcher(term);
 		if (matcher.matches()) {
