@@ -1,3 +1,6 @@
 product=finding
 finding=disorder
+fsn-synonym-exempt=trade product unit of use,trade product pack,containered trade product pack
+duplicate-term-exempt=trade product unit of use,trade product pack,containered trade product pack
+fsn-special-char-exempt=trade product unit of use,trade product pack,containered trade product pack
 redundant-isa-exempt-modules=999999001000000104
