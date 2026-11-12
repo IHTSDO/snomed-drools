@@ -61,3 +61,6 @@ real clinical drug
 real medicinal product
 real packaged clinical drug
 supplier
+trade product unit of use
+trade product pack
+containered trade product pack
